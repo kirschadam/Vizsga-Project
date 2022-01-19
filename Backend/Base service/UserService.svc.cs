@@ -1,7 +1,7 @@
 ﻿using Base_service.DatabaseManagers;
 using System;
-using System.Collections.Generic;
 using System.Data;
+using System.Runtime.InteropServices;
 
 namespace Base_service
 {
@@ -9,8 +9,8 @@ namespace Base_service
     {
         const string join_location = "INNER JOIN `locations` ON `users`.`locationId` = `locations`.`id`";
         const string join_region = " INNER JOIN `regions` ON `locations`.`regionId` = `regions`.`id`";
-
-        public Response ListUser(string id = "", string username = "", string location = "", string region = "", string limit = "")
+        
+        public Response ListUser([Optional]string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit)
         {
             Response response = new Response();
             try
@@ -73,7 +73,7 @@ namespace Base_service
         public Response LoginUser(string username, string password)
         {
             Response response = new Response();
-
+            
             try
             {
                 BaseSelect(new string[] { 
@@ -139,7 +139,7 @@ namespace Base_service
 
 
 
-        public string UpdateUser(string id, string username = "", string password = "", string locationId = "", string permission = "", string active = "")
+        public string UpdateUser(string id, [Optional] string username, [Optional] string password, [Optional] string locationId, [Optional] string permission, [Optional] string active)
         {
             int? result = null;
 
