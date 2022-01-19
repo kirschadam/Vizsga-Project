@@ -20,7 +20,7 @@ namespace Base_service
                 for (int i = 0; i < 5; i++)
                 {
                     //If the given input holds information, make a condition about it
-                    if (inputs[i] != null)
+                    if (inputs[i] != null && inputs[i].Length != 0)
                     {
                         switch (i)
                         {
