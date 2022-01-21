@@ -107,12 +107,16 @@ namespace Base_service
 
 
 
-        public string RegisterUser(string username, string password, string locationId, string permission)
+        public string RegisterUser(string username, string password, string location, string permission)
         {
             int? result = null;
 
             try
             {
+                BaseSelect(new string[] { "locations", "id", $"WHERE name = '{location}'" });
+                BaseReader.Read();
+                string locationId = BaseReader["id"].ToString();
+
                 string values = "";
                 foreach (var item in new string[] { username, password, locationId, permission})
                 {
