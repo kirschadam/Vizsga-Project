@@ -10,13 +10,13 @@ using System.Text;
 
 namespace Base_service
 {
-    public class StorageManagement : BaseDatabaseCommands, IStorageManagement
+    public class StockManagement : BaseDatabaseCommands, IStockManagement
     {
         const string join_products = "INNER JOIN `products` ON `stocks`.`productId` = `products`.`id`";
         const string join_locations = " INNER JOIN `locations` ON `stocks`.`locationId` = `locations`.`id`";
-        public Response_Storage ListStorage([Optional] string name, [Optional] string location)
+        public Response_Stock ListStock([Optional] string name, [Optional] string location)
         {
-            Response_Storage response = new Response_Storage();
+            Response_Stock response = new Response_Stock();
 
             try
             {

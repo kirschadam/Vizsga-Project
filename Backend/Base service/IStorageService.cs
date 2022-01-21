@@ -7,7 +7,7 @@ using System.ServiceModel.Web;
 namespace Base_service
 {
     [ServiceContract]
-    public interface IStorageManagement
+    public interface IStockManagement
     {
         [OperationContract]
         [WebInvoke(Method = "GET",
@@ -16,13 +16,13 @@ namespace Base_service
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
             UriTemplate = "/list?name={name}&location={location}"
             )]
-        Response_Storage ListStorage([Optional] string name, [Optional] string location);
+        Response_Stock ListStock([Optional] string name, [Optional] string location);
     }
 
     [DataContract]
-    public class Response_Storage
+    public class Response_Stock
     {
-        private string message = null, uid = null;
+        private string message = null;
         private List<Stock> stocks = new List<Stock>();
 
         [DataMember]
@@ -33,22 +33,15 @@ namespace Base_service
         }
 
         [DataMember]
-        public string Uid
-        {
-            get { return uid; }
-            set { uid = value; }
-        }
-
-        [DataMember]
         public List<Stock> Stocks
         {
             get { return stocks; }
             set { stocks = value; }
         }
 
-        public Response_Storage() { }
+        public Response_Stock() { }
 
-        public Response_Storage(string message, List<Stock> stocks)
+        public Response_Stock(string message, List<Stock> stocks)
         {
             Message = message;
             Stocks = stocks;
