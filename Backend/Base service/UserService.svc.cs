@@ -10,9 +10,9 @@ namespace Base_service
         const string join_location = "INNER JOIN `locations` ON `users`.`locationId` = `locations`.`id`";
         const string join_region = " INNER JOIN `regions` ON `locations`.`regionId` = `regions`.`id`";
         
-        public Response ListUser([Optional]string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit)
+        public Response_User ListUser([Optional]string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit)
         {
-            Response response = new Response();
+            Response_User response = new Response_User();
             try
             {
                 string conditions = ""; 
@@ -70,9 +70,9 @@ namespace Base_service
 
 
 
-        public Response LoginUser(string username, string password)
+        public Response_User LoginUser(string username, string password)
         {
-            Response response = new Response();
+            Response_User response = new Response_User();
             
             try
             {

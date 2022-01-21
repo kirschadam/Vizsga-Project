@@ -103,12 +103,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="StorageService.svc" />
     <Content Include="UserService.svc" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DatabaseManagers\BaseDatabaseCommands.cs" />
     <Compile Include="DatabaseManagers\BaseDatabaseManager.cs" />
+    <Compile Include="IStorageService.cs" />
+    <Compile Include="StorageService.svc.cs">
+      <DependentUpon>StorageService.svc</DependentUpon>
+    </Compile>
     <Compile Include="UserService.svc.cs">
       <DependentUpon>UserService.svc</DependentUpon>
     </Compile>
