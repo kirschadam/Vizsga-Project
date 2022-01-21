@@ -113,14 +113,16 @@ namespace Base_service
 
             try
             {
-                BaseSelect(new string[] { "locations", "id", $"WHERE name = '{location}'" });
-                BaseReader.Read();
-                string locationId = BaseReader["id"].ToString();
+                string locationId = "";
+                BaseSelect(new string[] { "locations", "`id`", $"WHERE `name` = '{location}'" });
+                if(BaseReader.Read()) locationId = BaseReader["id"].ToString();
+
+                Console.WriteLine(locationId);
 
                 string values = "";
                 foreach (var item in new string[] { username, password, locationId, permission})
                 {
-                    if (item == null) return "Please give every needed detail of the user being registered!";
+                    if (item == null || item == "") return "Please give every needed detail of the user being registered!";
                     values += $"'{item}',";
                 }
 
@@ -153,7 +155,7 @@ namespace Base_service
                 string[] inputs = new string[] { username, password, locationId, permission, active };
                 for (int i = 0; i < 5; i++)
                 {
-                    if (inputs[i] != null)
+                    if (inputs[i] != null && inputs[i] != "")
                     {
                         if (changes != "") changes += ",";
                         switch (i)

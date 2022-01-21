@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 
 namespace Base_service.DatabaseManagers
 {
@@ -6,6 +7,8 @@ namespace Base_service.DatabaseManagers
     {
         public void BaseSelect(string[] parts)
         {
+            if (BaseCommand.Connection.State == ConnectionState.Open) BaseCommand.Connection.Close();
+
             string query = null;
 
             //Switch case, decides what the Select funtion that called this has in it
@@ -46,6 +49,8 @@ namespace Base_service.DatabaseManagers
 
         public int? BaseInsert(string[] parts)
         {
+            if (BaseCommand.Connection.State == ConnectionState.Open) BaseCommand.Connection.Close();
+
             int? affected_rows;
             BaseCommand.CommandText = $"INSERT INTO `{parts[0]}`({parts[1]}) VALUES ({parts[2]});";
 
@@ -61,6 +66,8 @@ namespace Base_service.DatabaseManagers
 
         public int? BaseUpdate(string[] parts)
         {
+            if (BaseCommand.Connection.State == ConnectionState.Open) BaseCommand.Connection.Close();
+
             int? affected_rows;
 
             BaseCommand.CommandText = $"UPDATE `{parts[0]}` SET {parts[1]} WHERE {parts[2]};";
@@ -76,6 +83,8 @@ namespace Base_service.DatabaseManagers
 
         public int? BaseDelete(string[] parts)
         {
+            if (BaseCommand.Connection.State == ConnectionState.Open) BaseCommand.Connection.Close();
+
             int? affected_rows;
 
             BaseCommand.CommandText = $"DELETE FROM `{parts[0]}` WHERE {parts[1]};";
