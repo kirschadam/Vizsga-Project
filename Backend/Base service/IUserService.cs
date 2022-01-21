@@ -25,7 +25,7 @@ namespace Base_service
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
             UriTemplate = "/login?username={username}&password={password}"
             )]
-        Response_User LoginUser(string username, string password);
+        Response_Login LoginUser(string username, string password);
 
         [OperationContract]
         [WebInvoke(Method = "POST",
@@ -86,6 +86,41 @@ namespace Base_service
         }
     }
 
+    [DataContract]
+    public class Response_Login
+    {
+        private string message = null, uid = null;
+        private List<User> users = new List<User>();
+
+        [DataMember]
+        public string Message
+        {
+            get { return message; }
+            set { message = value; }
+        }
+
+        [DataMember]
+        public string Uid
+        {
+            get { return uid; }
+            set { uid = value; }
+        }
+
+        [DataMember]
+        public List<User> Users
+        {
+            get { return users; }
+            set { users = value; }
+        }
+
+        public Response_Login() { }
+
+        public Response_Login(string message, List<User> users)
+        {
+            Message = message;
+            Users = users;
+        }
+    }
 
     [DataContract]
     public class User

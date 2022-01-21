@@ -70,9 +70,9 @@ namespace Base_service
 
 
 
-        public Response_User LoginUser(string username, string password)
+        public Response_Login LoginUser(string username, string password)
         {
-            Response_User response = new Response_User();
+            Response_Login response = new Response_Login();
             
             try
             {
@@ -115,7 +115,8 @@ namespace Base_service
             {
                 string locationId = "";
                 BaseSelect("locations", "`id`", $"WHERE `name` = '{location}'", "");
-                if(BaseReader.Read()) locationId = BaseReader["id"].ToString();
+                if (BaseReader.Read()) locationId = BaseReader["id"].ToString();
+                else return "Location not found in database!";
 
                 Console.WriteLine(locationId);
 

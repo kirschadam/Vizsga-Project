@@ -22,7 +22,7 @@ namespace Base_service
     [DataContract]
     public class Response_Storage
     {
-        private string message = null;
+        private string message = null, uid = null;
         private List<Stock> stocks = new List<Stock>();
 
         [DataMember]
@@ -30,6 +30,13 @@ namespace Base_service
         {
             get { return message; }
             set { message = value; }
+        }
+
+        [DataMember]
+        public string Uid
+        {
+            get { return uid; }
+            set { uid = value; }
         }
 
         [DataMember]
