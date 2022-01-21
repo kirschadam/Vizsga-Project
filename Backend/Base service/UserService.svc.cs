@@ -1,18 +1,29 @@
 ﻿using Base_service.DatabaseManagers;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace Base_service
 {
-    public class UserManagement : BaseDatabaseCommands, IUserManagement
+    public class UserService : BaseDatabaseCommands, IUserService
     {
+        public static Dictionary<string, User> current_users = new Dictionary<string, User>();
+
         const string join_location = "INNER JOIN `locations` ON `users`.`locationId` = `locations`.`id`";
         const string join_region = " INNER JOIN `regions` ON `locations`.`regionId` = `regions`.`id`";
         
-        public Response_User ListUser([Optional]string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit)
+        public Response_User ListUser(string uid, [Optional]string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit)
         {
             Response_User response = new Response_User();
+
+            if (!current_users.ContainsKey(uid))
+            {
+                response.Message = "Unauthorized user!";
+                return response;
+            }
+
             try
             {
                 string conditions = ""; 
@@ -92,8 +103,17 @@ namespace Base_service
                         int.Parse(BaseReader["permission"].ToString()),
                         int.Parse(BaseReader["active"].ToString())
                        ));
+
+                    //Generating unique id for user, removing previous instance if it wasn't before
+                    current_users = current_users.TakeWhile(n => n.Value.Username != response.Users[0].Username).ToDictionary(x => x.Key, y => y.Value);
+
+                    response.Uid = Guid.NewGuid().ToString(); 
+                    current_users.Add(response.Uid, response.Users[0]);
+
+                    Console.WriteLine(response.Uid + "\t" + response.Users[0].Username);
+                    response.Message = $"Welcome {response.Users[0].Username}!";
                 }
-                response.Message = $"Number of users found: {response.Users.Count}";
+                else response.Message = "Username or password incorrect!";
             }
             catch (Exception ex) { Console.WriteLine(ex.Message); response.Message = "There was a problem with your request!"; }
             finally
@@ -105,16 +125,29 @@ namespace Base_service
             return response;
         }
 
-
-
-        public string RegisterUser(string username, string password, string location, string permission)
+        public string LogoutUser(string uid)
         {
+            if (current_users.Remove(uid))
+            {
+                return "You have logged out!";
+            }
+            else return "You are not logged in!";
+        }
+
+
+
+        public string RegisterUser(string uid, string username, string password, string location, string permission)
+        {
+            if (!current_users.ContainsKey(uid)) return "Unauthorized user!";
+
             int? result = null;
 
             try
             {
-                string locationId = "";
+                //Checking the name of the location to find the corresponding location Id
                 BaseSelect("locations", "`id`", $"WHERE `name` = '{location}'", "");
+
+                string locationId = "";
                 if (BaseReader.Read()) locationId = BaseReader["id"].ToString();
                 else return "Location not found in database!";
 
@@ -146,8 +179,10 @@ namespace Base_service
 
 
 
-        public string UpdateUser(string id, [Optional] string username, [Optional] string password, [Optional] string locationId, [Optional] string permission, [Optional] string active)
+        public string UpdateUser(string uid, string id, [Optional] string username, [Optional] string password, [Optional] string locationId, [Optional] string permission, [Optional] string active)
         {
+            if (!current_users.ContainsKey(uid)) return "Unauthorized user!";
+
             int? result = null;
 
             try
@@ -161,11 +196,11 @@ namespace Base_service
                         if (changes != "") changes += ",";
                         switch (i)
                         {
-                            case 0: { changes += $"`username`='{inputs[i]}' "; break; }
-                            case 1: { changes += $"`password`='{inputs[i]}' "; break; }
-                            case 2: { changes += $"`locationId`='{inputs[i]}' "; break; }
-                            case 3: { changes += $"`permission`.`name`='{inputs[i]}' "; break; }
-                            case 4: { changes += $"`active`='{inputs[i]}'"; break; }
+                            case 0: { changes += $"`username`='{inputs[0]}' "; break; }
+                            case 1: { changes += $"`password`='{inputs[1]}' "; break; }
+                            case 2: { changes += $"`locationId`='{inputs[2]}' "; break; }
+                            case 3: { changes += $"`permission`.`name`='{inputs[3]}' "; break; }
+                            case 4: { changes += $"`active`='{inputs[4]}'"; break; }
                         }
                     }
                 }
@@ -189,8 +224,10 @@ namespace Base_service
 
 
 
-        public string DeleteUser(string id)
+        public string DeleteUser(string uid, string id)
         {
+            if (!current_users.ContainsKey(uid)) return "Unauthorized user!";
+
             int? result = null;
 
             try { result = BaseDelete("users", $"`id`='{id}'"); }
@@ -198,7 +235,7 @@ namespace Base_service
             catch (Exception ex) { Console.WriteLine(ex.Message); }
             finally
             {
-                if (BaseCommand.Connection.State == System.Data.ConnectionState.Open)
+                if (BaseCommand.Connection.State == ConnectionState.Open)
                     BaseCommand.Connection.Close();
             }
 

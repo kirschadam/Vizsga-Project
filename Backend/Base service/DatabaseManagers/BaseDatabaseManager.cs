@@ -11,12 +11,12 @@ namespace Base_service.DatabaseManagers
             ConnectionString = "SERVER=localhost; DATABASE=assets; UID=root; PASSWORD=; SSL MODE = none;"
         };
 
-        public static MySqlCommand BaseCommand { get; } = new MySqlCommand
+        public MySqlCommand BaseCommand { get; } = new MySqlCommand
         {
             CommandType = System.Data.CommandType.Text,
             Connection = BaseConnection
         };
 
-        public static MySqlDataReader BaseReader { get; set; }
+        public MySqlDataReader BaseReader { get; set; }
     }
 }

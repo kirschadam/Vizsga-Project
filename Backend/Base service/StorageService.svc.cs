@@ -10,13 +10,19 @@ using System.Text;
 
 namespace Base_service
 {
-    public class StockManagement : BaseDatabaseCommands, IStockManagement
+    public class StockService : BaseDatabaseCommands, IStockService
     {
         const string join_products = "INNER JOIN `products` ON `stocks`.`productId` = `products`.`id`";
         const string join_locations = " INNER JOIN `locations` ON `stocks`.`locationId` = `locations`.`id`";
-        public Response_Stock ListStock([Optional] string name, [Optional] string location)
+        public Response_Stock ListStock(string uid, [Optional] string name, [Optional] string location)
         {
             Response_Stock response = new Response_Stock();
+
+            if (!UserService.current_users.ContainsKey(uid))
+            {
+                response.Message = "Unauthorized user!";
+                return response;
+            }
 
             try
             {

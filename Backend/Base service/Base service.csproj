@@ -103,6 +103,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="LocationService.svc" />
     <Content Include="StorageService.svc" />
     <Content Include="UserService.svc" />
     <Content Include="Web.config" />
@@ -110,7 +111,11 @@
   <ItemGroup>
     <Compile Include="DatabaseManagers\BaseDatabaseCommands.cs" />
     <Compile Include="DatabaseManagers\BaseDatabaseManager.cs" />
+    <Compile Include="ILocationService.cs" />
     <Compile Include="IStorageService.cs" />
+    <Compile Include="LocationService.svc.cs">
+      <DependentUpon>LocationService.svc</DependentUpon>
+    </Compile>
     <Compile Include="StorageService.svc.cs">
       <DependentUpon>StorageService.svc</DependentUpon>
     </Compile>
