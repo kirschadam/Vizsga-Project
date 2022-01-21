@@ -95,23 +95,23 @@ namespace Base_service
 
                 if (BaseReader.Read())
                 {
-                    response.Users.Add(new User(
+                    response.User =new User(
                         int.Parse(BaseReader["id"].ToString()),
                         BaseReader["username"].ToString(),
                         BaseReader["password"].ToString(),
                         BaseReader["location"].ToString(),
                         int.Parse(BaseReader["permission"].ToString()),
                         int.Parse(BaseReader["active"].ToString())
-                       ));
+                       );
 
                     //Generating unique id for user, removing previous instance if it wasn't before
-                    current_users = current_users.TakeWhile(n => n.Value.Username != response.Users[0].Username).ToDictionary(x => x.Key, y => y.Value);
+                    current_users = current_users.TakeWhile(n => n.Value.Username != response.User.Username).ToDictionary(x => x.Key, y => y.Value);
 
                     response.Uid = Guid.NewGuid().ToString(); 
-                    current_users.Add(response.Uid, response.Users[0]);
+                    current_users.Add(response.Uid, response.User);
 
-                    Console.WriteLine(response.Uid + "\t" + response.Users[0].Username);
-                    response.Message = $"Welcome {response.Users[0].Username}!";
+                    Console.WriteLine(response.Uid + "\t" + response.User.Username);
+                    response.Message = $"Welcome {response.User.Username}!";
                 }
                 else response.Message = "Username or password incorrect!";
             }

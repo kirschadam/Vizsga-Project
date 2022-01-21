@@ -99,7 +99,7 @@ namespace Base_service
     public class Response_Login
     {
         private string message = null, uid = null;
-        private List<User> users = new List<User>();
+        private User user = null;
 
         [DataMember]
         public string Message
@@ -116,18 +116,19 @@ namespace Base_service
         }
 
         [DataMember]
-        public List<User> Users
+        public User User
         {
-            get { return users; }
-            set { users = value; }
+            get { return user; }
+            set { user = value; }
         }
 
         public Response_Login() { }
 
-        public Response_Login(string message, List<User> users)
+        public Response_Login(string message, string uid , User user)
         {
             Message = message;
-            Users = users;
+            Uid = uid;
+            User = user;
         }
     }
 
