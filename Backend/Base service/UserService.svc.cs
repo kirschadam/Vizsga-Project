@@ -37,12 +37,12 @@ namespace Base_service
                 //put and AND keyword between every condition, if there are multiple, every condition starts with "`" and ends with "' "
                 if (conditions != "") conditions = conditions.Insert(0, "WHERE ").Replace("'`", "' AND `");
 
-                BaseSelect(new string[] { 
+                BaseSelect(
                     "users", 
                     "`users`.`id`, `username`, `password`, `locations`.`name` AS 'location', `permission`, `active`", 
                     conditions, 
                     join_location + (region == null ? "" : join_region) 
-                });
+                );
 
                 if (BaseReader == null) return null;
 
@@ -76,11 +76,11 @@ namespace Base_service
             
             try
             {
-                BaseSelect(new string[] { 
+                BaseSelect(
                     "users", 
                     "`users`.`id`, `username`, `password`, `locations`.`name` AS 'location', `permission`, `active`", 
                     $"WHERE `username` = '{username}' AND `password` = '{password}'", 
-                    join_location });
+                    join_location );
 
                 if (BaseReader.Read())
                 {
@@ -114,7 +114,7 @@ namespace Base_service
             try
             {
                 string locationId = "";
-                BaseSelect(new string[] { "locations", "`id`", $"WHERE `name` = '{location}'" });
+                BaseSelect("locations", "`id`", $"WHERE `name` = '{location}'", "");
                 if(BaseReader.Read()) locationId = BaseReader["id"].ToString();
 
                 Console.WriteLine(locationId);
@@ -126,7 +126,7 @@ namespace Base_service
                     values += $"'{item}',";
                 }
 
-                result = BaseInsert(new string[] { "users", "`username`, `password`, `locationId`, `permission`, `active`", values + "'1'" });
+                result = BaseInsert("users", "`username`, `password`, `locationId`, `permission`, `active`", values + "'1'");
             }
 
             catch (Exception ex) { Console.WriteLine(ex.Message); }
@@ -169,7 +169,7 @@ namespace Base_service
                     }
                 }
 
-                result = BaseUpdate(new string[] { "users", changes, $"`id`='{id}'" });
+                result = BaseUpdate("users", changes, $"`id`='{id}'");
             }
 
             catch (Exception ex) { Console.WriteLine(ex.Message); }
@@ -192,7 +192,7 @@ namespace Base_service
         {
             int? result = null;
 
-            try { result = BaseDelete(new string[] { "users", $"`id`='{id}'" }); }
+            try { result = BaseDelete("users", $"`id`='{id}'"); }
 
             catch (Exception ex) { Console.WriteLine(ex.Message); }
             finally

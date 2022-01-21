@@ -5,37 +5,12 @@ namespace Base_service.DatabaseManagers
 {
     public class BaseDatabaseCommands : BaseDatabaseManager
     {
-        public void BaseSelect(string[] parts)
+        public void BaseSelect(string table, string columns, string conditions, string inner_joins)
         {
             if (BaseCommand.Connection.State == ConnectionState.Open) BaseCommand.Connection.Close();
 
-            string query = null;
+            string query = $"SELECT {columns} FROM `{table}` {inner_joins} {conditions};";
 
-            //Switch case, decides what the Select funtion that called this has in it
-            //the parts in order are: 0 - table name, 1 - requested columns, 2 - request conditions, 3 - inner joins, if needed
-            switch (parts.Length)
-            {
-                case 1:
-                    {
-                        query = $"SELECT * FROM `{parts[0]}`;";
-                        break;
-                    }
-                case 2:
-                    {
-                        query = $"SELECT {parts[1]} FROM `{parts[0]}`;";
-                        break;
-                    }
-                case 3:
-                    {
-                        query = $"SELECT {parts[1]} FROM `{parts[0]}` {parts[2]};";
-                        break;
-                    }
-                case 4:
-                    {
-                        query = $"SELECT {parts[1]} FROM `{parts[0]}` {parts[3]} {parts[2]};";
-                        break;
-                    }
-            }
             Console.WriteLine(query);
 
             BaseCommand.CommandText = query;
@@ -47,12 +22,12 @@ namespace Base_service.DatabaseManagers
 
 
 
-        public int? BaseInsert(string[] parts)
+        public int? BaseInsert(string table, string columns, string values)
         {
             if (BaseCommand.Connection.State == ConnectionState.Open) BaseCommand.Connection.Close();
 
             int? affected_rows;
-            BaseCommand.CommandText = $"INSERT INTO `{parts[0]}`({parts[1]}) VALUES ({parts[2]});";
+            BaseCommand.CommandText = $"INSERT INTO `{table}`({columns}) VALUES ({values});";
 
             BaseCommand.Connection.Open();
 
@@ -64,13 +39,13 @@ namespace Base_service.DatabaseManagers
 
 
 
-        public int? BaseUpdate(string[] parts)
+        public int? BaseUpdate(string table, string sets, string conditions)
         {
             if (BaseCommand.Connection.State == ConnectionState.Open) BaseCommand.Connection.Close();
 
             int? affected_rows;
 
-            BaseCommand.CommandText = $"UPDATE `{parts[0]}` SET {parts[1]} WHERE {parts[2]};";
+            BaseCommand.CommandText = $"UPDATE `{table}` SET {sets} WHERE {conditions};";
 
             BaseCommand.Connection.Open();
 
@@ -81,13 +56,13 @@ namespace Base_service.DatabaseManagers
 
 
 
-        public int? BaseDelete(string[] parts)
+        public int? BaseDelete(string table, string conditions)
         {
             if (BaseCommand.Connection.State == ConnectionState.Open) BaseCommand.Connection.Close();
 
             int? affected_rows;
 
-            BaseCommand.CommandText = $"DELETE FROM `{parts[0]}` WHERE {parts[1]};";
+            BaseCommand.CommandText = $"DELETE FROM `{table}` WHERE {conditions};";
 
             BaseCommand.Connection.Open();
 

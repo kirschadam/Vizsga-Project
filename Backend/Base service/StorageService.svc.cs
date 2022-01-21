@@ -33,11 +33,11 @@ namespace Base_service
 
                 if(conditions != "") conditions = conditions.Insert(0, "WHERE ").Replace("'`", "' AND `");
 
-                BaseSelect(new string[] { 
+                BaseSelect(
                     "stocks", 
                     "`stocks`.`id` AS 'id', `quantity`, `products`.`name` AS 'product', `locations`.`name` AS 'location'", 
                     conditions, 
-                    join_products + join_locations });
+                    join_products + join_locations);
 
                 if (BaseReader == null) return null;
 
