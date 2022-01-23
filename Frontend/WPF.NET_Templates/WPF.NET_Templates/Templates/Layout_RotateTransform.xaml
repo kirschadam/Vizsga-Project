@@ -1,0 +1,32 @@
+﻿<Window x:Class="WPF.NET_Templates.Templates.Layout_RotateTransform"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPF.NET_Templates"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Layout RotateTransform" Height="450" Width="800">
+    <Grid>
+        <StackPanel>
+            <Label Width="150" Background="AntiqueWhite">Label1</Label>
+            <Label Width="170" Background="AntiqueWhite">Rotate with RenderTransform
+
+                <Label.RenderTransform>
+                    <RotateTransform Angle="45" />
+                </Label.RenderTransform>
+            </Label>
+            <Label Width="150" Background="AntiqueWhite">Label3</Label>
+        </StackPanel>
+        <StackPanel Margin="0,200,0,0">
+            <Label Width="150" Background="AntiqueWhite">Label1</Label>
+            <Label Width="170" Background="AntiqueWhite">Rotate with LayoutTransform
+
+                <Label.LayoutTransform>
+                    <RotateTransform Angle="45" />
+                </Label.LayoutTransform>
+            </Label>
+            <Label Width="150" Background="AntiqueWhite">Label3</Label>
+        </StackPanel>
+    </Grid>
+</Window>
