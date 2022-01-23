@@ -151,7 +151,6 @@ namespace Base_service
                 if (BaseReader.Read()) locationId = BaseReader["id"].ToString();
                 else return "Location not found in database!";
 
-                Console.WriteLine(locationId);
 
                 string values = "";
                 foreach (var item in new string[] { username, password, locationId, permission})
@@ -179,7 +178,7 @@ namespace Base_service
 
 
 
-        public string UpdateUser(string uid, string id, [Optional] string username, [Optional] string password, [Optional] string locationId, [Optional] string permission, [Optional] string active)
+        public string UpdateUser(string uid, string id, [Optional] string username, [Optional] string password, [Optional] string location, [Optional] string permission, [Optional] string active)
         {
             if (!current_users.ContainsKey(uid)) return "Unauthorized user!";
 
@@ -187,6 +186,14 @@ namespace Base_service
 
             try
             {
+                //Checking the name of the location to find the corresponding location Id
+                BaseSelect("locations", "`id`", $"WHERE `name` = '{location}'", "");
+
+                string locationId = "";
+                if (BaseReader.Read()) locationId = BaseReader["id"].ToString();
+                else return "Location not found in database!";
+
+
                 string changes = "";
                 string[] inputs = new string[] { username, password, locationId, permission, active };
                 for (int i = 0; i < 5; i++)
@@ -199,7 +206,7 @@ namespace Base_service
                             case 0: { changes += $"`username`='{inputs[0]}' "; break; }
                             case 1: { changes += $"`password`='{inputs[1]}' "; break; }
                             case 2: { changes += $"`locationId`='{inputs[2]}' "; break; }
-                            case 3: { changes += $"`permission`.`name`='{inputs[3]}' "; break; }
+                            case 3: { changes += $"`permission`='{inputs[3]}' "; break; }
                             case 4: { changes += $"`active`='{inputs[4]}'"; break; }
                         }
                     }
