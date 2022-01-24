@@ -1,0 +1,103 @@
+﻿<Window x:Class="FrontendWPF.GridView_Users"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FrontendWPF"
+        xmlns:componentmodel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:util="clr-namespace:FrontendWPF.Classes"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+            DataContext="{Binding RelativeSource={RelativeSource Self}}"  
+        Title="GridView Users" Height="450" Width="800">
+
+    <!--TODO: Step 1: In this simple data binding example we will 
+    add and remove number from an observable collection, which are
+    almost like lists, but they have some extra features, such as
+    being able to notify when a value is added to the collection,
+    hense the term observable-->
+    <Grid>
+        <!--TODO: Step 2: Add main grid with stack panel-->
+        <StackPanel Name="stackpanel"  Margin="10" Orientation="Horizontal">
+            <!--TODO: Step 3: Add list box and which will have it's
+            item source binded to the attribute defined in
+            MainWindow.xaml.cs so for this step leave out
+            ItemsSource="{Binding AvailableNumbers}" 
+            -->
+            <!--ItemsSource="{Binding AvailableNumbers}"-->
+
+            <ListView Name="listview" Background="AliceBlue" Foreground="Black" FontSize="14" Loaded="listview_Loaded" SelectionChanged="listview_SelectionChanged" BorderThickness="2"
+                      util:GridViewSort.AutoSort="True"
+                      util:GridViewSort.ShowSortGlyph="True"
+                      >
+
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="VerticalContentAlignment"  Value="Stretch"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+
+                <ListView.View>
+                    <GridView x:Name="gridview">
+
+                        <GridView.ColumnHeaderContainerStyle>
+                            <Style TargetType="{x:Type GridViewColumnHeader}">
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Foreground" Value="Navy"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                <Setter Property="BorderThickness" Value="1"/>
+                            </Style>
+                        </GridView.ColumnHeaderContainerStyle>
+
+                        <GridViewColumn Header="Id "
+                            util:GridViewSort.PropertyName="Id">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="LightGray" BorderThickness=".5" Margin="-6,-3">
+                                        <TextBlock Text="{Binding Id}" Margin="6,3" />
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Username " 
+                      util:GridViewSort.PropertyName="Username">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="LightGray" BorderThickness=".5" Margin="-6,-3">
+                                        <TextBlock Text="{Binding Username}" Margin="6,3" />
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Password "
+                      util:GridViewSort.PropertyName="Password">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="LightGray" BorderThickness=".5" Margin="-6,-3">
+                                        <TextBlock Text="{Binding Password}" Margin="6,3" />
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+
+
+
+            <!--TODO: Step 4: Add stack panel containing add and removed
+            buttons-->
+            <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,20,10">
+                <Button MinWidth="75" Margin="10,0,0,0" Click="AddNumber">Add</Button>
+                <Button MinWidth="75" Margin="10,0,0,0" Click="DeleteNumber">Delete</Button>
+            </StackPanel>
+        </StackPanel>
+        <Grid>
+            <TextBlock Text="TexBlock" Margin="520,199,116,137">
+                           
+            </TextBlock>
+        </Grid>
+    </Grid>
+</Window>
