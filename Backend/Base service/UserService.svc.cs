@@ -186,13 +186,16 @@ namespace Base_service
 
             try
             {
-                //Checking the name of the location to find the corresponding location Id
-                BaseSelect("locations", "`id`", $"WHERE `name` = '{location}'", "");
-
                 string locationId = "";
-                if (BaseReader.Read()) locationId = BaseReader["id"].ToString();
-                else return "Location not found in database!";
 
+                //Checking the name of the location to find the corresponding location Id
+                if (location != null || location != "")
+                {
+                    BaseSelect("locations", "`id`", $"WHERE `name` = '{location}'", "");
+
+                    if (BaseReader.Read()) locationId = BaseReader["id"].ToString();
+                    else return "Location not found in database!";
+                }
 
                 string changes = "";
                 string[] inputs = new string[] { username, password, locationId, permission, active };
@@ -231,13 +234,21 @@ namespace Base_service
 
 
 
-        public string DeleteUser(string uid, string id)
+        public string DeleteUser(string uid, [Optional] string id, [Optional] string username)
         {
             if (!current_users.ContainsKey(uid)) return "Unauthorized user!";
 
             int? result = null;
 
-            try { result = BaseDelete("users", $"`id`='{id}'"); }
+            try 
+            {
+                if (id != null && id != "")
+                {
+                    result = BaseDelete("users", $"`id`='{id}'");
+                }
+                else if (username != null && username != "") result = BaseDelete("users", $"`username`='{username}'");
+                else return "Give either a username or an id!";
+            }
 
             catch (Exception ex) { Console.WriteLine(ex.Message); }
             finally

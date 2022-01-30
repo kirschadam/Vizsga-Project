@@ -61,9 +61,9 @@ namespace Base_service
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/delete?uid={uid}&id={id}"
+            UriTemplate = "/delete?uid={uid}&id={id}&username={username}"
             )]
-        string DeleteUser(string uid, string id);
+        string DeleteUser(string uid, [Optional] string id, [Optional] string username);
     }
 
     [DataContract]
