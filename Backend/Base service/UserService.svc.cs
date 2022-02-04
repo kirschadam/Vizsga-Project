@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Data;
 using System.Runtime.InteropServices;
 using System.Linq;
+using Base_service.JsonClasses;
 
 namespace Base_service
 {
-    public class UserService : BaseDatabaseCommands, IUserService
+    public class UserService : BaseDatabaseCommands, Interfaces.IUserService
     {
         public static Dictionary<string, User> current_users = new Dictionary<string, User>();
 

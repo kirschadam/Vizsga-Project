@@ -111,18 +111,21 @@
   <ItemGroup>
     <Compile Include="DatabaseManagers\BaseDatabaseCommands.cs" />
     <Compile Include="DatabaseManagers\BaseDatabaseManager.cs" />
-    <Compile Include="ILocationService.cs" />
-    <Compile Include="IStorageService.cs" />
+    <Compile Include="Interfaces\ILocationService.cs" />
+    <Compile Include="Interfaces\IStorageService.cs" />
+    <Compile Include="JsonClasses\Location.cs" />
     <Compile Include="LocationService.svc.cs">
       <DependentUpon>LocationService.svc</DependentUpon>
     </Compile>
+    <Compile Include="JsonClasses\Storage.cs" />
     <Compile Include="StorageService.svc.cs">
       <DependentUpon>StorageService.svc</DependentUpon>
     </Compile>
+    <Compile Include="JsonClasses\User.cs" />
     <Compile Include="UserService.svc.cs">
       <DependentUpon>UserService.svc</DependentUpon>
     </Compile>
-    <Compile Include="IUserService.cs" />
+    <Compile Include="Interfaces\IUserService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

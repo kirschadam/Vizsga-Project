@@ -1,16 +1,12 @@
 ﻿using Base_service.DatabaseManagers;
+using Base_service.JsonClasses;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.ServiceModel;
-using System.Text;
 
 namespace Base_service
 {
-    public class LocationService : BaseDatabaseCommands, ILocationService
+    public class LocationService : BaseDatabaseCommands, Interfaces.ILocationService
     {
         const string join_region = " INNER JOIN `regions` ON `locations`.`regionId` = `regions`.`id`";
 

@@ -1,16 +1,12 @@
 ﻿using Base_service.DatabaseManagers;
+using Base_service.JsonClasses;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.ServiceModel;
-using System.Text;
 
 namespace Base_service
 {
-    public class StockService : BaseDatabaseCommands, IStockService
+    public class StockService : BaseDatabaseCommands, Interfaces.IStockService
     {
         const string join_products = "INNER JOIN `products` ON `stocks`.`productId` = `products`.`id`";
         const string join_locations = " INNER JOIN `locations` ON `stocks`.`locationId` = `locations`.`id`";
