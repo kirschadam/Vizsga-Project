@@ -176,7 +176,7 @@ namespace Base_service.JsonClasses
     [DataContract]
     public class SalePurchase
     {
-        private int? id = null, quantity = null, tValue = null;
+        private int? id = null, quantity = null;
         private string name = null, location = null, user = null;
         private DateTime? date = null;
 
@@ -199,13 +199,6 @@ namespace Base_service.JsonClasses
         {
             get { return quantity; }
             set { quantity = value; }
-        }
-
-        [DataMember]
-        public int? TValue
-        {
-            get { return tValue; }
-            set { tValue = value; }
         }
 
         [DataMember]
@@ -232,12 +225,11 @@ namespace Base_service.JsonClasses
 
         public SalePurchase() { }
 
-        public SalePurchase(int? id, string name, int? quantity, int? tValue, DateTime? date, string location, string user)
+        public SalePurchase(int? id, string name, int? quantity, DateTime? date, string location, string user)
         {
             Id = id;
             Name = name;
             Quantity = quantity;
-            TValue = tValue;
             Date = date;
             Location = location;
             User = user;

@@ -56,7 +56,15 @@ CREATE TRIGGER `tr_purchase_after`
 AFTER INSERT ON `purchases` FOR EACH ROW 
 UPDATE `stocks` SET `stocks`.`quantity` = `stocks`.`quantity` + NEW.`quantity` 
 WHERE `stocks`.`locationId` = NEW.`locationId` 
-AND `stocks`.`productId` = NEW.`locationId`;
+AND `stocks`.`productId` = NEW.`productId`;
+
+CREATE TRIGGER `tr_purchase_before` 
+BEFORE UPDATE ON `purchases` FOR EACH ROW 
+UPDATE `stocks` SET `stocks`.`quantity` = `stocks`.`quantity` + (NEW.`quantity` - (
+SELECT `quantity` FROM `purchases` 
+WHERE `id` = NEW.`id`))
+WHERE `stocks`.`locationId` = NEW.`locationId` 
+AND `stocks`.`productId` = NEW.`productId`;
 
 CREATE TABLE `sales` (
   `id` int(12) PRIMARY KEY AUTO_INCREMENT,
@@ -73,5 +81,13 @@ CREATE TABLE `sales` (
 CREATE TRIGGER `tr_sold_after` 
 AFTER INSERT ON `sales` FOR EACH ROW 
 UPDATE `stocks` SET `stocks`.`quantity` = `stocks`.`quantity` - NEW.`quantity` 
+WHERE `stocks`.`locationId` = NEW.`locationId` 
+AND `stocks`.`productId` = NEW.`productId`;
+
+CREATE TRIGGER `tr_sold_before` 
+BEFORE UPDATE ON `sales` FOR EACH ROW 
+UPDATE `stocks` SET `stocks`.`quantity` = `stocks`.`quantity` - (NEW.`quantity` - (
+SELECT `quantity` FROM `sales` 
+WHERE `id` = NEW.`id`))
 WHERE `stocks`.`locationId` = NEW.`locationId` 
 AND `stocks`.`productId` = NEW.`productId`;
