@@ -85,7 +85,7 @@ namespace FrontendWPF.Components
         {
             //        Console.WriteLine("Init: " + GifSource);
             if (GifSource != null)
-                // Source = GetSource();
+                Source = GetSource();
             _isInitialized = true;
         }
 

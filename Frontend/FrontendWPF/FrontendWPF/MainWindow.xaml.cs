@@ -25,8 +25,8 @@ namespace FrontendWPF
         {
             InitializeComponent();
             Visibility = Visibility.Collapsed;
-            Shared.startWindow_With_PinPanels = new StartWindow_with_pinPanels();
-            Shared.startWindow_With_PinPanels.Show();
+            Shared.StartWindow = new StartWindow();
+            Shared.StartWindow.Show();
             Close();
         }
 

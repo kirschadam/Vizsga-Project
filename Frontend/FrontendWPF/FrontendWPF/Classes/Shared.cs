@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace FrontendWPF.Classes
 {
     public class Shared
     {
-        public static StartWindow_with_pinPanels startWindow_With_PinPanels;
-        public static List<string> locationsList = new List<string> { "Miskolc", "Budapest" };
+        public static StartWindow StartWindow;
+        public static List<string> locationsList = new List<string> { "Budapest", "Debrecen", "Szeged", "Miskolc", "Pécs", "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely","Érd", "Szolnok", "Tatabánya", "Sopron", "Kaposvár", "Veszprém", "Békéscsaba", "Zalaegerszeg", "Eger", "Nagykanizsa" };
         public static List<string> permissionList = new List<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
         public static ServiceReference3.User loggedInUser = null;
         public static string uid;
@@ -53,9 +54,14 @@ namespace FrontendWPF.Classes
         // style a DataGrid cell
         public static void StyleDatagridCell(DataGrid dataGrid, int row_index, int column_index, System.Windows.Media.SolidColorBrush backgroundColor, System.Windows.Media.SolidColorBrush foregroundColor)
         {
-            int itemsCount = dataGrid.Items.Count;
+            // int itemsCount = dataGrid.Items.Count;
             // cannot recognizes rows (items) that are not visible (and results in error)!!
             DataGridRow row = dataGrid.ItemContainerGenerator.ContainerFromItem(dataGrid.Items[row_index]) as DataGridRow;
+            if (row == null)
+            {
+                return;
+            }
+            
             DataGridCell cell = dataGrid.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
             //set style
             cell.Background = backgroundColor;
@@ -72,6 +78,36 @@ namespace FrontendWPF.Classes
             return VisualTreeHelper.GetChild(x, 0) as ScrollViewer;
         }
 
+        // https://docs.microsoft.com/hu-hu/dotnet/desktop/wpf/graphics-multimedia/how-to-animate-a-property-without-using-a-storyboard?view=netframeworkdesktop-4.8
+        public static void ChangeColor(DataGridCell cell, Color fromColor, Color toColor)
+        {
+            SolidColorBrush myBrush = new SolidColorBrush
+            {
+                Color = fromColor
+            };
+
+            ColorAnimation animation = new ColorAnimation
+            {
+                To = toColor,
+                BeginTime = TimeSpan.FromSeconds(3),
+                Duration = TimeSpan.FromSeconds(2),
+                FillBehavior = FillBehavior.Stop,
+                AutoReverse = false,
+                // RepeatBehavior = RepeatBehavior.Forever
+            };
+            // due to FillBehavior.Stop the color reverts to starting color, so it has to be reset to ending color
+            animation.Completed += (s, a) =>
+            {
+                cell.Background = new SolidColorBrush(toColor); // convert Color to SolidColorBrush
+                ;
+            };
+
+            // Apply the animation to the brush's Color property.
+            myBrush.BeginAnimation(SolidColorBrush.ColorProperty, animation);
+
+            cell.Background = myBrush;
+            // cell.BeginAnimation(SolidColorBrush.ColorProperty, animation);
+        }
 
     }
 

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FrontendWPF.ServiceStorageManger {
+namespace FrontendWPF.StockService {
     using System.Runtime.Serialization;
     using System;
     
@@ -26,7 +26,7 @@ namespace FrontendWPF.ServiceStorageManger {
         private string MessageField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private FrontendWPF.ServiceStorageManger.Stock[] StocksField;
+        private FrontendWPF.StockService.Stock[] StocksField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -52,7 +52,7 @@ namespace FrontendWPF.ServiceStorageManger {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public FrontendWPF.ServiceStorageManger.Stock[] Stocks {
+        public FrontendWPF.StockService.Stock[] Stocks {
             get {
                 return this.StocksField;
             }
@@ -180,7 +180,7 @@ namespace FrontendWPF.ServiceStorageManger {
         private string MessageField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private FrontendWPF.ServiceStorageManger.Product[] ProductsField;
+        private FrontendWPF.StockService.Product[] ProductsField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -206,7 +206,7 @@ namespace FrontendWPF.ServiceStorageManger {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public FrontendWPF.ServiceStorageManger.Product[] Products {
+        public FrontendWPF.StockService.Product[] Products {
             get {
                 return this.ProductsField;
             }
@@ -318,7 +318,7 @@ namespace FrontendWPF.ServiceStorageManger {
         private string MessageField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private FrontendWPF.ServiceStorageManger.SalePurchase[] SalesPurchasesField;
+        private FrontendWPF.StockService.SalePurchase[] SalesPurchasesField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -344,7 +344,7 @@ namespace FrontendWPF.ServiceStorageManger {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public FrontendWPF.ServiceStorageManger.SalePurchase[] SalesPurchases {
+        public FrontendWPF.StockService.SalePurchase[] SalesPurchases {
             get {
                 return this.SalesPurchasesField;
             }
@@ -492,14 +492,14 @@ namespace FrontendWPF.ServiceStorageManger {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="ServiceStorageManger.IStockService")]
+    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="StockService.IStockService")]
     public interface IStockService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/ListStock", ReplyAction="http://tempuri.org/IStockService/ListStockResponse")]
-        FrontendWPF.ServiceStorageManger.Response_Stock ListStock(string uid, string id, string product, string location, string qOver, string qUnder, string limit);
+        FrontendWPF.StockService.Response_Stock ListStock(string uid, string id, string product, string location, string qOver, string qUnder, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/ListStock", ReplyAction="http://tempuri.org/IStockService/ListStockResponse")]
-        System.Threading.Tasks.Task<FrontendWPF.ServiceStorageManger.Response_Stock> ListStockAsync(string uid, string id, string product, string location, string qOver, string qUnder, string limit);
+        System.Threading.Tasks.Task<FrontendWPF.StockService.Response_Stock> ListStockAsync(string uid, string id, string product, string location, string qOver, string qUnder, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/AddStock", ReplyAction="http://tempuri.org/IStockService/AddStockResponse")]
         string AddStock(string uid, string product, string location);
@@ -520,10 +520,10 @@ namespace FrontendWPF.ServiceStorageManger {
         System.Threading.Tasks.Task<string> RemoveStockAsync(string uid, string id, string location);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/ListProduct", ReplyAction="http://tempuri.org/IStockService/ListProductResponse")]
-        FrontendWPF.ServiceStorageManger.Response_Product ListProduct(string uid, string id, string name, string qOver, string qUnder, string limit);
+        FrontendWPF.StockService.Response_Product ListProduct(string uid, string id, string name, string qOver, string qUnder, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/ListProduct", ReplyAction="http://tempuri.org/IStockService/ListProductResponse")]
-        System.Threading.Tasks.Task<FrontendWPF.ServiceStorageManger.Response_Product> ListProductAsync(string uid, string id, string name, string qOver, string qUnder, string limit);
+        System.Threading.Tasks.Task<FrontendWPF.StockService.Response_Product> ListProductAsync(string uid, string id, string name, string qOver, string qUnder, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/AddProduct", ReplyAction="http://tempuri.org/IStockService/AddProductResponse")]
         string AddProduct(string uid, string name, string unitPrice);
@@ -544,10 +544,10 @@ namespace FrontendWPF.ServiceStorageManger {
         System.Threading.Tasks.Task<string> RemoveProductAsync(string uid, string id);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/ListSalePurchase", ReplyAction="http://tempuri.org/IStockService/ListSalePurchaseResponse")]
-        FrontendWPF.ServiceStorageManger.Response_SalePurchase ListSalePurchase(string uid, string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit);
+        FrontendWPF.StockService.Response_SalePurchase ListSalePurchase(string uid, string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/ListSalePurchase", ReplyAction="http://tempuri.org/IStockService/ListSalePurchaseResponse")]
-        System.Threading.Tasks.Task<FrontendWPF.ServiceStorageManger.Response_SalePurchase> ListSalePurchaseAsync(string uid, string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit);
+        System.Threading.Tasks.Task<FrontendWPF.StockService.Response_SalePurchase> ListSalePurchaseAsync(string uid, string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/AddSalePurchase", ReplyAction="http://tempuri.org/IStockService/AddSalePurchaseResponse")]
         string AddSalePurchase(string uid, string type, string product, string quantity, string location);
@@ -569,12 +569,12 @@ namespace FrontendWPF.ServiceStorageManger {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface IStockServiceChannel : FrontendWPF.ServiceStorageManger.IStockService, System.ServiceModel.IClientChannel {
+    public interface IStockServiceChannel : FrontendWPF.StockService.IStockService, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class StockServiceClient : System.ServiceModel.ClientBase<FrontendWPF.ServiceStorageManger.IStockService>, FrontendWPF.ServiceStorageManger.IStockService {
+    public partial class StockServiceClient : System.ServiceModel.ClientBase<FrontendWPF.StockService.IStockService>, FrontendWPF.StockService.IStockService {
         
         public StockServiceClient() {
         }
@@ -595,11 +595,11 @@ namespace FrontendWPF.ServiceStorageManger {
                 base(binding, remoteAddress) {
         }
         
-        public FrontendWPF.ServiceStorageManger.Response_Stock ListStock(string uid, string id, string product, string location, string qOver, string qUnder, string limit) {
+        public FrontendWPF.StockService.Response_Stock ListStock(string uid, string id, string product, string location, string qOver, string qUnder, string limit) {
             return base.Channel.ListStock(uid, id, product, location, qOver, qUnder, limit);
         }
         
-        public System.Threading.Tasks.Task<FrontendWPF.ServiceStorageManger.Response_Stock> ListStockAsync(string uid, string id, string product, string location, string qOver, string qUnder, string limit) {
+        public System.Threading.Tasks.Task<FrontendWPF.StockService.Response_Stock> ListStockAsync(string uid, string id, string product, string location, string qOver, string qUnder, string limit) {
             return base.Channel.ListStockAsync(uid, id, product, location, qOver, qUnder, limit);
         }
         
@@ -627,11 +627,11 @@ namespace FrontendWPF.ServiceStorageManger {
             return base.Channel.RemoveStockAsync(uid, id, location);
         }
         
-        public FrontendWPF.ServiceStorageManger.Response_Product ListProduct(string uid, string id, string name, string qOver, string qUnder, string limit) {
+        public FrontendWPF.StockService.Response_Product ListProduct(string uid, string id, string name, string qOver, string qUnder, string limit) {
             return base.Channel.ListProduct(uid, id, name, qOver, qUnder, limit);
         }
         
-        public System.Threading.Tasks.Task<FrontendWPF.ServiceStorageManger.Response_Product> ListProductAsync(string uid, string id, string name, string qOver, string qUnder, string limit) {
+        public System.Threading.Tasks.Task<FrontendWPF.StockService.Response_Product> ListProductAsync(string uid, string id, string name, string qOver, string qUnder, string limit) {
             return base.Channel.ListProductAsync(uid, id, name, qOver, qUnder, limit);
         }
         
@@ -659,11 +659,11 @@ namespace FrontendWPF.ServiceStorageManger {
             return base.Channel.RemoveProductAsync(uid, id);
         }
         
-        public FrontendWPF.ServiceStorageManger.Response_SalePurchase ListSalePurchase(string uid, string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit) {
+        public FrontendWPF.StockService.Response_SalePurchase ListSalePurchase(string uid, string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit) {
             return base.Channel.ListSalePurchase(uid, type, id, product, qOver, qUnder, before, after, location, user, limit);
         }
         
-        public System.Threading.Tasks.Task<FrontendWPF.ServiceStorageManger.Response_SalePurchase> ListSalePurchaseAsync(string uid, string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit) {
+        public System.Threading.Tasks.Task<FrontendWPF.StockService.Response_SalePurchase> ListSalePurchaseAsync(string uid, string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit) {
             return base.Channel.ListSalePurchaseAsync(uid, type, id, product, qOver, qUnder, before, after, location, user, limit);
         }
         

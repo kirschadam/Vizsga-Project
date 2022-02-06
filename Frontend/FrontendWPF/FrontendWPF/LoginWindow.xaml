@@ -60,7 +60,7 @@
             </Grid.RowDefinitions>
 
 
-            <Border CornerRadius="10" Grid.RowSpan="2">
+            <Border CornerRadius="10" Grid.RowSpan="2" BorderThickness="1" BorderBrush="Aqua"  >
                 <Border.Background>
                     <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
                         <GradientStop Color="#FF8E52F7"/>
@@ -140,7 +140,7 @@
                 <StackPanel Orientation="Horizontal" Margin="0,50,0,0">
                     <Button Name="Button_Login" Click="Button_Login_ClickAsync"
                             Width="100" Height="40" Margin="60,0,60,0" Content="L O G I N" FontWeight="Normal" />
-                    <Button Name="Button_Register" Click="Button_Register_Click"  Width="100" Height="40" Content="R E G I S T E R" FontWeight="Normal" IsEnabled="False"/>
+                    <Button Name="Button_Close" Click="Button_Close_Click"  Width="100" Height="40" Content="C L O S E" FontWeight="Normal" IsEnabled="False"/>
                 </StackPanel>
 
             </StackPanel>

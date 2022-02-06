@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace FrontendWPF.ServiceReference3 {
+namespace FrontendWPF.UserService {
     using System.Runtime.Serialization;
     using System;
     
@@ -26,7 +26,7 @@ namespace FrontendWPF.ServiceReference3 {
         private string MessageField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private FrontendWPF.ServiceReference3.User[] UsersField;
+        private FrontendWPF.UserService.User[] UsersField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -52,7 +52,7 @@ namespace FrontendWPF.ServiceReference3 {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public FrontendWPF.ServiceReference3.User[] Users {
+        public FrontendWPF.UserService.User[] Users {
             get {
                 return this.UsersField;
             }
@@ -215,7 +215,7 @@ namespace FrontendWPF.ServiceReference3 {
         private string UidField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private FrontendWPF.ServiceReference3.User UserField;
+        private FrontendWPF.UserService.User UserField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -254,7 +254,7 @@ namespace FrontendWPF.ServiceReference3 {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public FrontendWPF.ServiceReference3.User User {
+        public FrontendWPF.UserService.User User {
             get {
                 return this.UserField;
             }
@@ -277,20 +277,20 @@ namespace FrontendWPF.ServiceReference3 {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="ServiceReference3.IUserService")]
+    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="UserService.IUserService")]
     public interface IUserService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/ListUser", ReplyAction="http://tempuri.org/IUserService/ListUserResponse")]
-        FrontendWPF.ServiceReference3.Response_User ListUser(string uid, string id, string username, string location, string region, string limit);
+        FrontendWPF.UserService.Response_User ListUser(string uid, string id, string username, string location, string region, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/ListUser", ReplyAction="http://tempuri.org/IUserService/ListUserResponse")]
-        System.Threading.Tasks.Task<FrontendWPF.ServiceReference3.Response_User> ListUserAsync(string uid, string id, string username, string location, string region, string limit);
+        System.Threading.Tasks.Task<FrontendWPF.UserService.Response_User> ListUserAsync(string uid, string id, string username, string location, string region, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/LoginUser", ReplyAction="http://tempuri.org/IUserService/LoginUserResponse")]
-        FrontendWPF.ServiceReference3.Response_Login LoginUser(string username, string password);
+        FrontendWPF.UserService.Response_Login LoginUser(string username, string password);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/LoginUser", ReplyAction="http://tempuri.org/IUserService/LoginUserResponse")]
-        System.Threading.Tasks.Task<FrontendWPF.ServiceReference3.Response_Login> LoginUserAsync(string username, string password);
+        System.Threading.Tasks.Task<FrontendWPF.UserService.Response_Login> LoginUserAsync(string username, string password);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/LogoutUser", ReplyAction="http://tempuri.org/IUserService/LogoutUserResponse")]
         string LogoutUser(string uid);
@@ -318,12 +318,12 @@ namespace FrontendWPF.ServiceReference3 {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface IUserServiceChannel : FrontendWPF.ServiceReference3.IUserService, System.ServiceModel.IClientChannel {
+    public interface IUserServiceChannel : FrontendWPF.UserService.IUserService, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class UserServiceClient : System.ServiceModel.ClientBase<FrontendWPF.ServiceReference3.IUserService>, FrontendWPF.ServiceReference3.IUserService {
+    public partial class UserServiceClient : System.ServiceModel.ClientBase<FrontendWPF.UserService.IUserService>, FrontendWPF.UserService.IUserService {
         
         public UserServiceClient() {
         }
@@ -344,19 +344,19 @@ namespace FrontendWPF.ServiceReference3 {
                 base(binding, remoteAddress) {
         }
         
-        public FrontendWPF.ServiceReference3.Response_User ListUser(string uid, string id, string username, string location, string region, string limit) {
+        public FrontendWPF.UserService.Response_User ListUser(string uid, string id, string username, string location, string region, string limit) {
             return base.Channel.ListUser(uid, id, username, location, region, limit);
         }
         
-        public System.Threading.Tasks.Task<FrontendWPF.ServiceReference3.Response_User> ListUserAsync(string uid, string id, string username, string location, string region, string limit) {
+        public System.Threading.Tasks.Task<FrontendWPF.UserService.Response_User> ListUserAsync(string uid, string id, string username, string location, string region, string limit) {
             return base.Channel.ListUserAsync(uid, id, username, location, region, limit);
         }
         
-        public FrontendWPF.ServiceReference3.Response_Login LoginUser(string username, string password) {
+        public FrontendWPF.UserService.Response_Login LoginUser(string username, string password) {
             return base.Channel.LoginUser(username, password);
         }
         
-        public System.Threading.Tasks.Task<FrontendWPF.ServiceReference3.Response_Login> LoginUserAsync(string username, string password) {
+        public System.Threading.Tasks.Task<FrontendWPF.UserService.Response_Login> LoginUserAsync(string username, string password) {
             return base.Channel.LoginUserAsync(username, password);
         }
         

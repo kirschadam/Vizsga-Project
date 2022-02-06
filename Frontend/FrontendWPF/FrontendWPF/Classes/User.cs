@@ -28,11 +28,8 @@ namespace FrontendWPF.Classes
         public static List<ServiceReference3.User> GetUsers(string id, string username, string location, string region, string limit)
         {
             ServiceReference3.UserServiceClient client = new ServiceReference3.UserServiceClient();
-            ServiceStorageManger.StockServiceClient stockClient = new ServiceStorageManger.StockServiceClient();
  
             ServiceReference3.User[] usersArray;
-            ServiceStorageManger.Stock[] stockArray;
-            // ServiceStorageManger.Response_Storage[] responseArray = { };
             List<ServiceReference3.User> usersList = new List<ServiceReference3.User>();
  
             try
@@ -41,8 +38,6 @@ namespace FrontendWPF.Classes
                 usersArray = client.ListUser(Shared.uid, id, username, location, region, limit).Users;
                 // ServiceReference3.Response_User response_User = new ServiceReference3.Response_User();
                 // string uid = response_User.Uid;
-
-                stockArray = stockClient.ListStock(Shared.uid, "", "").Stocks;
 
                 // if (usersArray == null)
                 if (usersArray.Length == 0) // { FrontendWPF.ServiceReference3.User[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!

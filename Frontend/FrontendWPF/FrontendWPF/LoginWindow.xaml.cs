@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using FrontendWPF.Classes;
 // using FrontendWPF.Components;
 // using System.ServiceModel;
@@ -35,7 +36,7 @@ namespace FrontendWPF
         {
             InitializeComponent();
             gifImage.StartAnimation();
-          }
+        }
 
 
         private async void Button_Login_ClickAsync(object sender, RoutedEventArgs e)
@@ -67,7 +68,7 @@ namespace FrontendWPF
                 {
                     errorMessage = $"The remote database is not available. Please check your Internet connection, or contact the service provider.";
                 }
-                else if (responseLogin.Message.Contains("Welcome") == false)
+                else if (responseLogin.Message.Contains("Username or password incorrect!") == false && responseLogin.Message.Contains("Welcome") == false)
                 {
                     errorMessage = responseLogin.Message;
                 }
@@ -127,12 +128,12 @@ namespace FrontendWPF
             //if (Textbox_UserName.Text == "admin" && PasswordBox_Password.Password == "admin")
 
             // if (userArray.Length == 1)
-            if (responseLogin.User != null)
+            if (responseLogin.Message.Contains("Welcome"))
             {
                 Shared.loggedInUser = responseLogin.User;
                 Shared.uid = responseLogin.Uid;
                 Shared.loggedIn = true;
-                Button_Register.Click -= Button_Register_Click; // remove event handlers
+                Button_Close.Click -= Button_Close_Click; // remove event handlers
                 Button_Login.Click -= Button_Login_ClickAsync;
 
                 // Image_Login.Source = new BitmapImage(new Uri("/Resources/Images/success.png", UriKind.Relative));
@@ -148,12 +149,35 @@ namespace FrontendWPF
                 Button_Login.FontWeight = FontWeight.FromOpenTypeWeight(400);
                 Button_Login.FontSize = 20;
                 Button_Login.Content = "O K";
-                Shared.startWindow_With_PinPanels.button_login.Foreground = Brushes.Green;
-                Shared.startWindow_With_PinPanels.button_login.Content = "Log out";
-                Shared.startWindow_With_PinPanels.button_ManageUsersWindow.IsEnabled = true;
+                Shared.StartWindow.button_login.Foreground = Brushes.LightGreen;
+                Shared.StartWindow.button_login.Content = "Log out";
+
+                // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
+                if (Shared.loggedInUser.Active == 1)
+                {
+                    if (Shared.loggedInUser.Permission < 9)
+                    {
+                        Shared.StartWindow.button_ManageUsersWindow.ToolTip = "You do not have rights to manage users!";
+                    }
+                    else
+                    {
+                        Shared.StartWindow.button_ManageUsersWindow.IsEnabled = true;
+                        Shared.StartWindow.button_ManageUsersWindow.Foreground = Brushes.White;
+                    }
+                    Shared.StartWindow.button_ManageProductsWindow.IsEnabled = true;
+                    Shared.StartWindow.button_ManageProductsWindow.Foreground = Brushes.White;
+                }
+                else
+                {
+                    gifImage.Visibility = Visibility.Hidden;
+                    TextBlock_Login.Foreground = Brushes.Salmon;
+                    TextBlock_Login.Text = "Your membership is suspended, please contact the administrator!";
+                    await Task.Delay(5000);
+                    // MessageBox.Show("Your membership is suspended, please contact the administrator!", caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
 
                 // how to run a method as an Action: https://stackoverflow.com/questions/13260322/how-to-use-net-action-to-execute-a-method-with-unknown-number-of-parameters
-                
+
                 // await Shared.Delay(() => CloseWindow(), 2500);
                 await Task.Delay(2500); // delays below code with 2500ms
                 Close();
@@ -194,17 +218,12 @@ namespace FrontendWPF
                 e.Cancel = true;
             }
         }
-        private RegisterWindow registerWindow = new RegisterWindow();
-        private void Button_Register_Click(object sender, RoutedEventArgs e)
+
+        private void Button_Close_Click(object sender, RoutedEventArgs e)
         {
-            if (registerWindow.IsLoaded == false)
-            {
-                Button_Register.Click -= Button_Register_Click; // remove event handler
-                Button_Login.Click -= Button_Login_ClickAsync;
-                registerWindow = new RegisterWindow();
-                registerWindow.Show();
-                Close();
-            }
+            Button_Close.Click -= Button_Close_Click; // remove event handler
+            Button_Login.Click -= Button_Login_ClickAsync;
+            Close();
         }
 
         private void Textbox_UserName_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -232,7 +251,7 @@ namespace FrontendWPF
 
         private void WindowFadeIn_Completed(object sender, EventArgs e)
         {
-            Button_Register.IsEnabled = true;
+            Button_Close.IsEnabled = true;
         }
 
 

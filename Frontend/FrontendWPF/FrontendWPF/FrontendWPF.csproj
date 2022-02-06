@@ -61,8 +61,14 @@
     </ApplicationDefinition>
     <Compile Include="Classes\GridViewSort.cs" />
     <Compile Include="Classes\Shared.cs" />
+    <Compile Include="Classes\Product.cs" />
     <Compile Include="Classes\User.cs" />
     <Compile Include="Components\GifImage.cs" />
+    <Compile Include="Connected Services\LocationService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <Compile Include="Connected Services\ServiceReference3\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -73,11 +79,24 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
+    <Compile Include="Connected Services\StockService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Connected Services\UserService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
     <Compile Include="DataGrid_Users.xaml.cs">
       <DependentUpon>DataGrid_Users.xaml</DependentUpon>
     </Compile>
     <Compile Include="GridView_Users.xaml.cs">
       <DependentUpon>GridView_Users.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ManageProductsWindow.xaml.cs">
+      <DependentUpon>ManageProductsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ManageUsersWindow.xaml.cs">
       <DependentUpon>ManageUsersWindow.xaml</DependentUpon>
@@ -131,8 +150,8 @@
     <Compile Include="Templates\Layout_RotateTransform.xaml.cs">
       <DependentUpon>Layout_RotateTransform.xaml</DependentUpon>
     </Compile>
-    <Compile Include="StartWindow_with_pinPanels.xaml.cs">
-      <DependentUpon>StartWindow_with_pinPanels.xaml</DependentUpon>
+    <Compile Include="StartWindow.xaml.cs">
+      <DependentUpon>StartWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Templates\Add_Element_Programmatically.xaml.cs">
       <DependentUpon>Add_Element_Programmatically.xaml</DependentUpon>
@@ -151,6 +170,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="GridView_Users.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ManageProductsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -234,7 +257,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="StartWindow_with_pinPanels.xaml">
+    <Page Include="StartWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -273,6 +296,22 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Connected Services\LocationService\FrontendWPF.LocationService.Response_Location.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\LocationService\FrontendWPF.LocationService.Response_Region.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\LocationService\item.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\LocationService\item1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\LocationService\item2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\LocationService\LocationService.wsdl" />
     <None Include="Connected Services\ServiceReference3\FrontendWPF.ServiceReference3.Response_Login.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
@@ -289,6 +328,12 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Connected Services\ServiceReference3\UserManagement.wsdl" />
+    <None Include="Connected Services\ServiceStorageManger\FrontendWPF.ServiceStorageManger.Response_Product.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\ServiceStorageManger\FrontendWPF.ServiceStorageManger.Response_SalePurchase.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Connected Services\ServiceStorageManger\FrontendWPF.ServiceStorageManger.Response_Stock.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
@@ -302,6 +347,41 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Connected Services\ServiceStorageManger\StorageManagement.wsdl" />
+    <None Include="Connected Services\StockService\FrontendWPF.StockService.Response_Product.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\StockService\FrontendWPF.StockService.Response_SalePurchase.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\StockService\FrontendWPF.StockService.Response_Stock.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\StockService\item.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\StockService\item1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\StockService\item2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\StockService\StockService.wsdl" />
+    <None Include="Connected Services\UserService\FrontendWPF.UserService.Response_Login.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\UserService\FrontendWPF.UserService.Response_User.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Connected Services\UserService\item.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\UserService\item1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\UserService\item2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Connected Services\UserService\UserService.wsdl" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -367,8 +447,11 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <WCFMetadataStorage Include="Connected Services\LocationService\" />
     <WCFMetadataStorage Include="Connected Services\ServiceReference3\" />
     <WCFMetadataStorage Include="Connected Services\ServiceStorageManger\" />
+    <WCFMetadataStorage Include="Connected Services\StockService\" />
+    <WCFMetadataStorage Include="Connected Services\UserService\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Connected Services\ServiceReference3\item.disco" />
@@ -400,6 +483,51 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Connected Services\ServiceStorageManger\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\StockService\item.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\StockService\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\StockService\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\StockService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\LocationService\item.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\LocationService\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\LocationService\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\LocationService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\UserService\item.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\UserService\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\UserService\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Connected Services\UserService\Reference.svcmap">
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
