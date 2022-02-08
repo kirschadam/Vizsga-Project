@@ -14,9 +14,10 @@ namespace Base_service
             //Checking the name of the region to find the corresponding region Id
             var result_read = BaseSelect("regions", "`id`", new string[,] { { "`name`", "=", $"'{region}'" } }, "");
 
-            string regionId = "";
+            string regionId;
             if (result_read.Item1.Rows.Count != 0) regionId = result_read.Item1.Rows[0]["id"].ToString();
-            if (result_read.Item2 != "") return result_read.Item2;
+            else if (result_read.Item2 != "") return result_read.Item2;
+            else return "Region not found in database!";
 
 
             var result = BaseInsert("locations", "`name`,`regionId`", $"'{location}','{regionId}'");
@@ -171,7 +172,8 @@ namespace Base_service
                 var result_read = BaseSelect("regions", "`id`", new string[,] { { "`name`", "=", $"'{region}'"} }, "");
 
                 if (result_read.Item1.Rows.Count != 0) regionId = result_read.Item1.Rows[0]["id"].ToString();
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2;
+                else return "Region not found in database!";
             }
 
             string[,] changes = 

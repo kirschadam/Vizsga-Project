@@ -28,19 +28,21 @@ namespace Base_service
             //Checking the name of the product to find the corresponding product Id
             var result_read = BaseSelect("products", "`id`", new string[,] { {"`name`", "=", $"'{product}'" } }, "");
 
-            string productId = "";
+            string productId;
             if (result_read.Item1.Rows.Count != 0) productId = result_read.Item1.Rows[0]["id"].ToString();
-            if (result_read.Item2 != "") return result_read.Item2;
+            else if (result_read.Item2 != "") return result_read.Item2;
+            else return "Product not found in database!";
 
             //Checking the name of the location to find the corresponding location Id
             result_read = BaseSelect("locations", "`id`", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
-            string locationId = "";
+            string locationId;
             if (result_read.Item1.Rows.Count != 0) locationId = result_read.Item1.Rows[0]["id"].ToString();
-            if (result_read.Item2 != "") return result_read.Item2;
+            else if (result_read.Item2 != "") return result_read.Item2;
+            else return "Location not found in database!";
 
             //Formatting current time to sql accepted format if user didn't give date
-            if(date == null || date == "") date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            if (date == null || date == "") date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             int? id = Current_users[uid].Id;
 
 
@@ -59,16 +61,18 @@ namespace Base_service
             //Checking the name of the product to find the corresponding product Id
             var result_read = BaseSelect("products", "`id`", new string[,] { { "`name`", "=", $"'{product}'" } }, "");
 
-            string productId = "";
+            string productId;
             if (result_read.Item1.Rows.Count != 0) productId = result_read.Item1.Rows[0]["id"].ToString();
-            if (result_read.Item2 != "") return result_read.Item2;
+            else if (result_read.Item2 != "") return result_read.Item2;
+            else return "Product not found in database!";
 
             //Checking the name of the location to find the corresponding location Id
             result_read = BaseSelect("locations", "`id`", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
-            string locationId = "";
+            string locationId;
             if (result_read.Item1.Rows.Count != 0) locationId = result_read.Item1.Rows[0]["id"].ToString();
-            if (result_read.Item2 != "") return result_read.Item2;
+            else if (result_read.Item2 != "") return result_read.Item2;
+            else return "Location not found in database!";
 
 
             var result = BaseInsert("stocks", "`productId`,`locationId`,`quantity`", $"'{productId}','{locationId}','0'");
@@ -118,7 +122,7 @@ namespace Base_service
 
 
 
-        public Response_SalePurchase ListSalePurchase(string uid, string type, [Optional] string id, [Optional] string product, [Optional] string qOver, [Optional] string qUnder, [Optional] string before, [Optional] string after, [Optional] string location, [Optional] string user, [Optional] string limit)
+        public Response_SalePurchase ListSalePurchase(string uid, string type, [Optional] string id, [Optional] string product, [Optional] string qOver, [Optional] string qUnder, [Optional] string before, [Optional] string after, [Optional] string location, [Optional] string username, [Optional] string limit)
         {
             Response_SalePurchase response = new Response_SalePurchase();
 
@@ -139,7 +143,7 @@ namespace Base_service
                 { "`date`", ">", $"'{before}'" },
                 { "`date`", "<", $"'{after}'" },
                 { "`locations`.`name`", "=", $"'{location}'" },
-                { "`users`.`username`", "=", $"'{user}'" },
+                { "`users`.`username`", "=", $"'{username}'" },
                 { " LIMIT", " ", $"'{limit}'" }
             };
             
@@ -234,14 +238,15 @@ namespace Base_service
             if (type == null || type == "") return "State if the transaction is a sale or a purchase!";
 
             //Check for case under which we delete
-            Tuple<int?, string> result = new Tuple<int?, string>(null, null);
+            Tuple<int?, string> result;
             if (id != null && id != "") result = BaseDelete(type + "s", $"`id`='{id}'");
             else if (location != null && location != "")
             {
                 var result_read = BaseSelect("locations", "id", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) result = BaseDelete(type + "s", $"`location`={result_read.Item1.Rows[0]["id"]}'");
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2;
+                else return "Location not found in database!";
             }
             else return "Give an id or location to delete!";
 
@@ -258,14 +263,15 @@ namespace Base_service
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
 
             //Check for case under which we delete
-            Tuple<int?, string> result = new Tuple<int?, string>(null, null);
+            Tuple<int?, string> result;
             if (id != null && id != "") result = BaseDelete("stocks", $"`id`='{id}'");
             else if (location != null && location != "")
             {
                 var result_read = BaseSelect("locations", "id", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) result = BaseDelete("stocks", $"`location`={result_read.Item1.Rows[0]["id"]}'");
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2;
+                else return "Location not found in database!";
             }
             else return "Give an id or location to delete!";
 
@@ -295,7 +301,7 @@ namespace Base_service
 
 
 
-        public string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string date, [Optional] string location, [Optional] string user)
+        public string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string date, [Optional] string location, [Optional] string username)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
             if (type == null || type == "") return "State if the transaction is a sale or a purchase!";
@@ -307,7 +313,8 @@ namespace Base_service
                 var result_read = BaseSelect("locations", "`id`", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) locationId = result_read.Item1.Rows[0]["id"].ToString();
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2;
+                else return "Location not found in database!";
             }
 
             //Checking the name of the product to find the corresponding product Id
@@ -317,17 +324,19 @@ namespace Base_service
                 var result_read = BaseSelect("products", "`id`", new string[,] { { "`name`", "=", $"'{product}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) productId = result_read.Item1.Rows[0]["id"].ToString();
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2;
+                else return "Product not found in database!";
             }
 
             //Checking the name of the user to find the corresponding user Id
             string userId = "";
             if (product != null && product != "")
             {
-                var result_read = BaseSelect("users", "`id`", new string[,] { { "`username`", "=", $"'{user}'" } }, "");
+                var result_read = BaseSelect("users", "`id`", new string[,] { { "`username`", "=", $"'{username}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) userId = result_read.Item1.Rows[0]["id"].ToString();
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2;
+                else return "User not found in database!";
             }
 
             string[,] changes = 
@@ -360,7 +369,8 @@ namespace Base_service
                 var result_read = BaseSelect("locations", "`id`", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) locationId = result_read.Item1.Rows[0]["id"].ToString();
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2;
+                else return "Location not found in database!";
             }
 
             //Checking the name of the product to find the corresponding product Id
@@ -370,7 +380,8 @@ namespace Base_service
                 var result_read = BaseSelect("products", "`id`", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) productId = result_read.Item1.Rows[0]["id"].ToString();
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2;
+                else return "Product not found in database!";
             }
 
             string[,] changes = 

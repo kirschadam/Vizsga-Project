@@ -119,9 +119,10 @@ namespace Base_service
             //Checking the name of the location to find the corresponding location Id
             var result_read = BaseSelect("locations", "`id`", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
-            string locationId = "";
+            string locationId;
             if (result_read.Item1.Rows.Count != 0) locationId = result_read.Item1.Rows[0]["id"].ToString();
-            if (result_read.Item2 != "") return result_read.Item2;
+            else if (result_read.Item2 != "") return result_read.Item2;
+            else return "Location not found in database!";
 
             //Piece together and check for empty values
             string values = "";
@@ -151,7 +152,8 @@ namespace Base_service
                 var result_read = BaseSelect("locations", "`id`", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) locationId = result_read.Item1.Rows[0]["id"].ToString();
-                if (result_read.Item2 != "") return result_read.Item2;
+                else if (result_read.Item2 != "") return result_read.Item2; 
+                else return "Location not found in database!";
             }
 
             string[,] changes = 

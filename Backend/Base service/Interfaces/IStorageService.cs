@@ -85,9 +85,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/listsalepurchase?uid={uid}&id={id}&type={type}&product={product}&qover={qover}&under={qunder}&before={before}&after={after}&location={location}&user={user}&limit={limit}"
+            UriTemplate = "/listsalepurchase?uid={uid}&id={id}&type={type}&product={product}&qover={qover}&under={qunder}&before={before}&after={after}&location={location}&username={username}&limit={limit}"
             )]
-        Response_SalePurchase ListSalePurchase(string uid, string type, [Optional] string id, [Optional] string product, [Optional] string qOver, [Optional] string qUnder, [Optional] string before, [Optional] string after, [Optional] string location, [Optional] string user, [Optional] string limit);
+        Response_SalePurchase ListSalePurchase(string uid, string type, [Optional] string id, [Optional] string product, [Optional] string qOver, [Optional] string qUnder, [Optional] string before, [Optional] string after, [Optional] string location, [Optional] string username, [Optional] string limit);
 
         [OperationContract]
         [WebInvoke(Method = "POST",
@@ -103,9 +103,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/updatesalepurchase?uid={uid}&id={id}&type={type}&product={product}&quantity={quantity}&date={date}&location={location}&user={user}"
+            UriTemplate = "/updatesalepurchase?uid={uid}&id={id}&type={type}&product={product}&quantity={quantity}&date={date}&location={location}&username={username}"
             )]
-        string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string date, [Optional] string location, [Optional] string user);
+        string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string date, [Optional] string location, [Optional] string username);
 
         [OperationContract]
         [WebInvoke(Method = "DELETE",
