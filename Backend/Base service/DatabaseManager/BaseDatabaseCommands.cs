@@ -75,7 +75,7 @@ namespace Base_service.DatabaseManager
             string set = "";
             for (int i = 0; i < sets.GetLength(0); i++)
             {
-                if (sets[i, 2] == "''") continue;
+                if (sets[i, 1] == "''") continue;
                 if (set != "") set += ",";
 
                 set += sets[i,0] + "=" + sets[i,1];
