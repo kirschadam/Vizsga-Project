@@ -191,7 +191,11 @@ namespace FrontendWPF
                 button_ManageUsersWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF9D9D9D");
                 button_ManageProductsWindow.IsEnabled = false;
                 button_ManageProductsWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF989898");
-                
+                button_ManagePurchasesWindow.IsEnabled = false;
+                button_ManagePurchasesWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF989898");
+                button_ManageSalesWindow.IsEnabled = false;
+                button_ManageSalesWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF8C8C8C");
+
                 ServiceReference3.UserServiceClient client = new ServiceReference3.UserServiceClient();
                 
                 try
@@ -385,7 +389,28 @@ namespace FrontendWPF
             }
         }
 
-        
+        ManagePurchasesWindow ManagePurchasesWindow;
+        private void button_ManagePurchasesWindow_Click(object sender, RoutedEventArgs e)
+        {
+            // show only if not open already (to avoid multiple instances)
+            if (!Application.Current.Windows.OfType<Window>().Contains(ManagePurchasesWindow))
+            {
+                ManagePurchasesWindow = new ManagePurchasesWindow();
+                if (ManagePurchasesWindow.IsEnabled) ManagePurchasesWindow.Show();
+            }
+        }
+
+        ManageSalesWindow ManageSalesWindow;
+        private void button_ManageSalesWindow_Click(object sender, RoutedEventArgs e)
+        {
+            // show only if not open already (to avoid multiple instances)
+            if (!Application.Current.Windows.OfType<Window>().Contains(ManageSalesWindow))
+            {
+                ManageSalesWindow = new ManageSalesWindow();
+                if (ManageSalesWindow.IsEnabled) ManageSalesWindow.Show();
+            }
+        }
+
         private void MenuItem_exit_Click(object sender, RoutedEventArgs e)
         {
             CloseWindow();

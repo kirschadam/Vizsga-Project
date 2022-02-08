@@ -385,13 +385,13 @@ namespace FrontendWPF.ServiceStorageManger {
         private string LocationField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string NameField;
+        private string ProductField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private System.Nullable<int> QuantityField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string UserField;
+        private string UsernameField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -443,14 +443,14 @@ namespace FrontendWPF.ServiceStorageManger {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Name {
+        public string Product {
             get {
-                return this.NameField;
+                return this.ProductField;
             }
             set {
-                if ((object.ReferenceEquals(this.NameField, value) != true)) {
-                    this.NameField = value;
-                    this.RaisePropertyChanged("Name");
+                if ((object.ReferenceEquals(this.ProductField, value) != true)) {
+                    this.ProductField = value;
+                    this.RaisePropertyChanged("Product");
                 }
             }
         }
@@ -469,14 +469,14 @@ namespace FrontendWPF.ServiceStorageManger {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public string User {
+        public string Username {
             get {
-                return this.UserField;
+                return this.UsernameField;
             }
             set {
-                if ((object.ReferenceEquals(this.UserField, value) != true)) {
-                    this.UserField = value;
-                    this.RaisePropertyChanged("User");
+                if ((object.ReferenceEquals(this.UsernameField, value) != true)) {
+                    this.UsernameField = value;
+                    this.RaisePropertyChanged("Username");
                 }
             }
         }

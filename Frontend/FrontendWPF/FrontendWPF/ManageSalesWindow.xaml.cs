@@ -20,28 +20,30 @@ using FrontendWPF.Classes;
 namespace FrontendWPF
 {
 
-    public partial class ManageUsersWindow : Window
+    public partial class ManageSalesWindow : Window
     {
-        private ServiceReference3.UserServiceClient client = new ServiceReference3.UserServiceClient();
+        private StockService.StockServiceClient stockClient = new StockService.StockServiceClient();
         private bool closeCompleted = false;
+        private List<StockService.SalePurchase> dbSalesList { get; set; }
 
-        private List<ServiceReference3.User> dbUsersList { get; set; }
-        
         System.Collections.IList selectedItems;
-        List<ServiceReference3.User> selectedUsersList { get; set; }
-        List<ServiceReference3.User> filterUsersList { get; set; }
-        List<ServiceReference3.User> filteredUsersList { get; set; }
+        List<StockService.SalePurchase> filterSalesList { get; set; }
+        List<StockService.SalePurchase> filteredSalesList { get; set; }
+        List<StockService.SalePurchase> selectedSalesList { get; set; }
+        private List<StockService.Product> dbProductsList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
-        private List<User> usersList { get; set; }
-        private int[] fieldsEntered = new int[5]; // Username, Password, Location, Permission, Active 
+        private List<SalePurchase> salesList { get; set; }
+        private int[] fieldsEntered = new int[5]; // (product) Name, Quantity, Date, Location, User(name)
         ScrollViewer scrollViewer;
+        string lastProduct = "";
+        int? lastQuantity = null;
         string lastLocation = "";
-        int? lastPersmission = null;
-        int? lastActive = null;
+        string lastUsername = "";
+                
 
-        public ManageUsersWindow()
+        public ManageSalesWindow()
         {
             InitializeComponent();
 
@@ -62,11 +64,11 @@ namespace FrontendWPF
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
-            // query all users from database
-            dbUsersList = User.GetUsers("", "", "", "", "");
+            // query all sales from database
+            dbSalesList = SalePurchase.GetSalesPurchases(type: "sale", id: "", product: "", qOver: "", qUnder: "", before: "", after: "", location: "", user: "", limit: "");
 
-            // close window and stop if no user is retrieved
-            if (dbUsersList.Count == 0)
+            // close window and stop if no sale is retrieved
+            if (dbSalesList.Count == 0)
             {
                 IsEnabled = false;
                 closeCompleted = true;
@@ -75,22 +77,22 @@ namespace FrontendWPF
                 return;
             }
 
-            usersList = new List<User>();
-            for (int i = 0; i < dbUsersList.Count; i++)
-            {
-                usersList.Add(new User((int)dbUsersList[i].Id, dbUsersList[i].Username, dbUsersList[i].Password));
-            }
-            // dataGrid1.ItemsSource = usersList;
-            dataGrid1.ItemsSource = dbUsersList;
+
+
+
+
+
+
+            dataGrid1.ItemsSource = dbSalesList;
 
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
 
             if (window.IsLoaded == false) // run on the first time when window is not loaded
             {
-                filterUsersList = new List<ServiceReference3.User>();
+                filterSalesList = new List<StockService.SalePurchase>();
 
                 Dispatcher.InvokeAsync(() => {
-                    double stretch = (600 - 21) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
+                    double stretch = (600 - 58) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
                     dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                     dataGrid0.Width = dataGrid1.Width;
                     // stretch columns to dataGrid1 width
@@ -106,23 +108,22 @@ namespace FrontendWPF
             }
             ScrollDown();
 
-            // create/reset user_filter item and add it to filter dataGrid0
-            user_filter = new ServiceReference3.User()
+            // create/reset sale_filter item and add it to filter dataGrid0
+            sale_filter = new StockService.SalePurchase()
             {
-                Id = null,
-                Username = "",
-                Password = "",
-                Location = "",
-                Permission = null,
-                Active = null
+                Id = -1,
+                Product = "-1", // Name of product
+                Quantity = -1,
+                Date = null,
+                Location = "-1",
+                Username = "-1"
             };
-            filterUsersList.Clear();
-            filterUsersList.Add(user_filter);
-            dataGrid0.ItemsSource = filterUsersList;
+            filterSalesList.Clear();
+            filterSalesList.Add(sale_filter);
+            dataGrid0.ItemsSource = filterSalesList;
             dataGrid0.Items.Refresh();
 
             SetUserAccess();
-
         }
 
         // https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically
@@ -148,7 +149,7 @@ namespace FrontendWPF
         {
             selectedItems = dataGrid1.SelectedItems;
 
-            // in update mode  update selectedcells and user_edited (when SelecionUnit is Cell)
+            // in update mode  update selectedcells and sale_edited (when SelecionUnit is Cell)
             // if (dataGrid1.SelectionUnit == DataGridSelectionUnit.Cell)
             if (edit_mode == "update")
             {
@@ -156,13 +157,13 @@ namespace FrontendWPF
                 IList<DataGridCellInfo> selectedcells = e.AddedCells;
                 if (selectedcells.Count > 0) // ignore new selection when button is pressed and selection becomes 0; 
                 {
-                    user_edited = (ServiceReference3.User)selectedcells[0].Item;
-                    user_edited0 = user_edited;
+                    sale_edited = (StockService.SalePurchase)selectedcells[0].Item;
+                    sale_edited0 = sale_edited;
                 }
             }
         }
 
-        private void Button_DeleteUser_Click(object sender, RoutedEventArgs e)
+        private void Button_DeleteSale_Click(object sender, RoutedEventArgs e)
         {
             if (edit_mode == "update")
             {
@@ -171,44 +172,44 @@ namespace FrontendWPF
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
                 DataGridCellInfo currentCell = dataGrid1.CurrentCell;
 
-                dataGrid1.SelectedItems.Add(user_edited); // this triggers SelectionChanged and sets new selectedItems
+                dataGrid1.SelectedItems.Add(sale_edited); // this triggers SelectionChanged and sets new selectedItems
             }
-            
+
             if (selectedItems.Count > 0)
             {
-                selectedUsersList = new List<ServiceReference3.User>();
-                foreach (ServiceReference3.User user in selectedItems)
+                selectedSalesList = new List<StockService.SalePurchase>();
+                foreach (StockService.SalePurchase sale in selectedItems)
                 {
-                    selectedUsersList.Add(user);
+                    selectedSalesList.Add(sale);
                 }
-                dataGrid1.ItemsSource = selectedUsersList;
+                dataGrid1.ItemsSource = selectedSalesList;
 
                 // waits to render dataGrid1 and sets row background color to Salmon 
                 dataGrid1.Dispatcher.InvokeAsync(() => {
-                    for (int i = 0; i < selectedUsersList.Count; i++)
+                    for (int i = 0; i < selectedSalesList.Count; i++)
                     {
                         Shared.StyleDatagridCell(dataGrid1, row_index: i, column_index: 1, Brushes.Salmon, Brushes.White);
                     }
 
-                    int selectedUsers = selectedUsersList.Count;
-                    string deleteMessage = selectedUsers == 1 ? "Are you sure to delete the selected user?" : $"Are you sure to delete the selected {selectedUsers} users?";
+                    int selectedSales = selectedSalesList.Count;
+                    string deleteMessage = selectedSales == 1 ? "Are you sure to delete the selected sale?" : $"Are you sure to delete the selected {selectedSales} sales?";
 
-                    TextBlock_message.Text = selectedUsers == 1 ? "Delete user?" : $"Delete {selectedUsers} users?";
+                    TextBlock_message.Text = selectedSales == 1 ? "Delete sale?" : $"Delete {selectedSales} sales?";
                     TextBlock_message.Foreground = Brushes.Salmon;
                     MessageBoxResult result = MessageBox.Show(deleteMessage, caption: "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        for (int i = selectedUsers - 1; i >= 0; i--)
+                        for (int i = selectedSales - 1; i >= 0; i--)
                         {
                             try
                             {
-                                // DELETE user(s) from database
-                                deleteMessage = client.DeleteUser(Shared.uid, selectedUsersList[i].Id.ToString(), selectedUsersList[i].Username);
-                                if (deleteMessage == "User successfully deleted!")
+                                // DELETE sale(s) from database
+                                deleteMessage = stockClient.RemoveSalePurchase(Shared.uid, type: "sale", id: selectedSalesList[i].Id.ToString(), location: selectedSalesList[i].Location.ToString());
+                                if (deleteMessage == "Sale(s)/purchase(s) successfully removed!")
                                 {
-                                    dbUsersList.Remove(selectedUsersList[i]); // remove user also from dbUsersList
-                                    selectedUsersList.RemoveAt(i);
+                                    dbSalesList.Remove(selectedSalesList[i]); // remove sale also from dbSalesList
+                                    selectedSalesList.RemoveAt(i);
                                 }
                                 else
                                 {
@@ -231,18 +232,18 @@ namespace FrontendWPF
                             }
                         }
 
-                        if (selectedUsersList.Count == 0)
+                        if (selectedSalesList.Count == 0)
                         {
-                            deleteMessage = selectedUsers == 1 ? "The user has been deleted." : "The users have been deleted.";
-                            TextBlock_message.Text = selectedUsers == 1 ? "User deleted." : "Users deleted.";
+                            deleteMessage = selectedSales == 1 ? "The sale has been deleted." : "The sales have been deleted.";
+                            TextBlock_message.Text = selectedSales == 1 ? "Sale deleted." : "Sales deleted.";
                         }
                         else
                         {
-                            deleteMessage = selectedUsersList.Count == 1 ? "The user shown in the table could not be deleted, as reported in the error message." : "The users shown in the table could not be deleted, as reported in the error message.";
+                            deleteMessage = selectedSalesList.Count == 1 ? "The sale shown in the table could not be deleted, as reported in the error message." : "The sales shown in the table could not be deleted, as reported in the error message.";
                         }
-                        // list the users that could not be deleted (empty if all deleted)
+                        // list the sales that could not be deleted (empty if all deleted)
                         dataGrid1.ItemsSource = null;
-                        dataGrid1.ItemsSource = selectedUsersList;
+                        dataGrid1.ItemsSource = selectedSalesList;
 
                         checkBox_fadeInOut.IsChecked = false;
                         checkBox_fadeInOut.IsChecked = true; // show gifImage
@@ -251,7 +252,7 @@ namespace FrontendWPF
 
                     }
                     // dataGrid1.Focus();
-                    dataGrid1.ItemsSource = dbUsersList;
+                    dataGrid1.ItemsSource = dbSalesList;
                     // for some reason the sorting gets improper, so sort again by Id
                     SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
 
@@ -263,18 +264,18 @@ namespace FrontendWPF
             }
             else
             {
-                MessageBox.Show("Nothing is selected. Please select at least one user. ", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Nothing is selected. Please select at least one sale. ", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             dataGrid1.CanUserSortColumns = true;
         }
 
-      
-        private void Button_UpdateUser_Click(object sender, RoutedEventArgs e)
+
+        private void Button_UpdateSale_Click(object sender, RoutedEventArgs e)
         {
-            UpdateUser();
+            UpdateSale();
         }
 
-        private void UpdateUser()
+        private void UpdateSale()
         {
             if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
             {
@@ -290,7 +291,7 @@ namespace FrontendWPF
                 edit_mode = "update";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Single;
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.Cell;
-                TextBlock_message.Text = "Update user.";
+                TextBlock_message.Text = "Update sale.";
                 TextBlock_message.Foreground = Brushes.White;
                 ScrollDown();
             }
@@ -302,12 +303,12 @@ namespace FrontendWPF
         }
 
 
-        private void Button_AddUser_Click(object sender, RoutedEventArgs e)
+        private void Button_AddSale_Click(object sender, RoutedEventArgs e)
         {
-            AddUser();
+            AddSale();
         }
 
-        private void AddUser()
+        private void AddSale()
         {
             if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
             {
@@ -320,33 +321,36 @@ namespace FrontendWPF
             if (edit_mode == "read" || edit_mode == "update") // if read mode (window just opened) or update mode, switch to insert mode
             {
 
-                // in db select last user with highest Id
-                int? highestId = dbUsersList.Max(u => u.Id);
-                user_edited = new ServiceReference3.User() // create new user with suggested values
+                // in db select last sale with highest Id
+                int? highestId = dbSalesList.Max(u => u.Id);
+                sale_edited = new StockService.SalePurchase() // create new sale with suggested values
                 {
                     Id = highestId + 1,
-                    Username = "",
-                    Password = "",
-                    Location = lastLocation = lastLocation != "" ? lastLocation : Shared.loggedInUser.Location,
-                    Permission = lastPersmission = lastPersmission != null ? lastPersmission : 1,
-                    Active = lastActive = lastActive != null ? lastActive : 1
+                    Product = lastProduct != "" ? lastProduct : "",
+                    Quantity = lastQuantity != null ? lastQuantity : 1,
+                    Date = DateTime.Now,
+                    Location = lastLocation != "" ? lastLocation : Shared.loggedInUser.Location,
+                    Username = lastUsername != "" ? lastUsername : Shared.loggedInUser.Username
                 };
-                user_edited0 = user_edited;
-              
-                dbUsersList.Add(user_edited);
+                    
+                    
+            
+                sale_edited0 = sale_edited;
+
+                dbSalesList.Add(sale_edited);
                 dataGrid1.ItemsSource = null;
-                dataGrid1.ItemsSource = dbUsersList;
+                dataGrid1.ItemsSource = dbSalesList;
 
                 dataGrid1.IsReadOnly = false; // CanUserAddRows="False" must be set in XAML
                 ScrollDown();
                 row_index = dataGrid1.Items.Count - 1;
-                dataGrid1.SelectedItem = dataGrid1.Items[row_index]; // select last row containing the user to be added
+                dataGrid1.SelectedItem = dataGrid1.Items[row_index]; // select last row containing the sale to be added
 
                 // delay execution after dataGrid1 is re-rendered (after new itemsource binding)!
                 // https://stackoverflow.com/questions/44272633/is-there-a-datagrid-rendering-complete-event
                 // https://stackoverflow.com/questions/9732709/the-calling-thread-cannot-access-this-object-because-a-different-thread-owns-it
                 dataGrid1.Dispatcher.InvokeAsync(() => {
-                    // style the id cell of the new user
+                    // style the id cell of the new sale
                     Shared.StyleDatagridCell(dataGrid1, dataGrid1.Items.Count - 1, PK_column_index, Brushes.Salmon, Brushes.White);
                     dataGrid1.Focus();
                     row = dataGrid1.ItemContainerGenerator.ContainerFromItem(dataGrid1.Items[row_index]) as DataGridRow;
@@ -359,12 +363,12 @@ namespace FrontendWPF
                 edit_mode = "insert";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
-                TextBlock_message.Text = "Add user.";
+                TextBlock_message.Text = "Add sale.";
                 TextBlock_message.Foreground = Brushes.White;
             }
             else
             {
-                MessageBox.Show("Please fill in all user data, then press Enter.", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Please fill in all sale data, then press Enter.", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 dataGrid1.Focus();
                 dataGrid1.BeginEdit();
             }
@@ -380,22 +384,22 @@ namespace FrontendWPF
         int column_index;
         int filterc_index;
         string changed_property_name;
-        ServiceReference3.User user_edited, user_edited0, user_filter;
+        StockService.SalePurchase sale_edited, sale_edited0, sale_filter;
 
         private void dataGrid1_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Commit)
             {
-                // exit insert mode if 'Update user' is clicked
-                if (Button_UpdateUser.IsKeyboardFocused)
+                // exit insert mode if 'Update sale' is clicked
+                if (Button_UpdateSale.IsKeyboardFocused)
                 {
                     edit_mode = "read";
                     dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
                     dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
-                    dbUsersList.RemoveAt(dbUsersList.Count - 1);
+                    dbSalesList.RemoveAt(dbSalesList.Count - 1);
                     dataGrid1.ItemsSource = null;
-                    dataGrid1.ItemsSource = dbUsersList;
-                    UpdateUser();
+                    dataGrid1.ItemsSource = dbSalesList;
+                    UpdateSale();
                     return;
                 }
                 else if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
@@ -412,16 +416,18 @@ namespace FrontendWPF
                 row_index = row.GetIndex();
                 column = e.Column;
                 column_index = column.DisplayIndex;
-                //user_edited = row.Item as ServiceReference3.User; //  user_edited and user_edited0 are already defined in UpdateUser and AddUser (read out current (old) values from the row, because the entry is a new value)
+                //sale_edited = row.Item as StockService.SalePurchase; //  sale_edited and sale_edited0 are already defined in UpdateSale and AddSale (read out current (old) values from the row, because the entry is a new value)
 
                 cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
                 textBox = (TextBox)cell.Content;
                 new_value = textBox.Text;
 
                 changed_property_name = dataGrid1.Columns[column_index].Header.ToString();
-                // get old property value of user by property name
+                if (changed_property_name == "Product name") { changed_property_name = "Product"; }
+                if (changed_property_name == "User name") { changed_property_name = "Username"; }
+                // get old property value of sale by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-                old_value = user_edited.GetType().GetProperty(changed_property_name).GetValue(user_edited).ToString();
+                old_value = sale_edited.GetType().GetProperty(changed_property_name).GetValue(sale_edited).ToString();
 
                 // check data correctness
                 string stopMessage = "";
@@ -429,30 +435,36 @@ namespace FrontendWPF
                 {
                     stopMessage = "New value cannot be empty!";
                 }
-                else if (changed_property_name == "Username" && new_value != old_value && dbUsersList.Any(p => p.Username == new_value)) // stop if user already exists in database, AND if new username is different
+                else if (changed_property_name == "Product") // if wrong (product) Name value is entered
                 {
-                    stopMessage = $"The username '{new_value}' is already taken, please enter another username!";
+                    if (new_value == "")
+                    {
+                        stopMessage = $"Please enter a correct value for the Product name!";
+                    }
+                    else
+                    {
+                        dbProductsList = Product.GetProducts("", "", "", "", "");
+                        if (dbProductsList.Any(p => p.Name == new_value) == false)
+                        {
+                            stopMessage = $"The product does not exist in the database. Please check product name.";
+                        }
+                    }
                 }
-                else if (changed_property_name == "Username" && new_value.Length < 5)
+                else if (changed_property_name == "Name") // if wrong (product) Name value is entered
                 {
-                    stopMessage = $"The username must be at least 5 charachters long!";
+                    if (new_value == "")
+                    {
+                        stopMessage = $"Please enter a correct value for the Product name!";
+                    }
                 }
-                else if (changed_property_name == "Password" && new_value.Length < 5)
+                else if (changed_property_name == "Date") // if wrong (product) Name value is entered
                 {
-                    stopMessage = $"The password must be at least 5 charachters long!";
+                    if (DateTime.TryParse(new_value, out _) == false)
+                    {
+                        stopMessage = $"Please enter a correct value for the date value!";
+                    }
                 }
-                else if (changed_property_name == "Location" && Shared.locationsList.Any(p => p == new_value) == false) // if wrong Location name is entered
-                {
-                    stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
-                }
-                else if (changed_property_name == "Permission" && Shared.permissionList.Any(p => p == new_value) == false) // if wrong Permission value is entered
-                {
-                    stopMessage = $"The Permission value '{new_value}' does not exist, please enter the correct value (between 0-9)!";
-                }
-                else if (changed_property_name == "Active" && (new_value == "0" || new_value == "1") == false) // if wrong Active value is entered
-                {
-                    stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
-                }
+
 
                 if (stopMessage != "")  // warn user, and stop
                 {
@@ -464,12 +476,12 @@ namespace FrontendWPF
 
                         // select edited row/cell if user selected another row/cell
                         SelectEditedCell();
-                        
+
                         // remove event handler from wrong new cell (BegindEdit can also be removed if needed)
                         (sender as DataGrid).CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid1_CellEditEnding);
 
                         // select empty cell (if user eventually selected another one
-                        Button_ReloadData.Focus();
+                        Button_AddSale.Focus();
 
                         SelectTextBox();
 
@@ -479,8 +491,7 @@ namespace FrontendWPF
                     return;
                 }
                 // stop in insert mode if new and old value are the same AND the field was already updated (in insert mode the suggested old values of columns Location, Permission and Active can be same as old values if accepted) OR in each case in update mode; 
-                else 
-                if (old_value == new_value && (fieldsEntered[column_index - 1] == 1 || edit_mode == "update")) // && column_index < 3
+                else if (old_value == new_value && (fieldsEntered[column_index - 1] == 1 || edit_mode == "update")) // && column_index < 3
                 {
                     MoveToNextCell();
                     return;
@@ -489,28 +500,29 @@ namespace FrontendWPF
                 Dispatcher.InvokeAsync(() => {
                     SelectEditedCell(); // select edited row/cell if user selected another row/cell after data entry
                 }, DispatcherPriority.Loaded);
-                
+
                 if (edit_mode == "insert") // mark edited cell with salmon in insert mode
                 {
-                Shared.StyleDatagridCell(dataGrid1, row_index, column_index, Brushes.Salmon, Brushes.White); // style the updated cell
+                    Shared.StyleDatagridCell(dataGrid1, row_index, column_index, Brushes.Salmon, Brushes.White); // style the updated cell
                 }
 
-                if (changed_property_name == "Password" && new_value != old_value)
-                {
-                    new_value = Shared.CreateMD5(new_value); // encypt new password (the old password is already encrypted
-                }
 
                 // start saving new valid value
                 fieldsEntered[column_index - 1] = 1; // register the entered property's column index
 
-                if (column_index < 4) // // update string-type fields with new value (Username / Password / Location)
+                if (column_index == 1 || column_index == 4 || column_index == 5) // // update string-type fields with new value ( (product) Name, Location, User (name) )
                 {
-                    user_edited.GetType().GetProperty(changed_property_name).SetValue(user_edited, new_value);
+                    sale_edited.GetType().GetProperty(changed_property_name).SetValue(sale_edited, new_value);
                 }
-                else // update int?-type fields with new value (Permission / Active)
+                else if (column_index == 3) // // update Date fields with new value
+                {
+                    sale_edited.GetType().GetProperty(changed_property_name).SetValue(sale_edited, DateTime.Parse(new_value));
+                }
+                else // update int?-type fields with new value ( (product) Name, Quantity, LocationId, UserId)
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    user_edited.GetType().GetProperty(changed_property_name).SetValue(user_edited, Convert.ToInt32(new_value));
+                    
+                    sale_edited.GetType().GetProperty(changed_property_name).SetValue(sale_edited, Convert.ToInt32(new_value));
 
                 }
 
@@ -523,24 +535,29 @@ namespace FrontendWPF
                     {
                         if (edit_mode == "insert")
                         {
-                            // REGISTER into database
-                            registerMessage = client.RegisterUser(Shared.uid, user_edited.Username, user_edited.Password, user_edited.Location, user_edited.Permission.ToString());
-                            if (registerMessage != "User successfully registered!")
+                            // ADD into database
+                            registerMessage = stockClient.AddSalePurchase(Shared.uid, type: "sale", sale_edited.Product, sale_edited.Quantity.ToString(), sale_edited.Location);
+                            if (registerMessage.Contains("FOREIGN KEY (`productId`)"))
+                            {
+                                MessageBox.Show($"The product does not exist in the database. Please check product name.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                return;
+                            }
+                            else if (registerMessage != "Sale/Purchase successfully added!")
                             {
                                 MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell values? (or simply reload entire list?)
-                                user_edited = user_edited0;
+                                sale_edited = sale_edited0;
                                 return;
                             }
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = client.UpdateUser(Shared.uid, user_edited.Id.ToString(), user_edited.Username, user_edited.Password, user_edited.Location, user_edited.Permission.ToString(), user_edited.Active.ToString());
-                            if (updateMessage != "User successfully updated!")
+                            updateMessage = stockClient.UpdateSalePurchase(Shared.uid, sale_edited.Id.ToString(), type: "sale", sale_edited.Product, sale_edited.Quantity.ToString(), sale_edited.Date.ToString(), sale_edited.Location, sale_edited.Username);
+                            if (updateMessage != "Sale successfully updated!")
                             {
                                 MessageBox.Show(updateMessage + " Field was not updated in the database!", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
-                                user_edited = user_edited0;
+                                sale_edited = sale_edited0;
                                 return;
                             }
                         }
@@ -558,42 +575,46 @@ namespace FrontendWPF
                             return;
                         }
                     }
-                    
-                    
+
+
                     if (edit_mode == "insert")
                     {
-                        lastLocation = user_edited.Location; // save last data to suggest them for next record
-                        lastPersmission = user_edited.Permission;
-                        lastActive = user_edited.Active;
+                        lastProduct = sale_edited.Product; // save last data to suggest them for next record
+                        lastQuantity = sale_edited.Quantity;
+                        lastLocation = sale_edited.Location;
+                        lastUsername = sale_edited.Username;
 
-                        // set background color of added user to green
+                         
+
+                        // set background color of added sale to green
                         for (int i = 0; i < dataGrid1.Columns.Count; i++)
                         {
                             cell = dataGrid1.Columns[i].GetCellContent(row).Parent as DataGridCell;
                             cell.Background = Brushes.OliveDrab;
                         }
-                        TextBlock_message.Text = $"The user '{user_edited.Username}' has been added.";
+                        TextBlock_message.Text = $"The sale of id '{sale_edited.Id}' has been added.";
                         Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
                         edit_mode = "read";
                         dataGrid1.CanUserSortColumns = true;
                         dataGrid1.IsReadOnly = true;
                         dataGrid1.Dispatcher.InvokeAsync(() => {
-                            Button_AddUser.Focus(); // set focus to allow repeatedly add user on pressing the Add user button
+                            Button_AddSale.Focus(); // set focus to allow repeatedly add sale on pressing the Add sale button
                         },
                         DispatcherPriority.Loaded);
+
                     }
                     else if (edit_mode == "update")
                     {
-                        TextBlock_message.Text = $"The user '{user_edited.Username}' has been updated with {changed_property_name}.";
-                        
+                        TextBlock_message.Text = $"The sale of id '{sale_edited.Id}' has been updated with {changed_property_name}.";
+
                         // cell.Background = Brushes.OliveDrab;
                         Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
                         MoveToNextCell();
                     }
                     old_value = new_value; // update old_value after successful update
                     TextBlock_message.Foreground = Brushes.LightGreen;
-                    
-               
+
+
                     checkBox_fadeInOut.IsChecked = false;
                     checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
                     gifImage.StartAnimation();
@@ -602,30 +623,30 @@ namespace FrontendWPF
                 {
                     dataGrid1.Focus();
                     dataGrid1.Dispatcher.InvokeAsync(() => {
-                        
+
                         cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
 
-                        // select next unchanged column; if last 'Active' column is reached, return to first 'Username' column
+                        // select next unchanged column; if last 'UserId' column is reached, return to first (product) 'Name' column
                         int column_shift = 0;
                         while (fieldsEntered[column_index + column_shift - 1] != 0)
                         {
                             column_shift = column_index + column_shift == 5 ? -column_index + 1 : column_shift + 1;
                         }
                         cell = dataGrid1.Columns[column_index + column_shift].GetCellContent(row).Parent as DataGridCell;
-                        
+
                         // turn off eventual editing mode caused e.g. by tab key on data entry
                         if (cell.IsEditing) { cell.IsEditing = false; }
 
                         // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
                         // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
-                        Button_ReloadData.Focus();
+                        Button_AddSale.Focus();
 
                         SelectTextBox();
 
 
 
                     },
-                DispatcherPriority.Loaded); // style the id cell of the new user
+                DispatcherPriority.Loaded); // style the id cell of the new sale
                 }
 
             }
@@ -668,7 +689,7 @@ namespace FrontendWPF
         {
 
             // in insert mode, do not allow user to edit a different row, and restore selection, focus and editing
-            if (edit_mode == "insert" &&  e.Row.GetIndex() != row_index)
+            if (edit_mode == "insert" && e.Row.GetIndex() != row_index)
             {
                 e.Cancel = true;
                 SelectEditedCell();
@@ -678,7 +699,7 @@ namespace FrontendWPF
             }
         }
 
-        
+
         private void dataGrid1_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
         {
 
@@ -703,31 +724,31 @@ namespace FrontendWPF
         private void dataGrid1_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             DataGrid dataGrid1 = sender as DataGrid;
-            
+
             // https://stackoverflow.com/questions/3248023/code-to-check-if-a-cell-of-a-datagrid-is-currently-edited
             IEditableCollectionView itemsView = dataGrid1.Items;
-            
+
             // prevent dataGrid to select lower cell on Enter if not editing (otherwise entire editing would stop
             if (e.Key == Key.Enter && (itemsView.IsAddingNew || itemsView.IsEditingItem) == false && edit_mode != "insert")
-            if (e.Key == Key.Enter && itemsView.IsEditingItem == false && edit_mode != "insert")
-            {
-                // e.Handled = true;
-                // MoveToNextCell();
-            }
+                if (e.Key == Key.Enter && itemsView.IsEditingItem == false && edit_mode != "insert")
+                {
+                    // e.Handled = true;
+                    // MoveToNextCell();
+                }
         }
 
 
         private void MoveToNextCell()
         {
             dataGrid1.Dispatcher.InvokeAsync(() => {
-                // select next  column; if last 'Active' column is reached, return to first 'Username' column
+                // select next  column; if last 'UnitPrice' column is reached, return to first 'Name' column
                 if (column_index == dataGrid1.Columns.Count - 1)
                 {
                     column_index = 1;
                     // move 1 row down if it is not the last row
                     if (row_index < dataGrid1.Items.Count - 1)
                     {
-                        row = dataGrid1.ItemContainerGenerator.ContainerFromItem(dataGrid1.Items[row_index+1]) as DataGridRow;
+                        row = dataGrid1.ItemContainerGenerator.ContainerFromItem(dataGrid1.Items[row_index + 1]) as DataGridRow;
                         row_index++;
                     }
                 }
@@ -741,7 +762,7 @@ namespace FrontendWPF
                 // turn off eventual editing mode causes e.g. by tab key on data entry
                 // if (cell.IsEditing) { cell.IsEditing = false; }
 
-                
+
                 // go into edit mode if in insert mode
                 cell.Focus(); // set focus on cell
                 if (edit_mode == "insert") // TODO: tesztelni!
@@ -766,7 +787,7 @@ namespace FrontendWPF
             // Keyboard.Focus(textBox);
             textBox.SelectAll();
         }
-        
+
         private void ScrollDown()
         {
             // dataGrid1.Focus();
@@ -794,6 +815,7 @@ namespace FrontendWPF
             }
             */
         }
+
         // make window draggable
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -831,7 +853,7 @@ namespace FrontendWPF
         // show/hide dataGrid0 with filter row
         private void Button_Filter_Click(object sender, RoutedEventArgs e)
         {
-            filteredUsersList = new List<ServiceReference3.User>();
+            filteredSalesList = new List<StockService.SalePurchase>();
 
             // show filter dataGrid0
             if (stackPanel1.Height == 442)
@@ -871,49 +893,35 @@ namespace FrontendWPF
                 textBox = (TextBox)cell.Content;
                 new_value = textBox.Text;
                 changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
+                if (changed_property_name == "Product name") { changed_property_name = "Product"; }
+                if (changed_property_name == "User name") { changed_property_name = "Username"; }
 
-
-                /*
-                if (changed_property_name == "Id" && user_edited.Permission == null) user_filter.Id = -1;
-                if (changed_property_name == "Permission" && user_edited.Permission == null) user_filter.Permission = -1;
-                if (changed_property_name == "Active" && user_edited.Permission == null) user_filter.Active = -1;
-                */
-                //get old property value of user by property name
+                //get old property value of sale by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-
-                int? int_val = Int32.TryParse(user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString(), out var tempVal0) ? tempVal0 : (int?)null;
-
-                old_value = int_val != null ? user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString() : "";
+                old_value = sale_filter.GetType().GetProperty(changed_property_name).GetValue(sale_filter).ToString();
 
                 // check data correctness
                 string stopMessage = "";
                 if (changed_property_name == "Id")
                 {
-                    int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if (int_val == null || int_val < 0 )
+                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                    if (int_val == null || int_val < -1)
                     {
                         stopMessage = $"Please enter a correct value for the Id!";
                     }
                 }
-                else if (new_value != "" && changed_property_name == "Username" && new_value.Length < 5)
+                /*
+                else if (new_value != "" && new_value != "-1" && changed_property_name == "Name" && new_value.Length < 5)
                 {
-                    stopMessage = $"The username must be at least 5 charachters long!";
+                    stopMessage = $"The name must be at least 5 charachters long!";
                 }
-                else if (new_value != "" && new_value != "-1" && changed_property_name == "Password" && new_value.Length < 5)
+                */
+                else if (changed_property_name == "Name") // if wrong (product) Name value is entered
                 {
-                    stopMessage = $"The password must be at least 5 charachters long!";
-                }
-                else if (new_value !="" && changed_property_name == "Location" && Shared.locationsList.Any(p => p == new_value) == false) // if wrong Location name is entered
-                {
-                    stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
-                }
-                else if (changed_property_name == "Permission" && (new_value != "" && Shared.permissionList.Any(p => p == new_value) == false)) // if wrong Permission value is entered
-                {
-                    stopMessage = $"The Permission value '{new_value}' does not exist, please enter the correct value (between 0-9)!";
-                }
-                else if (changed_property_name == "Active" && ( (new_value == "0" || new_value == "1") == false)) // if wrong Active value is entered
-                {
-                    stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
+                    if (new_value == "")
+                    {
+                        stopMessage = $"Please enter a correct value for the Product name!";
+                    }
                 }
 
                 if (stopMessage != "")  // warn user, and stop
@@ -922,7 +930,7 @@ namespace FrontendWPF
                     textBox.Text = old_value; // restore correct cell value
                     return;
                 }
-                
+
                 /*
                 // stop if new and old value are the same 
                 else if (old_value == new_value)
@@ -931,39 +939,40 @@ namespace FrontendWPF
                 }
                 */
 
-                if (new_value !="" && new_value != "-1" && changed_property_name == "Password" && new_value != old_value)
-                {
-                    new_value = Shared.CreateMD5(new_value); // encypt new password (the old password is already encrypted
-                }
 
-                if (filterc_index < 4 == filterc_index > 0) // // update string-type fields with new value (Username / Password / Location)
+                if (filterc_index == 1 || filterc_index == 4 || filterc_index == 5 ) // // update string-type fields with new value ( (product) Name, Location, User (name) )
                 {
-                    user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, new_value);
+                    sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, new_value);
                 }
-                else // update int?-type fields with new value (Permission / Active)
+                else if (filterc_index == 3) // // update Date fields with new value
                 {
-                    int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, Convert.ToInt32(new_value));
+                    sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, DateTime.Parse(new_value));
+                }
+                else // update int?-type fields with new value (UnitPrice)
+                {
+                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                    sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, Convert.ToInt32(new_value));
 
                 }
 
                 // filter
-                filteredUsersList.Clear();
-                foreach (var user in dbUsersList)
+                filteredSalesList.Clear();
+                foreach (var sale in dbSalesList)
                 {
 
-                    if ( ( user_filter.Id == null || user.Id == user_filter.Id) && (user_filter.Username == "" || user.Username == user_filter.Username) && (user_filter.Password == "" || user.Password == user_filter.Password) && (user_filter.Location == "" || user.Location == user_filter.Location) && (user_filter.Permission == null || user.Permission == user_filter.Permission) && (user_filter.Active == null || user.Active == user_filter.Active))
+                    if ((sale_filter.Id == -1 || sale_filter.Id == null || sale.Id == sale_filter.Id) && (sale_filter.Product == "-1" || sale_filter.Product == "" || sale.Quantity == sale_filter.Quantity) && (sale_filter.Date == null || sale_filter.Date == null || sale.Date == sale_filter.Date))
                     {
-                        filteredUsersList.Add(user);
+                        filteredSalesList.Add(sale);
                         continue;
                     }
                 }
                 // update dataGrid1 with filtered items                    
-                dataGrid1.ItemsSource = filteredUsersList;
+                dataGrid1.ItemsSource = filteredSalesList;
                 SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
                 dataGrid1.Items.Refresh();
             }
         }
+
 
         private void dataGrid0_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -981,20 +990,22 @@ namespace FrontendWPF
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
             if (Shared.loggedInUser.Permission < 6)
             {
-                Button_DeleteUser.IsEnabled = false;
-                Button_DeleteUser.Foreground = Brushes.Gray;
-                Button_DeleteUser.ToolTip = "You do not have rights to delete data!";
+                Button_DeleteSale.IsEnabled = false;
+                Button_DeleteSale.Foreground = Brushes.Gray;
+                Button_DeleteSale.ToolTip = "You do not have rights to delete data!";
             }
             if (Shared.loggedInUser.Permission < 3)
             {
-                Button_AddUser.IsEnabled = false;
-                Button_AddUser.Foreground = Brushes.Gray;
-                Button_AddUser.ToolTip = "You do not have rights to add data!";
-                Button_UpdateUser.IsEnabled = false;
-                Button_UpdateUser.Foreground = Brushes.Gray;
-                Button_UpdateUser.ToolTip = "You do not have rights to update data!";
+                Button_AddSale.IsEnabled = false;
+                Button_AddSale.Foreground = Brushes.Gray;
+                Button_AddSale.ToolTip = "You do not have rights to add data!";
+                Button_UpdateSale.IsEnabled = false;
+                Button_UpdateSale.Foreground = Brushes.Gray;
+                Button_UpdateSale.ToolTip = "You do not have rights to update data!";
             }
         }
+
     }
 }
+
 
