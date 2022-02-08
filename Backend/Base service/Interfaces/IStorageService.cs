@@ -94,9 +94,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/addsalepurchase?uid={uid}&type={type}&product={product}&quantity={quantity}&location={location}"
+            UriTemplate = "/addsalepurchase?uid={uid}&type={type}&product={product}&quantity={quantity}&location={location}&date={date}"
             )]
-        string AddSalePurchase(string uid, string type, string product, string quantity, string location);
+        string AddSalePurchase(string uid, string type, string product, string quantity, string location, [Optional] string date);
 
         [OperationContract]
         [WebInvoke(Method = "PUT",

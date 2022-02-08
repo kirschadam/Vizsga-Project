@@ -37,7 +37,7 @@ namespace Base_service.JsonClasses
     public class Stock
     {
         private int? id = null, quantity = null;
-        private string name = null, location = null;
+        private string product = null, location = null;
 
         [DataMember]
         public int? Id
@@ -54,10 +54,10 @@ namespace Base_service.JsonClasses
         }
 
         [DataMember]
-        public string Name
+        public string Product
         {
-            get { return name; }
-            set { name = value; }
+            get { return product; }
+            set { product = value; }
         }
 
         [DataMember]
@@ -69,11 +69,11 @@ namespace Base_service.JsonClasses
 
         public Stock() { }
 
-        public Stock(int? id, int? quantity, string name, string location)
+        public Stock(int? id, int? quantity, string product, string location)
         {
             Id = id;
             Quantity = quantity;
-            Name = name;
+            Product = product;
             Location = location;
         }
     }

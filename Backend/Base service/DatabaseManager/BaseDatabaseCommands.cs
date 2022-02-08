@@ -7,29 +7,39 @@ namespace Base_service.DatabaseManager
 {
     public class BaseDatabaseCommands
     {
-        public static Dictionary<string, JsonClasses.User> current_users = new Dictionary<string, JsonClasses.User>();
+        public static Dictionary<string, JsonClasses.User> Current_users { get; } = new Dictionary<string, JsonClasses.User>();
 
-        public static MySqlConnection BaseConnection { get; } = new MySqlConnection()
+        public static MySqlConnection BaseConnection { get; } = new MySqlConnection("SERVER=localhost; DATABASE=assets; UID=root; PASSWORD=; SSL MODE = none;");
+
+        public Tuple<DataTable, string> BaseSelect(string table, string columns, string[,] condition_array, string inner_joins)
         {
-            ConnectionString = "SERVER=localhost; DATABASE=assets; UID=root; PASSWORD=; SSL MODE = none;"
-        };
-
-        public Tuple<MySqlDataReader, string, MySqlCommand> BaseSelect(string table, string columns, string conditions, string inner_joins)
-        {
-            string query = $"SELECT {columns} FROM `{table}` {inner_joins} {conditions};";
-
-            MySqlCommand command = new MySqlCommand(query, connection: BaseConnection);
-            MySqlDataReader reader = null;
-            string message = "";
-
-            try
+            //put the conditions together into a string
+            string conditions = "";
+            for (int i = 0; i < condition_array.GetLength(0); i++)
             {
-                BaseConnection.Open();
-                reader = command.ExecuteReader();
-            }
-            catch(Exception ex) { Console.WriteLine(query + "\n\n" + ex.Message); message = ex.Message; }
+                if (condition_array[i, 2] == "''") continue;
 
-            return new Tuple<MySqlDataReader, string, MySqlCommand>(reader, message, command);
+                for (int j = 0; j < condition_array.GetLength(1); j++)
+                {
+                    conditions += condition_array[i, j];
+                }
+            }
+
+            //If there are conditions, put and AND keyword between every condition, if there are multiple, every condition starts with "`" and ends with "'"
+            if (conditions != "") conditions = conditions.Replace("'`", "' AND `").Replace("%`", "% AND `");
+            else conditions = "1";
+
+            string query = $"SELECT {columns} FROM `{table}` {inner_joins} WHERE {conditions};";
+
+            DataTable result = new DataTable(); string message = "";
+
+            using(MySqlDataAdapter adapter = new MySqlDataAdapter(new MySqlCommand(query, BaseConnection)))
+            {
+                try { adapter.Fill(result); }
+                catch (Exception ex) { Console.WriteLine(query + "\n\n" + ex.Message); message = ex.Message; }
+            }
+
+            return new Tuple<DataTable, string>(result, message);
         }
 
 
@@ -38,20 +48,20 @@ namespace Base_service.DatabaseManager
         {
             string query = $"INSERT INTO `{table}`({columns}) VALUES ({values});";
 
-            int? affected_rows = null;
-            MySqlCommand command = new MySqlCommand(query, BaseConnection);
-            string message = "";
+            int? affected_rows = null; string message = "";
 
-            try
+            using (MySqlCommand command = new MySqlCommand(query, BaseConnection))
             {
-                command.Connection.Open();
-                affected_rows = command.ExecuteNonQuery();
-            }
-            catch (Exception ex) { Console.WriteLine(query + "\n\n" + ex.Message); message = ex.Message; }
-            finally
-            {
-                if (command.Connection.State == ConnectionState.Open)
-                    command.Connection.Close();
+                try
+                {
+                    command.Connection.Open();
+                    affected_rows = command.ExecuteNonQuery();
+                }
+                catch (Exception ex) { Console.WriteLine(query + "\n\n" + ex.Message); message = ex.Message; }
+                finally
+                {
+                    if (command.Connection.State == ConnectionState.Open) command.Connection.Close();
+                }
             }
 
             return new Tuple<int?, string>(affected_rows, message);
@@ -59,24 +69,34 @@ namespace Base_service.DatabaseManager
 
 
 
-        public Tuple<int?, string> BaseUpdate(string table, string sets, string conditions)
+        public Tuple<int?, string> BaseUpdate(string table, string[,] sets, string conditions)
         {
-            string query = $"UPDATE `{table}` SET {sets} WHERE {conditions};";
-
-            int? affected_rows = null;
-            MySqlCommand command = new MySqlCommand(query, BaseConnection);
-            string message = "";
-
-            try
+            //put the conditions together into a string
+            string set = "";
+            for (int i = 0; i < sets.GetLength(0); i++)
             {
-                command.Connection.Open();
-                affected_rows = command.ExecuteNonQuery();
+                if (sets[i, 2] == "''") continue;
+                if (set != "") set += ",";
+
+                set += sets[i,0] + "=" + sets[i,1];
             }
-            catch (Exception ex) { Console.WriteLine(query + "\n\n" + ex.Message); message = ex.Message; }
-            finally
+
+            string query = $"UPDATE `{table}` SET {set} WHERE {conditions};";
+
+            int? affected_rows = null; string message = "";
+
+            using (MySqlCommand command = new MySqlCommand(query, BaseConnection))
             {
-                if (command.Connection.State == ConnectionState.Open)
-                    command.Connection.Close();
+                try
+                {
+                    command.Connection.Open();
+                    affected_rows = command.ExecuteNonQuery();
+                }
+                catch (Exception ex) { Console.WriteLine(query + "\n\n" + ex.Message); message = ex.Message; }
+                finally
+                {
+                    if (command.Connection.State == ConnectionState.Open) command.Connection.Close();
+                }
             }
 
             return new Tuple<int?, string>(affected_rows, message);
@@ -88,20 +108,20 @@ namespace Base_service.DatabaseManager
         {
             string query = $"DELETE FROM `{table}` WHERE {conditions};";
 
-            int? affected_rows = null;
-            MySqlCommand command = new MySqlCommand(query, BaseConnection);
-            string message = "";
+            int? affected_rows = null; string message = "";
 
-            try
+            using (MySqlCommand command = new MySqlCommand(query, BaseConnection))
             {
-                command.Connection.Open();
-                affected_rows = command.ExecuteNonQuery();
-            }
-            catch (Exception ex) { Console.WriteLine(query + "\n\n" + ex.Message); message = ex.Message; }
-            finally
-            {
-                if (command.Connection.State == ConnectionState.Open)
-                    command.Connection.Close();
+                try
+                {
+                    command.Connection.Open();
+                    affected_rows = command.ExecuteNonQuery();
+                }
+                catch (Exception ex) { Console.WriteLine(query + "\n\n" + ex.Message); message = ex.Message; }
+                finally
+                {
+                    if (command.Connection.State == ConnectionState.Open) command.Connection.Close();
+                }
             }
 
             return new Tuple<int?, string>(affected_rows, message);
