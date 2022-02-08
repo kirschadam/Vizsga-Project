@@ -177,7 +177,7 @@ namespace Base_service.JsonClasses
     public class SalePurchase
     {
         private int? id = null, quantity = null;
-        private string name = null, location = null, user = null;
+        private string product = null, location = null, username = null;
         private DateTime? date = null;
 
         [DataMember]
@@ -188,10 +188,10 @@ namespace Base_service.JsonClasses
         }
 
         [DataMember]
-        public string Name
+        public string Product
         {
-            get { return name; }
-            set { name = value; }
+            get { return product; }
+            set { product = value; }
         }
 
         [DataMember]
@@ -216,23 +216,23 @@ namespace Base_service.JsonClasses
         }
 
         [DataMember]
-        public string User
+        public string Username
         {
-            get { return user; }
-            set { user = value; }
+            get { return username; }
+            set { username = value; }
         }
 
 
         public SalePurchase() { }
 
-        public SalePurchase(int? id, string name, int? quantity, DateTime? date, string location, string user)
+        public SalePurchase(int? id, string product, int? quantity, DateTime? date, string location, string username)
         {
             Id = id;
-            Name = name;
+            Product = product;
             Quantity = quantity;
             Date = date;
             Location = location;
-            User = user;
+            Username = username;
         }
     }
 }

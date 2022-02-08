@@ -109,8 +109,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DatabaseManagers\BaseDatabaseCommands.cs" />
-    <Compile Include="DatabaseManagers\BaseDatabaseManager.cs" />
+    <Compile Include="DatabaseManager\BaseDatabaseCommands.cs" />
     <Compile Include="Interfaces\ILocationService.cs" />
     <Compile Include="Interfaces\IStorageService.cs" />
     <Compile Include="JsonClasses\Location.cs" />
