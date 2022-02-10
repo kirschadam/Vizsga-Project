@@ -248,15 +248,17 @@
 
 
             <StackPanel Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0" Width="247">
+                <Button Name="Button_Close" Click="Button_Close_Click" Width="45" Height="40" Margin="0,0,6,0" Content="&#xf410;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSalmon" FontSize="24" HorizontalAlignment="Right"/>
+
                 <!--<Image Name="Image_Login" Source="/Resources/Images/login.gif" Width="160"/>-->
-                <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="80" Opacity="0"/>
+                <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="80" Opacity="0" Margin="0,-30,0,0"/>
 
                 <TextBlock Name="TextBlock_message" Text="Select an option."
-                           Margin="0, 10, 0,0"
+                           Margin="5, 5, 5, 0"
                            TextWrapping="Wrap"
                            FontWeight="Medium"
                            FontFamily="helvetica"
-                           FontSize="20"
+                           FontSize="18"
                            Foreground="White"
                            HorizontalAlignment="Center"/>
             </StackPanel>
@@ -272,7 +274,7 @@
                     <Button Name="Button_DeleteLocation" Click="Button_DeleteLocation_Click"  Width="125" Height="40" Margin="0,10,0,0" Content="Delete location" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
                     <Button Name="Button_Filter" Click="Button_Filter_Click" Width="125" Height="40" Margin="0,10,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
                     <Button Name="Button_ReloadData" Click="Button_ReloadData_Click"  Width="125" Height="40" Margin="0,10,0,0" Content="Reset" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_Close" Click="Button_Close_Click"  Width="125" Height="40" Margin="0,10,0,10" Content="Close" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="Button_Export" Click="Button_Export_Click" Width="125" Height="40" Margin="0,10,0,10" Content="Export" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Export data to file"/>
                 </StackPanel>
 
                 <StackPanel/>

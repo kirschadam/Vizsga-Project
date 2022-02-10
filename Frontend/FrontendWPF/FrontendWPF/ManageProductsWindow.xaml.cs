@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using FrontendWPF.Classes;
-
+using Microsoft.Win32;
 
 namespace FrontendWPF
 {
@@ -88,7 +89,8 @@ namespace FrontendWPF
             {
                 filterProductsList = new List<StockService.Product>();
 
-                Dispatcher.InvokeAsync(() => {
+                Dispatcher.InvokeAsync(() =>
+                {
                     double stretch = (600 - 58) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
                     dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                     dataGrid0.Width = dataGrid1.Width;
@@ -108,9 +110,9 @@ namespace FrontendWPF
             // create/reset product_filter item and add it to filter dataGrid0
             product_filter = new StockService.Product()
             {
-                Id = -1,
-                Name = "-1",
-                UnitPrice = -1
+                Id = null,
+                Name = "",
+                UnitPrice = null
             };
             filterProductsList.Clear();
             filterProductsList.Add(product_filter);
@@ -179,7 +181,8 @@ namespace FrontendWPF
                 dataGrid1.ItemsSource = selectedProductsList;
 
                 // waits to render dataGrid1 and sets row background color to Salmon 
-                dataGrid1.Dispatcher.InvokeAsync(() => {
+                dataGrid1.Dispatcher.InvokeAsync(() =>
+                {
                     for (int i = 0; i < selectedProductsList.Count; i++)
                     {
                         Shared.StyleDatagridCell(dataGrid1, row_index: i, column_index: 1, Brushes.Salmon, Brushes.White);
@@ -337,7 +340,8 @@ namespace FrontendWPF
                 // delay execution after dataGrid1 is re-rendered (after new itemsource binding)!
                 // https://stackoverflow.com/questions/44272633/is-there-a-datagrid-rendering-complete-event
                 // https://stackoverflow.com/questions/9732709/the-calling-thread-cannot-access-this-object-because-a-different-thread-owns-it
-                dataGrid1.Dispatcher.InvokeAsync(() => {
+                dataGrid1.Dispatcher.InvokeAsync(() =>
+                {
                     // style the id cell of the new product
                     Shared.StyleDatagridCell(dataGrid1, dataGrid1.Items.Count - 1, PK_column_index, Brushes.Salmon, Brushes.White);
                     dataGrid1.Focus();
@@ -422,7 +426,7 @@ namespace FrontendWPF
                 {
                     stopMessage = "New value cannot be empty!";
                 }
-                else 
+                else
                 if (changed_property_name == "Name" && new_value != old_value && dbProductsList.Any(p => p.Name == new_value)) // stop if product already exists in database, AND if new name is different
                 {
                     stopMessage = $"The name '{new_value}' is already taken, please enter another name!";
@@ -450,7 +454,8 @@ namespace FrontendWPF
                     textBox.Text = old_value; // restore correct cell value
                     // cell.Content = old_value;
 
-                    Dispatcher.InvokeAsync(() => {
+                    Dispatcher.InvokeAsync(() =>
+                    {
 
                         // select edited row/cell if user selected another row/cell
                         SelectEditedCell();
@@ -475,7 +480,8 @@ namespace FrontendWPF
                     return;
                 }
 
-                Dispatcher.InvokeAsync(() => {
+                Dispatcher.InvokeAsync(() =>
+                {
                     SelectEditedCell(); // select edited row/cell if user selected another row/cell after data entry
                 }, DispatcherPriority.Loaded);
 
@@ -523,7 +529,7 @@ namespace FrontendWPF
                             updateMessage = stockClient.UpdateProduct(Shared.uid, product_edited.Id.ToString(), product_edited.Name, product_edited.UnitPrice.ToString());
                             if (updateMessage != "Product successfully updated!")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated in the database!", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 product_edited = product_edited0;
                                 return;
@@ -545,10 +551,10 @@ namespace FrontendWPF
                     }
 
 
-                    if (edit_mode == "insert") 
+                    if (edit_mode == "insert")
                     {
                         lastNameIndex++;
-                        lastName = lastNameIndex == 2 ? product_edited.Name + " " + lastNameIndex : product_edited.Name.Substring(0, product_edited.Name.Length -lastNameIndex.ToString().Length -1) + " " + lastNameIndex; // save last data to suggest them for next record
+                        lastName = lastNameIndex == 2 ? product_edited.Name + " " + lastNameIndex : product_edited.Name.Substring(0, product_edited.Name.Length - lastNameIndex.ToString().Length - 1) + " " + lastNameIndex; // save last data to suggest them for next record
                         lastUnitPrice = product_edited.UnitPrice;
 
                         // set background color of added product to green
@@ -562,7 +568,8 @@ namespace FrontendWPF
                         edit_mode = "read";
                         dataGrid1.CanUserSortColumns = true;
                         dataGrid1.IsReadOnly = true;
-                        dataGrid1.Dispatcher.InvokeAsync(() => {
+                        dataGrid1.Dispatcher.InvokeAsync(() =>
+                        {
                             Button_AddProduct.Focus(); // set focus to allow repeatedly add product on pressing the Add product button
                         },
                         DispatcherPriority.Loaded);
@@ -587,7 +594,8 @@ namespace FrontendWPF
                 else // move to next cell
                 {
                     dataGrid1.Focus();
-                    dataGrid1.Dispatcher.InvokeAsync(() => {
+                    dataGrid1.Dispatcher.InvokeAsync(() =>
+                    {
 
                         cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
 
@@ -705,7 +713,8 @@ namespace FrontendWPF
 
         private void MoveToNextCell()
         {
-            dataGrid1.Dispatcher.InvokeAsync(() => {
+            dataGrid1.Dispatcher.InvokeAsync(() =>
+            {
                 // select next  column; if last 'UnitPrice' column is reached, return to first 'Name' column
                 if (column_index == dataGrid1.Columns.Count - 1)
                 {
@@ -860,30 +869,35 @@ namespace FrontendWPF
                 changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
                 if (changed_property_name == "Unit price") { changed_property_name = "UnitPrice"; }
 
+                // if any product_filter value is null, set it temporarily to -999 to avoid error when setting old value                
+                if (changed_property_name == "Id" && product_filter.Id == null) product_filter.Id = -999;
+                if (changed_property_name == "UnitPrice" && product_filter.UnitPrice == null) product_filter.UnitPrice = -999;
                 //get old property value of product by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
                 old_value = product_filter.GetType().GetProperty(changed_property_name).GetValue(product_filter).ToString();
+                if (changed_property_name == "Id" && product_filter.Id == -999) product_filter.Id = null;
+                if (changed_property_name == "UnitPrice" && product_filter.UnitPrice == -999) product_filter.UnitPrice = null;
 
                 // check data correctness
                 string stopMessage = "";
                 if (changed_property_name == "Id")
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if (int_val == null || int_val < -1)
+                    if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
                     {
-                        stopMessage = $"Please enter a correct value for the Id!";
+                        stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
                     }
                 }
                 else if (new_value != "" && new_value != "-1" && changed_property_name == "Name" && new_value.Length < 5)
                 {
                     stopMessage = $"The name must be at least 5 charachters long!";
                 }
-                else if (changed_property_name == "UnitPrice") // if wrong UnitPrice value is entered
+                else if (changed_property_name == "UnitPrice" && new_value != "") // if wrong UnitPrice value is entered
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if (int_val == null || int_val == 0 || int_val < -1)
+                    if ((new_value != "" && int_val == null) || int_val < 0)
                     {
-                        stopMessage = $"Please enter a correct value for the Unit price!";
+                        stopMessage = $"The Unit price '{new_value}' does not exist, please enter a correct value for the Unit price!";
                     }
                     else if (int_val > 10000000)
                     {
@@ -894,7 +908,7 @@ namespace FrontendWPF
                 if (stopMessage != "")  // warn user, and stop
                 {
                     MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    textBox.Text = old_value; // restore correct cell value
+                    if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
                     return;
                 }
 
@@ -911,10 +925,10 @@ namespace FrontendWPF
                 {
                     product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, new_value);
                 }
-                else // update int?-type fields with new value (UnitPrice)
+                else // update int?-type fields with new value (Id, UnitPrice)
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, Convert.ToInt32(new_value));
+                    product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, int_val);
 
                 }
 
@@ -923,7 +937,7 @@ namespace FrontendWPF
                 foreach (var product in dbProductsList)
                 {
 
-                    if ((product_filter.Id == -1 || product_filter.Id == null || product.Id == product_filter.Id) && (product_filter.Name == "-1" || product_filter.Name == "" || product.Name == product_filter.Name) && (product_filter.UnitPrice == -1 || product_filter.UnitPrice == null || product.UnitPrice == product_filter.UnitPrice))
+                    if ((product_filter.Id == null || product.Id == product_filter.Id) && (product_filter.Name == "" || product.Name == product_filter.Name) && (product_filter.UnitPrice == null || product.UnitPrice == product_filter.UnitPrice))
                     {
                         filteredProductsList.Add(product);
                         continue;
@@ -965,6 +979,43 @@ namespace FrontendWPF
                 Button_UpdateProduct.IsEnabled = false;
                 Button_UpdateProduct.Foreground = Brushes.Gray;
                 Button_UpdateProduct.ToolTip = "You do not have rights to update data!";
+            }
+        }
+
+        private void Button_Export_Click(object sender, RoutedEventArgs e)
+        {
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Comma separated text file (*.csv)|*.csv|C# file (*.cs)|*.cs";
+            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            saveFileDialog.FileName = "dbProducts"; 
+            saveFileDialog.DefaultExt = ".csv";
+            Nullable<bool> result = saveFileDialog.ShowDialog(); // show saveFileDialog
+            if (result == true)
+            {
+                // create file content
+                StreamWriter sr = new StreamWriter(saveFileDialog.FileName, append: false, encoding: Encoding.UTF8);
+                // write file header line
+                string header_row = "Id;Name;UnitPrice";
+                sr.WriteLine(header_row);
+
+                // write file rows
+                string rows = "";
+                StockService.Product product;
+                int i = 0;
+                for (i = 0; i < dataGrid1.Items.Count; i++)
+                {
+                    product = dataGrid1.Items[i] as StockService.Product;
+                    rows += $"{product.Id};{product.Name};{product.UnitPrice}\n";
+                }
+                sr.Write(rows);
+                sr.Close();
+
+                TextBlock_message.Text = $"Database content ({i} records) printed to '{saveFileDialog.FileName}' file.";
+                TextBlock_message.Foreground = Brushes.LightGreen;
+                checkBox_fadeInOut.IsChecked = false;
+                checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
+                gifImage.StartAnimation();
             }
         }
 

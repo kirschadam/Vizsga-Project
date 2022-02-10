@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using FrontendWPF.Classes;
+using Microsoft.Win32;
 
 
 namespace FrontendWPF
@@ -90,7 +92,7 @@ namespace FrontendWPF
                 filterUsersList = new List<ServiceReference3.User>();
 
                 Dispatcher.InvokeAsync(() => {
-                    double stretch = (600 - 21) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
+                    double stretch = (600 - 50) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
                     dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                     dataGrid0.Width = dataGrid1.Width;
                     // stretch columns to dataGrid1 width
@@ -429,13 +431,13 @@ namespace FrontendWPF
                 {
                     stopMessage = "New value cannot be empty!";
                 }
-                else if (changed_property_name == "Username" && new_value != old_value && dbUsersList.Any(p => p.Username == new_value)) // stop if user already exists in database, AND if new username is different
-                {
-                    stopMessage = $"The username '{new_value}' is already taken, please enter another username!";
-                }
                 else if (changed_property_name == "Username" && new_value.Length < 5)
                 {
                     stopMessage = $"The username must be at least 5 charachters long!";
+                }
+                else if (changed_property_name == "Username" && new_value != old_value && dbUsersList.Any(p => p.Username == new_value)) // stop if user already exists in database, AND if new username is different
+                {
+                    stopMessage = $"The username '{new_value}' is already taken, please enter another username!";
                 }
                 else if (changed_property_name == "Password" && new_value.Length < 5)
                 {
@@ -538,7 +540,7 @@ namespace FrontendWPF
                             updateMessage = client.UpdateUser(Shared.uid, user_edited.Id.ToString(), user_edited.Username, user_edited.Password, user_edited.Location, user_edited.Permission.ToString(), user_edited.Active.ToString());
                             if (updateMessage != "User successfully updated!")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated in the database!", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 user_edited = user_edited0;
                                 return;
@@ -806,6 +808,7 @@ namespace FrontendWPF
             CloseWindow();
         }
 
+
         private void CloseWindow()
         {
             Button_Close.IsEnabled = false;
@@ -872,27 +875,29 @@ namespace FrontendWPF
                 new_value = textBox.Text;
                 changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
 
-
-                /*
-                if (changed_property_name == "Id" && user_edited.Permission == null) user_filter.Id = -1;
-                if (changed_property_name == "Permission" && user_edited.Permission == null) user_filter.Permission = -1;
-                if (changed_property_name == "Active" && user_edited.Permission == null) user_filter.Active = -1;
-                */
+                // if any user_filter value is null, set it temporarily to -999 to avoid error when setting old value                
+                if (changed_property_name == "Id" && user_filter.Id == null) user_filter.Id = -999;
+                if (changed_property_name == "Permission" && user_filter.Permission == null) user_filter.Permission = -999;
+                if (changed_property_name == "Active" && user_filter.Active == null) user_filter.Active = -999;
                 //get old property value of user by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
 
                 int? int_val = Int32.TryParse(user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString(), out var tempVal0) ? tempVal0 : (int?)null;
 
                 old_value = int_val != null ? user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString() : "";
+                if (changed_property_name == "Id" && user_filter.Id == -999) user_filter.Id = null;
+                if (changed_property_name == "Permission" && user_filter.Permission == -999) user_filter.Permission = null;
+                if (changed_property_name == "Active" && user_filter.Active == -999) user_filter.Active = null;
+
 
                 // check data correctness
                 string stopMessage = "";
                 if (changed_property_name == "Id")
                 {
                     int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if (int_val == null || int_val < 0 )
+                    if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
                     {
-                        stopMessage = $"Please enter a correct value for the Id!";
+                        stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
                     }
                 }
                 else if (new_value != "" && changed_property_name == "Username" && new_value.Length < 5)
@@ -911,7 +916,7 @@ namespace FrontendWPF
                 {
                     stopMessage = $"The Permission value '{new_value}' does not exist, please enter the correct value (between 0-9)!";
                 }
-                else if (changed_property_name == "Active" && ( (new_value == "0" || new_value == "1") == false)) // if wrong Active value is entered
+                else if (changed_property_name == "Active" && (new_value != "" && (new_value == "0" || new_value == "1") == false)) // if wrong Active value is entered
                 {
                     stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
                 }
@@ -919,7 +924,7 @@ namespace FrontendWPF
                 if (stopMessage != "")  // warn user, and stop
                 {
                     MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    textBox.Text = old_value; // restore correct cell value
+                    if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
                     return;
                 }
                 
@@ -943,7 +948,7 @@ namespace FrontendWPF
                 else // update int?-type fields with new value (Permission / Active)
                 {
                     int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, Convert.ToInt32(new_value));
+                    user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, int_val);
 
                 }
 
@@ -993,6 +998,53 @@ namespace FrontendWPF
                 Button_UpdateUser.IsEnabled = false;
                 Button_UpdateUser.Foreground = Brushes.Gray;
                 Button_UpdateUser.ToolTip = "You do not have rights to update data!";
+            }
+        }
+
+        private void Button_Export_Click(object sender, RoutedEventArgs e)
+        {
+            
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Comma separated text file (*.csv)|*.csv|C# file (*.cs)|*.cs";
+            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            saveFileDialog.FileName = "dbUsers"; // Default file name
+            saveFileDialog.DefaultExt = ".csv"; // Default file extension
+            Nullable<bool> result = saveFileDialog.ShowDialog(); // show saveFileDialog
+            if (result == true)
+            {
+                // create file content
+                StreamWriter sr = new StreamWriter(saveFileDialog.FileName, append: false, encoding: Encoding.UTF8);
+                // write file header line
+                string header_row = "Id;Username;Password;Location;Persmission;Active";
+                /*
+                int num_columns = dataGrid1.Columns.Count;
+                for (int i = 0; i < num_columns; i++)
+                {
+                    header_row += dataGrid1.Columns[i].Header.ToString();
+                    if (i + 1 < num_columns) header_row += ";";
+                }
+                */
+                sr.WriteLine(header_row);
+
+                // write file rows
+                string rows = "";
+                ServiceReference3.User user;
+                int i = 0;
+                for (i= 0; i < dataGrid1.Items.Count; i++)
+                {
+                   user = dataGrid1.Items[i] as ServiceReference3.User;
+                   rows += $"{user.Id};{user.Username};{user.Password};{user.Location};{user.Permission};{user.Active}\n";
+                }
+                sr.Write(rows);
+                sr.Close();
+                // Save document
+                // File.WriteAllText(saveFileDialog.FileName, rows);
+
+                TextBlock_message.Text = $"Database content ({i} records) printed to '{saveFileDialog.FileName}' file.";
+                TextBlock_message.Foreground = Brushes.LightGreen;
+                checkBox_fadeInOut.IsChecked = false;
+                checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
+                gifImage.StartAnimation();
             }
         }
     }

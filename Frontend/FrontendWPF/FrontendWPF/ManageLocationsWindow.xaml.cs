@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,35 +16,30 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using FrontendWPF.Classes;
-
+using Microsoft.Win32;
 
 namespace FrontendWPF
 {
 
-    public partial class ManageSalesWindow : Window
+    public partial class ManageLocationsWindow : Window
     {
-        private StockService.StockServiceClient stockClient = new StockService.StockServiceClient();
+        private LocationService.LocationServiceClient locationClient = new LocationService.LocationServiceClient();
         private bool closeCompleted = false;
-        private List<StockService.SalePurchase> dbSalesList { get; set; }
+        private List<LocationService.Store> dbLocationsList { get; set; }
+        private List<LocationService.Region> dbRegionsList { get; set; }
 
         System.Collections.IList selectedItems;
-        List<StockService.SalePurchase> filterSalesList { get; set; }
-        List<StockService.SalePurchase> filteredSalesList { get; set; }
-        List<StockService.SalePurchase> selectedSalesList { get; set; }
-        private List<StockService.Product> dbProductsList { get; set; }
+        List<LocationService.Store> filterLocationsList { get; set; }
+        List<LocationService.Store> filteredLocationsList { get; set; }
+        List<LocationService.Store> selectedLocationsList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
-        private List<SalePurchase> salesList { get; set; }
-        private int[] fieldsEntered = new int[5]; // (product) Name, Quantity, Date, Location, User(name)
+        private List<Location> locationsList { get; set; }
+        private int[] fieldsEntered = new int[2]; // Name, Region
         ScrollViewer scrollViewer;
-        string lastProduct = "";
-        int? lastQuantity = null;
-        string lastLocation = "";
-        string lastUsername = "";
-                
 
-        public ManageSalesWindow()
+        public ManageLocationsWindow()
         {
             InitializeComponent();
 
@@ -64,11 +60,11 @@ namespace FrontendWPF
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
-            // query all sales from database
-            dbSalesList = SalePurchase.GetSalesPurchases(type: "sale", id: "", product: "", qOver: "", qUnder: "", before: "", after: "", location: "", user: "", limit: "");
+            // query all locations from database
+            dbLocationsList = Location.GetLocations("", "", "", "");
 
-            // close window and stop if no sale is retrieved
-            if (dbSalesList.Count == 0)
+            // close window and stop if no location is retrieved
+            if (dbLocationsList.Count == 0)
             {
                 IsEnabled = false;
                 closeCompleted = true;
@@ -83,16 +79,17 @@ namespace FrontendWPF
 
 
 
-            dataGrid1.ItemsSource = dbSalesList;
+            dataGrid1.ItemsSource = dbLocationsList;
 
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
 
             if (window.IsLoaded == false) // run on the first time when window is not loaded
             {
-                filterSalesList = new List<StockService.SalePurchase>();
+                filterLocationsList = new List<LocationService.Store>();
+                dbRegionsList = Region.GetRegions("", "", "", "");
 
                 Dispatcher.InvokeAsync(() => {
-                    double stretch = (600 - 63) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
+                    double stretch = (600 - 65) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
                     dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                     dataGrid0.Width = dataGrid1.Width;
                     // stretch columns to dataGrid1 width
@@ -108,19 +105,16 @@ namespace FrontendWPF
             }
             ScrollDown();
 
-            // create/reset sale_filter item and add it to filter dataGrid0
-            sale_filter = new StockService.SalePurchase()
+            // create/reset location_filter item and add it to filter dataGrid0
+            location_filter = new LocationService.Store()
             {
-                Id = -1,
-                Product = "-1", // Name of product
-                Quantity = -1,
-                Date = null,
-                Location = "-1",
-                Username = "-1"
+                Id = null,
+                Name = "",
+                Region = ""
             };
-            filterSalesList.Clear();
-            filterSalesList.Add(sale_filter);
-            dataGrid0.ItemsSource = filterSalesList;
+            filterLocationsList.Clear();
+            filterLocationsList.Add(location_filter);
+            dataGrid0.ItemsSource = filterLocationsList;
             dataGrid0.Items.Refresh();
 
             SetUserAccess();
@@ -149,7 +143,7 @@ namespace FrontendWPF
         {
             selectedItems = dataGrid1.SelectedItems;
 
-            // in update mode  update selectedcells and sale_edited (when SelecionUnit is Cell)
+            // in update mode  update selectedcells and location_edited (when SelecionUnit is Cell)
             // if (dataGrid1.SelectionUnit == DataGridSelectionUnit.Cell)
             if (edit_mode == "update")
             {
@@ -157,13 +151,13 @@ namespace FrontendWPF
                 IList<DataGridCellInfo> selectedcells = e.AddedCells;
                 if (selectedcells.Count > 0) // ignore new selection when button is pressed and selection becomes 0; 
                 {
-                    sale_edited = (StockService.SalePurchase)selectedcells[0].Item;
-                    sale_edited0 = sale_edited;
+                    location_edited = (LocationService.Store)selectedcells[0].Item;
+                    location_edited0 = location_edited;
                 }
             }
         }
 
-        private void Button_DeleteSale_Click(object sender, RoutedEventArgs e)
+        private void Button_DeleteLocation_Click(object sender, RoutedEventArgs e)
         {
             if (edit_mode == "update")
             {
@@ -172,44 +166,44 @@ namespace FrontendWPF
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
                 DataGridCellInfo currentCell = dataGrid1.CurrentCell;
 
-                dataGrid1.SelectedItems.Add(sale_edited); // this triggers SelectionChanged and sets new selectedItems
+                dataGrid1.SelectedItems.Add(location_edited); // this triggers SelectionChanged and sets new selectedItems
             }
 
             if (selectedItems.Count > 0)
             {
-                selectedSalesList = new List<StockService.SalePurchase>();
-                foreach (StockService.SalePurchase sale in selectedItems)
+                selectedLocationsList = new List<LocationService.Store>();
+                foreach (LocationService.Store location in selectedItems)
                 {
-                    selectedSalesList.Add(sale);
+                    selectedLocationsList.Add(location);
                 }
-                dataGrid1.ItemsSource = selectedSalesList;
+                dataGrid1.ItemsSource = selectedLocationsList;
 
                 // waits to render dataGrid1 and sets row background color to Salmon 
                 dataGrid1.Dispatcher.InvokeAsync(() => {
-                    for (int i = 0; i < selectedSalesList.Count; i++)
+                    for (int i = 0; i < selectedLocationsList.Count; i++)
                     {
                         Shared.StyleDatagridCell(dataGrid1, row_index: i, column_index: 1, Brushes.Salmon, Brushes.White);
                     }
 
-                    int selectedSales = selectedSalesList.Count;
-                    string deleteMessage = selectedSales == 1 ? "Are you sure to delete the selected sale?" : $"Are you sure to delete the selected {selectedSales} sales?";
+                    int selectedLocations = selectedLocationsList.Count;
+                    string deleteMessage = selectedLocations == 1 ? "Are you sure to delete the selected location?" : $"Are you sure to delete the selected {selectedLocations} locations?";
 
-                    TextBlock_message.Text = selectedSales == 1 ? "Delete sale?" : $"Delete {selectedSales} sales?";
+                    TextBlock_message.Text = selectedLocations == 1 ? "Delete location?" : $"Delete {selectedLocations} location?";
                     TextBlock_message.Foreground = Brushes.Salmon;
                     MessageBoxResult result = MessageBox.Show(deleteMessage, caption: "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        for (int i = selectedSales - 1; i >= 0; i--)
+                        for (int i = selectedLocations - 1; i >= 0; i--)
                         {
                             try
                             {
-                                // DELETE sale(s) from database
-                                deleteMessage = stockClient.RemoveSalePurchase(Shared.uid, type: "sale", id: selectedSalesList[i].Id.ToString(), location: selectedSalesList[i].Location.ToString());
-                                if (deleteMessage == "Sale(s)/purchase(s) successfully removed!")
+                                // DELETE location(s) from database
+                                deleteMessage = locationClient.RemoveLocation(Shared.uid, selectedLocationsList[i].Id.ToString(), selectedLocationsList[i].Name);
+                                if (deleteMessage == "Location successfully removed!")
                                 {
-                                    dbSalesList.Remove(selectedSalesList[i]); // remove sale also from dbSalesList
-                                    selectedSalesList.RemoveAt(i);
+                                    dbLocationsList.Remove(selectedLocationsList[i]); // remove location also from dbLocationsList
+                                    selectedLocationsList.RemoveAt(i);
                                 }
                                 else
                                 {
@@ -232,18 +226,18 @@ namespace FrontendWPF
                             }
                         }
 
-                        if (selectedSalesList.Count == 0)
+                        if (selectedLocationsList.Count == 0)
                         {
-                            deleteMessage = selectedSales == 1 ? "The sale has been deleted." : "The sales have been deleted.";
-                            TextBlock_message.Text = selectedSales == 1 ? "Sale deleted." : "Sales deleted.";
+                            deleteMessage = selectedLocations == 1 ? "The location has been deleted." : "The locations have been deleted.";
+                            TextBlock_message.Text = selectedLocations == 1 ? "Location deleted." : "Locations deleted.";
                         }
                         else
                         {
-                            deleteMessage = selectedSalesList.Count == 1 ? "The sale shown in the table could not be deleted, as reported in the error message." : "The sales shown in the table could not be deleted, as reported in the error message.";
+                            deleteMessage = selectedLocationsList.Count == 1 ? "The location shown in the table could not be deleted, as reported in the error message." : "The locations shown in the table could not be deleted, as reported in the error message.";
                         }
-                        // list the sales that could not be deleted (empty if all deleted)
+                        // list the locations that could not be deleted (empty if all deleted)
                         dataGrid1.ItemsSource = null;
-                        dataGrid1.ItemsSource = selectedSalesList;
+                        dataGrid1.ItemsSource = selectedLocationsList;
 
                         checkBox_fadeInOut.IsChecked = false;
                         checkBox_fadeInOut.IsChecked = true; // show gifImage
@@ -252,7 +246,7 @@ namespace FrontendWPF
 
                     }
                     // dataGrid1.Focus();
-                    dataGrid1.ItemsSource = dbSalesList;
+                    dataGrid1.ItemsSource = dbLocationsList;
                     // for some reason the sorting gets improper, so sort again by Id
                     SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
 
@@ -264,18 +258,18 @@ namespace FrontendWPF
             }
             else
             {
-                MessageBox.Show("Nothing is selected. Please select at least one sale. ", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Nothing is selected. Please select at least one location. ", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             dataGrid1.CanUserSortColumns = true;
         }
 
 
-        private void Button_UpdateSale_Click(object sender, RoutedEventArgs e)
+        private void Button_UpdateLocation_Click(object sender, RoutedEventArgs e)
         {
-            UpdateSale();
+            UpdateLocation();
         }
 
-        private void UpdateSale()
+        private void UpdateLocation()
         {
             if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
             {
@@ -291,7 +285,7 @@ namespace FrontendWPF
                 edit_mode = "update";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Single;
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.Cell;
-                TextBlock_message.Text = "Update sale.";
+                TextBlock_message.Text = "Update location.";
                 TextBlock_message.Foreground = Brushes.White;
                 ScrollDown();
             }
@@ -303,12 +297,12 @@ namespace FrontendWPF
         }
 
 
-        private void Button_AddSale_Click(object sender, RoutedEventArgs e)
+        private void Button_AddLocation_Click(object sender, RoutedEventArgs e)
         {
-            AddSale();
+            AddLocation();
         }
 
-        private void AddSale()
+        private void AddLocation()
         {
             if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
             {
@@ -321,36 +315,30 @@ namespace FrontendWPF
             if (edit_mode == "read" || edit_mode == "update") // if read mode (window just opened) or update mode, switch to insert mode
             {
 
-                // in db select last sale with highest Id
-                int? highestId = dbSalesList.Max(u => u.Id);
-                sale_edited = new StockService.SalePurchase() // create new sale with suggested values
+                // in db select last location with highest Id
+                int? highestId = dbLocationsList.Max(u => u.Id);
+                location_edited = new LocationService.Store() // create new location with suggested values
                 {
                     Id = highestId + 1,
-                    Product = lastProduct != "" ? lastProduct : "",
-                    Quantity = lastQuantity != null ? lastQuantity : 1,
-                    Date = DateTime.Now,
-                    Location = lastLocation != "" ? lastLocation : Shared.loggedInUser.Location,
-                    Username = lastUsername != "" ? lastUsername : Shared.loggedInUser.Username
+                    Name = "",
+                    Region = ""
                 };
-                    
-                    
-            
-                sale_edited0 = sale_edited;
+                location_edited0 = location_edited;
 
-                dbSalesList.Add(sale_edited);
+                dbLocationsList.Add(location_edited);
                 dataGrid1.ItemsSource = null;
-                dataGrid1.ItemsSource = dbSalesList;
+                dataGrid1.ItemsSource = dbLocationsList;
 
                 dataGrid1.IsReadOnly = false; // CanUserAddRows="False" must be set in XAML
                 ScrollDown();
                 row_index = dataGrid1.Items.Count - 1;
-                dataGrid1.SelectedItem = dataGrid1.Items[row_index]; // select last row containing the sale to be added
+                dataGrid1.SelectedItem = dataGrid1.Items[row_index]; // select last row containing the location to be added
 
                 // delay execution after dataGrid1 is re-rendered (after new itemsource binding)!
                 // https://stackoverflow.com/questions/44272633/is-there-a-datagrid-rendering-complete-event
                 // https://stackoverflow.com/questions/9732709/the-calling-thread-cannot-access-this-object-because-a-different-thread-owns-it
                 dataGrid1.Dispatcher.InvokeAsync(() => {
-                    // style the id cell of the new sale
+                    // style the id cell of the new location
                     Shared.StyleDatagridCell(dataGrid1, dataGrid1.Items.Count - 1, PK_column_index, Brushes.Salmon, Brushes.White);
                     dataGrid1.Focus();
                     row = dataGrid1.ItemContainerGenerator.ContainerFromItem(dataGrid1.Items[row_index]) as DataGridRow;
@@ -363,12 +351,12 @@ namespace FrontendWPF
                 edit_mode = "insert";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
-                TextBlock_message.Text = "Add sale.";
+                TextBlock_message.Text = "Add location.";
                 TextBlock_message.Foreground = Brushes.White;
             }
             else
             {
-                MessageBox.Show("Please fill in all sale data, then press Enter.", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Please fill in all location data, then press Enter.", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 dataGrid1.Focus();
                 dataGrid1.BeginEdit();
             }
@@ -384,22 +372,22 @@ namespace FrontendWPF
         int column_index;
         int filterc_index;
         string changed_property_name;
-        StockService.SalePurchase sale_edited, sale_edited0, sale_filter;
+        LocationService.Store location_edited, location_edited0, location_filter;
 
         private void dataGrid1_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Commit)
             {
-                // exit insert mode if 'Update sale' is clicked
-                if (Button_UpdateSale.IsKeyboardFocused)
+                // exit insert mode if 'Update location' is clicked
+                if (Button_UpdateLocation.IsKeyboardFocused)
                 {
                     edit_mode = "read";
                     dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
                     dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
-                    dbSalesList.RemoveAt(dbSalesList.Count - 1);
+                    dbLocationsList.RemoveAt(dbLocationsList.Count - 1);
                     dataGrid1.ItemsSource = null;
-                    dataGrid1.ItemsSource = dbSalesList;
-                    UpdateSale();
+                    dataGrid1.ItemsSource = dbLocationsList;
+                    UpdateLocation();
                     return;
                 }
                 else if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
@@ -416,18 +404,16 @@ namespace FrontendWPF
                 row_index = row.GetIndex();
                 column = e.Column;
                 column_index = column.DisplayIndex;
-                //sale_edited = row.Item as StockService.SalePurchase; //  sale_edited and sale_edited0 are already defined in UpdateSale and AddSale (read out current (old) values from the row, because the entry is a new value)
+                //location_edited = row.Item as LocationService.Location; //  location_edited and location_edited0 are already defined in UpdateLocation and AddLocation (read out current (old) values from the row, because the entry is a new value)
 
                 cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
                 textBox = (TextBox)cell.Content;
                 new_value = textBox.Text;
 
                 changed_property_name = dataGrid1.Columns[column_index].Header.ToString();
-                if (changed_property_name == "Product name") { changed_property_name = "Product"; }
-                if (changed_property_name == "User name") { changed_property_name = "Username"; }
-                // get old property value of sale by property name
+                // get old property value of location by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-                old_value = sale_edited.GetType().GetProperty(changed_property_name).GetValue(sale_edited).ToString();
+                old_value = location_edited.GetType().GetProperty(changed_property_name).GetValue(location_edited).ToString();
 
                 // check data correctness
                 string stopMessage = "";
@@ -435,36 +421,24 @@ namespace FrontendWPF
                 {
                     stopMessage = "New value cannot be empty!";
                 }
-                else if (changed_property_name == "Product") // if wrong (product) Name value is entered
+                else if (changed_property_name == "Name" && new_value.Length < 3)
                 {
-                    if (new_value == "")
-                    {
-                        stopMessage = $"Please enter a correct value for the Product name!";
-                    }
-                    else
-                    {
-                        dbProductsList = Product.GetProducts("", "", "", "", "");
-                        if (dbProductsList.Any(p => p.Name == new_value) == false)
-                        {
-                            stopMessage = $"The product does not exist in the database. Please check product name.";
-                        }
-                    }
+                    stopMessage = $"The name must be at least 3 charachters long!";
                 }
-                else if (changed_property_name == "Name") // if wrong (product) Name value is entered
+                else if (changed_property_name == "Name" && new_value != old_value && dbLocationsList.Any(p => p.Name == new_value)) // stop if location already exists in database, AND if new name is different
                 {
-                    if (new_value == "")
-                    {
-                        stopMessage = $"Please enter a correct value for the Product name!";
-                    }
+                    stopMessage = $"The location '{new_value}' already exists, please enter another name!";
                 }
-                else if (changed_property_name == "Date") // if wrong (product) Name value is entered
+                else if (changed_property_name == "Region" && new_value.Length < 3)
                 {
-                    if (DateTime.TryParse(new_value, out _) == false)
-                    {
-                        stopMessage = $"Please enter a correct value for the date value!";
-                    }
+                    stopMessage = $"The name must be at least 3 charachters long!";
+                }
+                else if (changed_property_name == "Region" && new_value != old_value && dbRegionsList.Any(p => p.Name == new_value) == false) // stop if region does not exist in database, AND if new name is different
+                {
+                    stopMessage = $"The region '{new_value}' does not exist, please check in the database!";
                 }
 
+                
 
                 if (stopMessage != "")  // warn user, and stop
                 {
@@ -481,7 +455,7 @@ namespace FrontendWPF
                         (sender as DataGrid).CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid1_CellEditEnding);
 
                         // select empty cell (if user eventually selected another one
-                        Button_AddSale.Focus();
+                        Button_AddLocation.Focus();
 
                         SelectTextBox();
 
@@ -510,19 +484,14 @@ namespace FrontendWPF
                 // start saving new valid value
                 fieldsEntered[column_index - 1] = 1; // register the entered property's column index
 
-                if (column_index == 1 || column_index == 4 || column_index == 5) // // update string-type fields with new value ( (product) Name, Location, User (name) )
+                if (column_index < 3) // // update string-type fields with new value (Name, Region)
                 {
-                    sale_edited.GetType().GetProperty(changed_property_name).SetValue(sale_edited, new_value);
+                    location_edited.GetType().GetProperty(changed_property_name).SetValue(location_edited, new_value);
                 }
-                else if (column_index == 3) // // update Date fields with new value
-                {
-                    sale_edited.GetType().GetProperty(changed_property_name).SetValue(sale_edited, DateTime.Parse(new_value));
-                }
-                else // update int?-type fields with new value ( (product) Name, Quantity, LocationId, UserId)
+                else // update int?-type fields with new value (nothing)
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    
-                    sale_edited.GetType().GetProperty(changed_property_name).SetValue(sale_edited, Convert.ToInt32(new_value));
+                    location_edited.GetType().GetProperty(changed_property_name).SetValue(location_edited, Convert.ToInt32(new_value));
 
                 }
 
@@ -536,28 +505,27 @@ namespace FrontendWPF
                         if (edit_mode == "insert")
                         {
                             // ADD into database
-                            registerMessage = stockClient.AddSalePurchase(Shared.uid, type: "sale", sale_edited.Product, sale_edited.Quantity.ToString(), sale_edited.Location, sale_edited.Date.ToString());
-                            if (registerMessage.Contains("FOREIGN KEY (`productId`)"))
-                            {
-                                MessageBox.Show($"The product does not exist in the database. Please check product name.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                                return;
-                            }
-                            else if (registerMessage != "Sale/Purchase successfully added!")
+                            registerMessage = locationClient.AddLocation(Shared.uid, location_edited.Name, location_edited.Region);
+                            if (registerMessage != "Location successfully added!")
                             {
                                 MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell values? (or simply reload entire list?)
-                                sale_edited = sale_edited0;
+                                location_edited = location_edited0;
                                 return;
                             }
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = stockClient.UpdateSalePurchase(Shared.uid, sale_edited.Id.ToString(), type: "sale", sale_edited.Product, sale_edited.Quantity.ToString(), sale_edited.Date.ToString(), sale_edited.Location, sale_edited.Username);
-                            if (updateMessage != "Sale successfully updated!")
+                            if (changed_property_name == "Name")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated in the database!", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                            updateMessage = locationClient.UpdateLocation(Shared.uid, location_edited.Id.ToString(), location_edited.Name, location_edited.Region);
+                            }
+                            
+                            if (updateMessage != "Location successfully updated!")
+                            {
+                                MessageBox.Show(updateMessage + " Record was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
-                                sale_edited = sale_edited0;
+                                location_edited = location_edited0;
                                 return;
                             }
                         }
@@ -577,35 +545,28 @@ namespace FrontendWPF
                     }
 
 
-                    if (edit_mode == "insert")
+                    if (edit_mode == "insert") 
                     {
-                        lastProduct = sale_edited.Product; // save last data to suggest them for next record
-                        lastQuantity = sale_edited.Quantity;
-                        lastLocation = sale_edited.Location;
-                        lastUsername = sale_edited.Username;
-
-                         
-
-                        // set background color of added sale to green
+                        // set background color of added location to green
                         for (int i = 0; i < dataGrid1.Columns.Count; i++)
                         {
                             cell = dataGrid1.Columns[i].GetCellContent(row).Parent as DataGridCell;
                             cell.Background = Brushes.OliveDrab;
                         }
-                        TextBlock_message.Text = $"The sale of id '{sale_edited.Id}' has been added.";
+                        TextBlock_message.Text = $"The location '{location_edited.Name}' has been added.";
                         Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
                         edit_mode = "read";
                         dataGrid1.CanUserSortColumns = true;
                         dataGrid1.IsReadOnly = true;
                         dataGrid1.Dispatcher.InvokeAsync(() => {
-                            Button_AddSale.Focus(); // set focus to allow repeatedly add sale on pressing the Add sale button
+                            Button_AddLocation.Focus(); // set focus to allow repeatedly add location on pressing the Add location button
                         },
                         DispatcherPriority.Loaded);
 
                     }
                     else if (edit_mode == "update")
                     {
-                        TextBlock_message.Text = $"The sale of id '{sale_edited.Id}' has been updated with {changed_property_name}.";
+                        TextBlock_message.Text = $"The location '{location_edited.Name}' has been updated with {changed_property_name}.";
 
                         // cell.Background = Brushes.OliveDrab;
                         Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
@@ -626,11 +587,11 @@ namespace FrontendWPF
 
                         cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
 
-                        // select next unchanged column; if last 'UserId' column is reached, return to first (product) 'Name' column
+                        // select next unchanged column; if last 'UnitPrice' column is reached, return to first 'Name' column
                         int column_shift = 0;
                         while (fieldsEntered[column_index + column_shift - 1] != 0)
                         {
-                            column_shift = column_index + column_shift == 5 ? -column_index + 1 : column_shift + 1;
+                            column_shift = column_index + column_shift == 2 ? -column_index + 1 : column_shift + 1;
                         }
                         cell = dataGrid1.Columns[column_index + column_shift].GetCellContent(row).Parent as DataGridCell;
 
@@ -639,14 +600,14 @@ namespace FrontendWPF
 
                         // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
                         // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
-                        Button_AddSale.Focus();
+                        Button_AddLocation.Focus();
 
                         SelectTextBox();
 
 
 
                     },
-                DispatcherPriority.Loaded); // style the id cell of the new sale
+                DispatcherPriority.Loaded); // style the id cell of the new location
                 }
 
             }
@@ -853,7 +814,7 @@ namespace FrontendWPF
         // show/hide dataGrid0 with filter row
         private void Button_Filter_Click(object sender, RoutedEventArgs e)
         {
-            filteredSalesList = new List<StockService.SalePurchase>();
+            filteredLocationsList = new List<LocationService.Store>();
 
             // show filter dataGrid0
             if (stackPanel1.Height == 442)
@@ -893,41 +854,38 @@ namespace FrontendWPF
                 textBox = (TextBox)cell.Content;
                 new_value = textBox.Text;
                 changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
-                if (changed_property_name == "Product name") { changed_property_name = "Product"; }
-                if (changed_property_name == "User name") { changed_property_name = "Username"; }
 
-                //get old property value of sale by property name
+                // if any location_filter value is null, set it temporarily to -999 to avoid error when setting old value                
+                if (changed_property_name == "Id" && location_filter.Id == null) location_filter.Id = -999;
+                //get old property value of location by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-                old_value = sale_filter.GetType().GetProperty(changed_property_name).GetValue(sale_filter).ToString();
+                old_value = location_filter.GetType().GetProperty(changed_property_name).GetValue(location_filter).ToString();
+                if (changed_property_name == "Id" && location_filter.Id == -999) location_filter.Id = null;
 
                 // check data correctness
                 string stopMessage = "";
                 if (changed_property_name == "Id")
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if (int_val == null || int_val < -1)
+                    if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
                     {
-                        stopMessage = $"Please enter a correct value for the Id!";
+                        stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
                     }
                 }
-                /*
-                else if (new_value != "" && new_value != "-1" && changed_property_name == "Name" && new_value.Length < 5)
+                else if (new_value != "" && new_value != "-1" && changed_property_name == "Name" && new_value.Length < 3)
                 {
-                    stopMessage = $"The name must be at least 5 charachters long!";
+                    stopMessage = $"The name must be at least 3 charachters long!";
                 }
-                */
-                else if (changed_property_name == "Name") // if wrong (product) Name value is entered
+                else if (new_value != "" && new_value != "-1" && changed_property_name == "Region" && new_value.Length < 3)
                 {
-                    if (new_value == "")
-                    {
-                        stopMessage = $"Please enter a correct value for the Product name!";
-                    }
+                    stopMessage = $"The name must be at least 3 charachters long!";
                 }
+
 
                 if (stopMessage != "")  // warn user, and stop
                 {
                     MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    textBox.Text = old_value; // restore correct cell value
+                    if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
                     return;
                 }
 
@@ -940,34 +898,29 @@ namespace FrontendWPF
                 */
 
 
-                if (filterc_index == 1 || filterc_index == 4 || filterc_index == 5 ) // // update string-type fields with new value ( (product) Name, Location, User (name) )
+                if (filterc_index < 3 && filterc_index > 0) // // update string-type fields with new value (Name, Region)
                 {
-                    sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, new_value);
+                    location_filter.GetType().GetProperty(changed_property_name).SetValue(location_filter, new_value);
                 }
-                else if (filterc_index == 3) // // update Date fields with new value
-                {
-                    sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, DateTime.Parse(new_value));
-                }
-                else // update int?-type fields with new value (UnitPrice)
+                else // update int?-type fields with new value (Id)
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, Convert.ToInt32(new_value));
-
+                    location_filter.GetType().GetProperty(changed_property_name).SetValue(location_filter, int_val);
                 }
 
                 // filter
-                filteredSalesList.Clear();
-                foreach (var sale in dbSalesList)
+                filteredLocationsList.Clear();
+                foreach (var location in dbLocationsList)
                 {
 
-                    if ((sale_filter.Id == -1 || sale_filter.Id == null || sale.Id == sale_filter.Id) && (sale_filter.Product == "-1" || sale_filter.Product == "" || sale.Quantity == sale_filter.Quantity) && (sale_filter.Date == null || sale_filter.Date == null || sale.Date == sale_filter.Date))
+                    if ((location_filter.Id == null || location.Id == location_filter.Id) && (location_filter.Name == "" || location.Name == location_filter.Name) && (location_filter.Region == "" || location.Region == location_filter.Region))
                     {
-                        filteredSalesList.Add(sale);
+                        filteredLocationsList.Add(location);
                         continue;
                     }
                 }
                 // update dataGrid1 with filtered items                    
-                dataGrid1.ItemsSource = filteredSalesList;
+                dataGrid1.ItemsSource = filteredLocationsList;
                 SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
                 dataGrid1.Items.Refresh();
             }
@@ -990,21 +943,57 @@ namespace FrontendWPF
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
             if (Shared.loggedInUser.Permission < 6)
             {
-                Button_DeleteSale.IsEnabled = false;
-                Button_DeleteSale.Foreground = Brushes.Gray;
-                Button_DeleteSale.ToolTip = "You do not have rights to delete data!";
+                Button_DeleteLocation.IsEnabled = false;
+                Button_DeleteLocation.Foreground = Brushes.Gray;
+                Button_DeleteLocation.ToolTip = "You do not have rights to delete data!";
             }
             if (Shared.loggedInUser.Permission < 3)
             {
-                Button_AddSale.IsEnabled = false;
-                Button_AddSale.Foreground = Brushes.Gray;
-                Button_AddSale.ToolTip = "You do not have rights to add data!";
-                Button_UpdateSale.IsEnabled = false;
-                Button_UpdateSale.Foreground = Brushes.Gray;
-                Button_UpdateSale.ToolTip = "You do not have rights to update data!";
+                Button_AddLocation.IsEnabled = false;
+                Button_AddLocation.Foreground = Brushes.Gray;
+                Button_AddLocation.ToolTip = "You do not have rights to add data!";
+                Button_UpdateLocation.IsEnabled = false;
+                Button_UpdateLocation.Foreground = Brushes.Gray;
+                Button_UpdateLocation.ToolTip = "You do not have rights to update data!";
             }
         }
 
+        private void Button_Export_Click(object sender, RoutedEventArgs e)
+        {
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Comma separated text file (*.csv)|*.csv|C# file (*.cs)|*.cs";
+            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            saveFileDialog.FileName = "dbLocations";
+            saveFileDialog.DefaultExt = ".csv";
+            Nullable<bool> result = saveFileDialog.ShowDialog(); // show saveFileDialog
+            if (result == true)
+            {
+                // create file content
+                StreamWriter sr = new StreamWriter(saveFileDialog.FileName, append: false, encoding: Encoding.UTF8);
+                // write file header line
+                string header_row = "Id;Name;Region";
+                sr.WriteLine(header_row);
+
+                // write file rows
+                string rows = "";
+                LocationService.Store location;
+                int i;
+                for (i = 0; i < dataGrid1.Items.Count; i++)
+                {
+                    location = dataGrid1.Items[i] as LocationService.Store;
+                    rows += $"{location.Id};{location.Name};{location.Region}\n";
+                }
+                sr.Write(rows);
+                sr.Close();
+
+                TextBlock_message.Text = $"Database content ({i} records) printed to '{saveFileDialog.FileName}' file.";
+                TextBlock_message.Foreground = Brushes.LightGreen;
+                checkBox_fadeInOut.IsChecked = false;
+                checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
+                gifImage.StartAnimation();
+            }
+        }
     }
 }
 
