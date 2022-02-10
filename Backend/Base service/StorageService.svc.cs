@@ -43,6 +43,7 @@ namespace Base_service
 
             //Formatting current time to sql accepted format if user didn't give date
             if (date == null || date == "") date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            else DateTime.Parse(date).ToString("yyyy-MM-dd HH:mm:ss.fff");
             int? id = Current_users[uid].Id;
 
 
