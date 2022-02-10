@@ -65,15 +65,23 @@ namespace Base_service
 
             foreach(DataRow reader in result.Item1.Rows)
             {
-                response.Locations.Add(new Store(
-                    int.Parse(reader["id"].ToString()),
-                    reader["name"].ToString(),
-                    reader["region"].ToString()
-                    ));
+                try
+                {
+                    response.Locations.Add(new Store(
+                        int.Parse(reader["id"].ToString()),
+                        reader["name"].ToString(),
+                        reader["region"].ToString()
+                        ));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    response.Message += $"Result with the id '{reader["id"]}' could not be converted correctly!";
+                }
             }
 
-            if (result.Item2 != "") response.Message = result.Item2;
-            else response.Message = $"Number of regions found: {response.Locations.Count}";
+            if (result.Item2 != "") response.Message += result.Item2;
+            else response.Message += $"Number of regions found: {response.Locations.Count}";
 
             return response;
         }
@@ -98,14 +106,22 @@ namespace Base_service
 
             foreach (DataRow reader in result.Item1.Rows)
             {
-                response.Regions.Add(new Region(
-                    int.Parse(reader["id"].ToString()),
-                    reader["name"].ToString()
-                    ));
+                try
+                {
+                    response.Regions.Add(new Region(
+                        int.Parse(reader["id"].ToString()),
+                        reader["name"].ToString()
+                        ));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    response.Message += $"Result with the id '{reader["id"]}' could not be converted correctly!";
+                }
             }
 
-            if (result.Item2 != "") response.Message = result.Item2;
-            else response.Message = $"Number of regions found: {response.Regions.Count}";
+            if (result.Item2 != "") response.Message += result.Item2;
+            else response.Message += $"Number of regions found: {response.Regions.Count}";
 
             //If we found regions, find all the locations associated with them
             if (response.Regions.Count > 0)
@@ -116,9 +132,17 @@ namespace Base_service
 
                     foreach (DataRow reader in result.Item1.Rows)
                     {
-                        item.Locations.Add(new Store(int.Parse(reader["id"].ToString()), reader["name"].ToString(), item.Name));
+                        try
+                        {
+                            item.Locations.Add(new Store(int.Parse(reader["id"].ToString()), reader["name"].ToString(), item.Name));
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            response.Message += $"Result with the id '{reader["id"]}' could not be converted correctly!";
+                        }
                     }
-                    if (result.Item2 != "") { response.Message = result.Item2; break; }
+                    if (result.Item2 != "") { response.Message += result.Item2; break; }
                 }
             }
 

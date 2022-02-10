@@ -106,15 +106,23 @@ namespace Base_service
 
             foreach (DataRow reader in result.Item1.Rows)
             {
-                response.Products.Add(new Product(
-                    int.Parse(reader["id"].ToString()),
-                    reader["name"].ToString(),
-                    int.Parse(reader["unitPrice"].ToString())
-                    ));
+                try
+                {
+                    response.Products.Add(new Product(
+                        int.Parse(reader["id"].ToString()),
+                        reader["name"].ToString(),
+                        int.Parse(reader["unitPrice"].ToString())
+                        ));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    response.Message += $"Result with the id '{reader["id"]}' could not be converted correctly!";
+                }
             }
 
-            if (result.Item2 != "") response.Message = result.Item2;
-            else response.Message = $"Number of products found: {response.Products.Count}";
+            if (result.Item2 != "") response.Message += result.Item2;
+            else response.Message += $"Number of products found: {response.Products.Count}";
 
             return response;
         }
@@ -153,20 +161,29 @@ namespace Base_service
                 conditions,
                 $"INNER JOIN `products` ON `{type}s`.`productId` = `products`.`id` INNER JOIN `locations` ON `{type}s`.`locationId` = `locations`.`id` INNER JOIN `users` ON `{type}s`.`userId` = `users`.`id`");
 
+
             foreach (DataRow reader in result.Item1.Rows)
             {
-                response.SalesPurchases.Add(new SalePurchase(
-                    int.Parse(reader["id"].ToString()),
-                    reader["product"].ToString(),
-                    int.Parse(reader["quantity"].ToString()),
-                    DateTime.Parse(reader["date"].ToString()),
-                    reader["location"].ToString(),
-                    reader["user"].ToString()
-                    ));
+                try
+                {
+                    response.SalesPurchases.Add(new SalePurchase(
+                        int.Parse(reader["id"].ToString()),
+                        reader["product"].ToString(),
+                        int.Parse(reader["quantity"].ToString()),
+                        DateTime.Parse(reader["date"].ToString()),
+                        reader["location"].ToString(),
+                        reader["user"].ToString()
+                        ));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    response.Message += $"Result with the id '{reader["id"]}' could not be converted correctly!";
+                }
             }
 
-            if (response.SalesPurchases.Count != 0) response.Message = result.Item2;
-            else response.Message = $"Number of sales/purchases found: {response.SalesPurchases.Count}";
+            if (response.SalesPurchases.Count != 0) response.Message += result.Item2;
+            else response.Message += $"Number of sales/purchases found: {response.SalesPurchases.Count}";
 
             return response;
         }
@@ -202,16 +219,25 @@ namespace Base_service
 
             foreach (DataRow reader in result.Item1.Rows)
             {
-                response.Stocks.Add(new Stock(
-                    int.Parse(reader["id"].ToString()),
-                    int.Parse(reader["quantity"].ToString()),
-                    reader["product"].ToString(),
-                    reader["location"].ToString()
-                    ));
+
+                try
+                {
+                    response.Stocks.Add(new Stock(
+                        int.Parse(reader["id"].ToString()),
+                        int.Parse(reader["quantity"].ToString()),
+                        reader["product"].ToString(),
+                        reader["location"].ToString()
+                        ));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    response.Message += $"Result with the id '{reader["id"]}' could not be converted correctly!";
+                }
             }
 
-            if (response.Stocks.Count != 0) response.Message = result.Item2;
-            else response.Message = $"Number of stocks found: {response.Stocks.Count}";
+            if (response.Stocks.Count != 0) response.Message += result.Item2;
+            else response.Message += $"Number of stocks found: {response.Stocks.Count}";
 
             return response;
         }

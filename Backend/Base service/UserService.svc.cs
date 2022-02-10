@@ -12,31 +12,31 @@ namespace Base_service
         {
             Response_User response = new Response_User();
 
-            try
+            if (!Current_users.ContainsKey(uid))
             {
-                if (!Current_users.ContainsKey(uid))
-                {
-                    response.Message = "Unauthorized user!";
-                    return response;
-                }
+                response.Message = "Unauthorized user!";
+                return response;
+            }
 
-                string[,] conditions = new string[,]
-                {
+            string[,] conditions = new string[,]
+            {
                     {"`users`.`id`", "=" , $"'{id}'" },
                     { "`username`", "=", $"'{username}'" },
                     { "`locations`.`name`", "=", $"'{location}'" },
                     { "`regions`.`name`", "=", $"'{region}'" },
                     { " LIMIT", " ", $"'{limit}'" }
-                };
+            };
 
-                var result = BaseSelect(
-                    "users",
-                    "`users`.`id`,`username`,`password`,`locations`.`name` AS 'location',`permission`,`active`",
-                    conditions,
-                    "INNER JOIN `locations` ON `users`.`locationId` = `locations`.`id` INNER JOIN `regions` ON `locations`.`regionId` = `regions`.`id`"
-                    );
+            var result = BaseSelect(
+                "users",
+                "`users`.`id`,`username`,`password`,`locations`.`name` AS 'location',`permission`,`active`",
+                conditions,
+                "INNER JOIN `locations` ON `users`.`locationId` = `locations`.`id` INNER JOIN `regions` ON `locations`.`regionId` = `regions`.`id`"
+                );
 
-                foreach (DataRow reader in result.Item1.Rows)
+            foreach (DataRow reader in result.Item1.Rows)
+            {
+                try
                 {
                     response.Users.Add(new User(
                         int.Parse(reader["id"].ToString()),
@@ -47,11 +47,15 @@ namespace Base_service
                         int.Parse(reader["active"].ToString())
                         ));
                 }
-
-                if (result.Item2 != "") response.Message = result.Item2;
-                response.Message = $"Number of users found: {response.Users.Count}";
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    response.Message += $"Result with the id '{reader["id"]}' could not be converted correctly!";
+                }
             }
-            catch (Exception ex) { Console.WriteLine(ex.Message); }
+
+            if (result.Item2 != "") response.Message += result.Item2;
+            response.Message += $"Number of users found: {response.Users.Count}";
 
             return response;
         }
@@ -71,17 +75,26 @@ namespace Base_service
                     );
 
             if (result.Item1.Rows.Count != 1) response.Message = "Username or password incorrect!";
-            else 
+            else
             {
                 DataRow reader = result.Item1.Rows[0];
-                response.User = new User(
-                    int.Parse(reader["id"].ToString()),
-                    reader["username"].ToString(),
-                    reader["password"].ToString(),
-                    reader["location"].ToString(),
-                    int.Parse(reader["permission"].ToString()),
-                    int.Parse(reader["active"].ToString())
-                   );
+                try
+                {
+                    response.User = new User(
+                        int.Parse(reader["id"].ToString()),
+                        reader["username"].ToString(),
+                        reader["password"].ToString(),
+                        reader["location"].ToString(),
+                        int.Parse(reader["permission"].ToString()),
+                        int.Parse(reader["active"].ToString())
+                       );
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    response.Message += $"User could not be converted correctly!";
+                    return response;
+                }
 
                 //Generating unique id for user, removing previous instance if it wasn't before
                 if(Current_users.Where(n => n.Value.Username == response.User.Username).Count() != 0)
