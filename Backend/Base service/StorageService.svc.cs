@@ -43,9 +43,8 @@ namespace Base_service
 
             //Formatting current time to sql accepted format if user didn't give date
             if (date == null || date == "") date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            else DateTime.Parse(date).ToString("yyyy-MM-dd HH:mm:ss.fff");
+            else date = DateTime.Parse(date).ToString("yyyy-MM-dd HH:mm:ss.fff");
             int? id = Current_users[uid].Id;
-
 
             var result = BaseInsert(type + "s", "`productId`, `quantity`, `date`, `locationId`, `userId`", $"'{productId}','{quantity}','{date}','{locationId}','{id}'");
             if (result.Item1 != null && result.Item1 > 0) return "Sale/Purchase successfully added!";
@@ -339,6 +338,8 @@ namespace Base_service
                 else if (result_read.Item2 != "") return result_read.Item2;
                 else return "User not found in database!";
             }
+
+            date = DateTime.Parse(date).ToString("yyyy-MM-dd HH:mm:ss.fff");
 
             string[,] changes = 
             {
