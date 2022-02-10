@@ -74,8 +74,7 @@ namespace Base_service
                     "INNER JOIN `locations` ON `users`.`locationId` = `locations`.`id`"
                     );
 
-            if (result.Item1.Rows.Count != 1) response.Message = "Username or password incorrect!";
-            else
+            if (result.Item1.Rows.Count == 1)
             {
                 DataRow reader = result.Item1.Rows[0];
                 try
@@ -108,6 +107,8 @@ namespace Base_service
                 Console.WriteLine(response.Uid + "\t" + response.User.Username);
                 response.Message = $"Welcome {response.User.Username}!";
             }
+            else if (result.Item2 != "") response.Message = result.Item2;
+            else response.Message = "Username or password incorrect!";
 
             return response;
         }
