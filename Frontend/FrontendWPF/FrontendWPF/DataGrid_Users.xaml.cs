@@ -28,8 +28,8 @@ namespace FrontendWPF
         //work, because lists don't inherit from INotifyCollectionChanged thus they cannot send
         //notifications when items get added or removed so the view does not know if things are
         //added or deleted
-        // public ObservableCollection<ServiceReference3.User> AvailableNumbers { get; set; }
-        public List<ServiceReference3.User> dbUsersList { get; set; }
+        // public ObservableCollection<UserService.User> AvailableNumbers { get; set; }
+        public List<UserService.User> dbUsersList { get; set; }
         public List<User> usersList { get; set; }
 
         public DataGrid_Users()
@@ -38,7 +38,7 @@ namespace FrontendWPF
             dataGrid1.RowHeaderWidth = 0;
             // dataGrid1.IsSynchronizedWithCurrentItem = true;
 
-            // dbUsersList = new List<ServiceReference3.User>();
+            // dbUsersList = new List<UserService.User>();
             // string query = $"WHERE 1";  // összes user lekérdezése
             dbUsersList = User.GetUsers("", "", "", "", ""); // query users from database
 
@@ -103,7 +103,7 @@ namespace FrontendWPF
         private void AddNumber(object sender, RoutedEventArgs e)
         {
 
-            ServiceReference3.User user = new ServiceReference3.User()
+            UserService.User user = new UserService.User()
             {
                 Id = 10,
                 Username = "user10",

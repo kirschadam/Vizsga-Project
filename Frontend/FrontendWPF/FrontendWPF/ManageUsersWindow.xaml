@@ -86,8 +86,8 @@
 
                 <DataGrid Name="dataGrid0" Background="AliceBlue" FontSize="14" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="2" Margin="10,0,0,0" HorizontalScrollBarVisibility="Hidden"
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserDeleteRows="False"
-                  CellEditEnding="dataGrid0_CellEditEnding"
-                  PreviewKeyDown="dataGrid0_PreviewKeyDown"
+                  BeginningEdit="dataGrid0_BeginningEdit"
+                  KeyUp="dataGrid0_KeyUp"
                   HeadersVisibility="Row"
                   SelectionUnit="Cell"
                   SelectionMode="Single"
@@ -148,7 +148,7 @@
                     </DataGrid.RowStyle>
 
                     <DataGrid.Columns >
-                        <DataGridTextColumn Header="Id" Binding="{Binding Id}" MinWidth="40" />
+                        <DataGridTextColumn Header="Id" Binding="{Binding Id}" MinWidth="40"/>
                         <DataGridTextColumn Header="Username" Binding="{Binding Username}" />
                         <DataGridTextColumn Header="Password" Binding="{Binding Password}" MaxWidth="100" FontFamily="Hololens MDL2 Assets" Foreground="LightGray" />
                         <DataGridTextColumn Header="Location" Binding="{Binding Location}" />
@@ -173,7 +173,8 @@
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="FontWeight" Value="SemiBold"/>
                             <Setter Property="Foreground" Value="Navy"/>
-                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            <Setter Property="Margin" Value="3,0,0,0"/>
                         </Style>
                     </DataGrid.ColumnHeaderStyle>
 
@@ -276,12 +277,13 @@
 
 
                 <StackPanel Orientation="Vertical" Margin="0,50,0,0">
-                    <Button Name="Button_AddUser" Click="Button_AddUser_Click" Width="110" Height="40" Margin="0,10,0,0" Content="Add user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_UpdateUser" Click="Button_UpdateUser_Click" Width="110" Height="40" Margin="0,10,0,0" Content="Update user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_DeleteUser" Click="Button_DeleteUser_Click" Width="110" Height="40" Margin="0,10,0,0" Content="Delete user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_Filter" Click="Button_Filter_Click" Width="110" Height="40" Margin="0,10,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_ReloadData" Click="Button_ReloadData_Click" Width="110" Height="40" Margin="0,10,0,0" Content="Reset" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_Export" Click="Button_Export_Click" Width="110" Height="40" Margin="0,10,0,10" Content="Export" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Export data to file"/>
+                    <Button Name="Button_AddUser" Click="Button_AddUser_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Add user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="Button_UpdateUser" Click="Button_UpdateUser_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Update user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="Button_DeleteUser" Click="Button_DeleteUser_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Delete user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="Button_Filter" Click="Button_Filter_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="Button_ReloadData" Click="Button_ReloadData_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Reset" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="Button_Export" Click="Button_Export_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Export" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Export data to file"/>
+                    <Button Name="Button_Import" Click="Button_Import_Click" Width="110" Height="40" Margin="0,8,0,10" Content="Import" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Import data from file"/>
                 </StackPanel>
 
                 <StackPanel/>

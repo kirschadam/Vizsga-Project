@@ -10,11 +10,11 @@ namespace FrontendWPF.Templates
     public class Users
     {
         // returns a list of users
-        public static List<ServiceReference3.User> GetUsers()
+        public static List<UserService.User> GetUsers()
         {
 
-            ServiceReference3.UserServiceClient client = new ServiceReference3.UserServiceClient();
-            ServiceReference3.User[] user = { };
+            UserService.UserServiceClient client = new UserService.UserServiceClient();
+            UserService.User[] user = { };
 
             try
             {

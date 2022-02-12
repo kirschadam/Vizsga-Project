@@ -198,7 +198,7 @@ namespace FrontendWPF
                 button_ManageLocationsWindow.IsEnabled = false;
                 button_ManageLocationsWindow.Foreground = Brushes.Gray;
 
-                ServiceReference3.UserServiceClient client = new ServiceReference3.UserServiceClient();
+                UserService.UserServiceClient client = new UserService.UserServiceClient();
                 
                 try
                 {

@@ -25,22 +25,22 @@ namespace FrontendWPF.Classes
         }
 
         // returns a list of users
-        public static List<ServiceReference3.User> GetUsers(string id, string username, string location, string region, string limit)
+        public static List<UserService.User> GetUsers(string id, string username, string location, string region, string limit)
         {
-            ServiceReference3.UserServiceClient client = new ServiceReference3.UserServiceClient();
+            UserService.UserServiceClient client = new UserService.UserServiceClient();
  
-            ServiceReference3.User[] usersArray;
-            List<ServiceReference3.User> usersList = new List<ServiceReference3.User>();
+            UserService.User[] usersArray;
+            List<UserService.User> usersList = new List<UserService.User>();
  
             try
             {
                 // string query = $"WHERE Username='{userName}' AND Password='{CreateMD5(password)}'";
                 usersArray = client.ListUser(Shared.uid, id, username, location, region, limit).Users;
-                // ServiceReference3.Response_User response_User = new ServiceReference3.Response_User();
+                // UserService.Response_User response_User = new UserService.Response_User();
                 // string uid = response_User.Uid;
 
                 // if (usersArray == null)
-                if (usersArray.Length == 0) // { FrontendWPF.ServiceReference3.User[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
+                if (usersArray.Length == 0) // { FrontendWPF.UserService.User[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
 
                 {
                     MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");

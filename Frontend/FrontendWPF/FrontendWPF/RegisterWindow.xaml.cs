@@ -23,7 +23,7 @@ namespace FrontendWPF
 
     public partial class RegisterWindow : Window
     {
-        public static ServiceReference3.UserServiceClient client;
+        public static UserService.UserServiceClient client;
         public RegisterWindow()
         {
             InitializeComponent();
@@ -33,7 +33,7 @@ namespace FrontendWPF
         
         private async void Button_Register_ClickAsync(object sender, RoutedEventArgs e)
         {
-            client = new ServiceReference3.UserServiceClient();
+            client = new UserService.UserServiceClient();
             // string uid = null;
             string userName = Textbox_UserName.Text;
             string password = PasswordBox_Password.Password;
@@ -66,7 +66,7 @@ namespace FrontendWPF
             
             try
             {
-                ServiceReference3.User[] userArray = client.ListUser(Shared.uid, "", userName, "", "", "").Users;
+                UserService.User[] userArray = client.ListUser(Shared.uid, "", userName, "", "", "").Users;
                 //user = client.UserList(query);
 
                 if (userArray == null)

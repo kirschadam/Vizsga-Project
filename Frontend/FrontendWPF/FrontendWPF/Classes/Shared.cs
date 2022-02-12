@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 
@@ -17,7 +18,7 @@ namespace FrontendWPF.Classes
         public static List<string> regionsList = new List<string> { "Pest", "Hajdú-Bihar", "Csongrád-Csanád", "Borsod-Abaúj", "Pécs", "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely", "Érd", "Szolnok", "Tatabánya", "Sopron", "Kaposvár", "Veszprém", "Békéscsaba", "Zalaegerszeg", "Eger", "Nagykanizsa" };
         */
         public static List<string> permissionList = new List<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-        public static ServiceReference3.User loggedInUser = null;
+        public static UserService.User loggedInUser = null;
         public static string uid;
         public static bool loggedIn = false;
 
@@ -112,6 +113,28 @@ namespace FrontendWPF.Classes
             // cell.BeginAnimation(SolidColorBrush.ColorProperty, animation);
         }
 
-    }
+        // https://stackoverflow.com/questions/11572411/sendkeys-send-method-in-wpf-application
+        ///   Sends the specified key.
+        /// <param name="key">The key.</param>
+        public static void SendKey(Key key)
+        {
+            if (Keyboard.PrimaryDevice != null)
+            {
+                if (Keyboard.PrimaryDevice.ActiveSource != null)
+                {
+                    var e = new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, key)
+                    {
+                        RoutedEvent = Keyboard.KeyDownEvent
+                    };
+                    InputManager.Current.ProcessInput(e);
 
+                    // Note: Based on your requirements you may also need to fire events for:
+                    // RoutedEvent = Keyboard.PreviewKeyDownEvent
+                    // RoutedEvent = Keyboard.KeyUpEvent
+                    // RoutedEvent = Keyboard.PreviewKeyUpEvent
+                }
+            }
+        }
+
+    }
 }

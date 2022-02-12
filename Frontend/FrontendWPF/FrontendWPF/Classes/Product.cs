@@ -36,11 +36,11 @@ namespace FrontendWPF.Classes
             {
                 // string query = $"WHERE name='{productName}' AND unitPrice='{CreateMD5(unitprice)}'";
                 productsArray = client.ListProduct(Shared.uid, id, name, qOver, qUnder, limit).Products;
-                // ServiceReference3.Response_Product response_Product = new ServiceReference3.Response_Product();
+                // UserService.Response_Product response_Product = new UserService.Response_Product();
                 // string uid = response_Product.Uid;
 
                 // if (productsArray == null)
-                if (productsArray.Length == 0) // { FrontendWPF.ServiceReference3.Product[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
+                if (productsArray.Length == 0) // { FrontendWPF.UserService.Product[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
 
                 {
                     MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");

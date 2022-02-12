@@ -32,6 +32,7 @@ namespace FrontendWPF
         List<LocationService.Store> filterLocationsList { get; set; }
         List<LocationService.Store> filteredLocationsList { get; set; }
         List<LocationService.Store> selectedLocationsList { get; set; }
+        List<LocationService.Store> importList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
@@ -92,11 +93,13 @@ namespace FrontendWPF
                     double stretch = (600 - 65) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
                     dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                     dataGrid0.Width = dataGrid1.Width;
+                    dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
                     // stretch columns to dataGrid1 width
                     for (int i = 1; i < dataGrid1.Columns.Count; i++)
                     {
                         dataGrid1.Columns[i].Width = dataGrid1.Columns[i].ActualWidth * stretch;
                         dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
+                        dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
                     }
                     dataGrid1.Items.Refresh();
                     ScrollDown();
@@ -114,6 +117,7 @@ namespace FrontendWPF
             };
             filterLocationsList.Clear();
             filterLocationsList.Add(location_filter);
+            dataGrid0.ItemsSource = null; // to avoid IsEditingItem error
             dataGrid0.ItemsSource = filterLocationsList;
             dataGrid0.Items.Refresh();
 
@@ -346,7 +350,7 @@ namespace FrontendWPF
                     cell.IsEditing = true;
                     cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
                 },
-                DispatcherPriority.Loaded);
+                DispatcherPriority.Background); // Background to avoid row = null error
 
                 edit_mode = "insert";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
@@ -516,14 +520,10 @@ namespace FrontendWPF
                         }
                         else if (edit_mode == "update")
                         {
-                            if (changed_property_name == "Name")
-                            {
                             updateMessage = locationClient.UpdateLocation(Shared.uid, location_edited.Id.ToString(), location_edited.Name, location_edited.Region);
-                            }
-                            
                             if (updateMessage != "Location successfully updated!")
                             {
-                                MessageBox.Show(updateMessage + " Record was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 location_edited = location_edited0;
                                 return;
@@ -698,7 +698,6 @@ namespace FrontendWPF
                 }
         }
 
-
         private void MoveToNextCell()
         {
             dataGrid1.Dispatcher.InvokeAsync(() => {
@@ -833,97 +832,102 @@ namespace FrontendWPF
             }
         }
 
-        private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        private void dataGrid0_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            if (e.EditAction == DataGridEditAction.Commit)
+            row = e.Row;
+            column = e.Column;
+        }
+        
+        private void dataGrid0_KeyUp(object sender, KeyEventArgs e)
+        //private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+
+            if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
             {
-                if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
-                {
-                    return;
-                }
-                else if (Button_Close.IsKeyboardFocused)
-                {
-                    CloseWindow();
-                    return;
-                }
-
-                row = e.Row;
-                column = e.Column;
-                filterc_index = column.DisplayIndex;
-                cell = dataGrid1.Columns[filterc_index].GetCellContent(row).Parent as DataGridCell;
-                textBox = (TextBox)cell.Content;
-                new_value = textBox.Text;
-                changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
-
-                // if any location_filter value is null, set it temporarily to -999 to avoid error when setting old value                
-                if (changed_property_name == "Id" && location_filter.Id == null) location_filter.Id = -999;
-                //get old property value of location by property name
-                // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-                old_value = location_filter.GetType().GetProperty(changed_property_name).GetValue(location_filter).ToString();
-                if (changed_property_name == "Id" && location_filter.Id == -999) location_filter.Id = null;
-
-                // check data correctness
-                string stopMessage = "";
-                if (changed_property_name == "Id")
-                {
-                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
-                    {
-                        stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
-                    }
-                }
-                else if (new_value != "" && new_value != "-1" && changed_property_name == "Name" && new_value.Length < 3)
-                {
-                    stopMessage = $"The name must be at least 3 charachters long!";
-                }
-                else if (new_value != "" && new_value != "-1" && changed_property_name == "Region" && new_value.Length < 3)
-                {
-                    stopMessage = $"The name must be at least 3 charachters long!";
-                }
-
-
-                if (stopMessage != "")  // warn user, and stop
-                {
-                    MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
-                    return;
-                }
-
-                /*
-                // stop if new and old value are the same 
-                else if (old_value == new_value)
-                {
-                    return;
-                }
-                */
-
-
-                if (filterc_index < 3 && filterc_index > 0) // // update string-type fields with new value (Name, Region)
-                {
-                    location_filter.GetType().GetProperty(changed_property_name).SetValue(location_filter, new_value);
-                }
-                else // update int?-type fields with new value (Id)
-                {
-                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    location_filter.GetType().GetProperty(changed_property_name).SetValue(location_filter, int_val);
-                }
-
-                // filter
-                filteredLocationsList.Clear();
-                foreach (var location in dbLocationsList)
-                {
-
-                    if ((location_filter.Id == null || location.Id == location_filter.Id) && (location_filter.Name == "" || location.Name == location_filter.Name) && (location_filter.Region == "" || location.Region == location_filter.Region))
-                    {
-                        filteredLocationsList.Add(location);
-                        continue;
-                    }
-                }
-                // update dataGrid1 with filtered items                    
-                dataGrid1.ItemsSource = filteredLocationsList;
-                SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
-                dataGrid1.Items.Refresh();
+                return;
             }
+            else if (Button_Close.IsKeyboardFocused)
+            {
+                CloseWindow();
+                return;
+            }
+
+            if (row == null || column == null) { return; } // stop if column or row is not selected or not in edit mode
+
+            // check wheter the pressed key is digit or number, otherwise stop
+            if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Subtract && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
+            {
+                return;
+            }
+            
+            // row = e.Row;
+            // column = e.Column;
+            filterc_index = column.DisplayIndex;
+            cell = dataGrid1.Columns[filterc_index].GetCellContent(row).Parent as DataGridCell;
+            if (cell.IsEditing == false) { return; } // stop if cell is not editing
+            textBox = (TextBox)cell.Content;
+            new_value = textBox.Text;
+            changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
+
+            // if any location_filter value is null, set it temporarily to -999 to avoid error when setting old value                
+            if (changed_property_name == "Id" && location_filter.Id == null) location_filter.Id = -999;
+            //get old property value of location by property name
+            // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
+            old_value = location_filter.GetType().GetProperty(changed_property_name).GetValue(location_filter).ToString();
+            if (changed_property_name == "Id" && location_filter.Id == -999) location_filter.Id = null;
+
+
+            if (old_value == "-999")
+            {
+                Dispatcher.InvokeAsync(() => {
+                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end
+                    Shared.SendKey(Key.End);
+                }, DispatcherPriority.Render);
+            }
+
+            // check data correctness
+            string stopMessage = "";
+            if (changed_property_name == "Id")
+            {
+                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
+                {
+                    stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
+                }
+            }
+
+            if (stopMessage != "")  // warn user, and stop
+            {
+                MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
+                return;
+            }
+
+            if (filterc_index < 3 && filterc_index > 0) // // update string-type fields with new value (Name, Region)
+            {
+                location_filter.GetType().GetProperty(changed_property_name).SetValue(location_filter, new_value);
+            }
+            else // update int?-type fields with new value (Id)
+            {
+                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                location_filter.GetType().GetProperty(changed_property_name).SetValue(location_filter, int_val);
+            }
+
+            // filter
+            filteredLocationsList.Clear();
+            foreach (var location in dbLocationsList)
+            {
+
+                if ((location_filter.Id == null || location.Id == location_filter.Id) && (location_filter.Name == "" || location.Name.ToLower().Contains(location_filter.Name.ToLower())) && (location_filter.Region == "" || location.Region.ToLower().Contains(location_filter.Region.ToLower())))
+                {
+                    filteredLocationsList.Add(location);
+                    continue;
+                }
+            }
+            // update dataGrid1 with filtered items                    
+            dataGrid1.ItemsSource = filteredLocationsList;
+            SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
+            dataGrid1.Items.Refresh();
         }
 
 
@@ -961,11 +965,15 @@ namespace FrontendWPF
         private void Button_Export_Click(object sender, RoutedEventArgs e)
         {
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Comma separated text file (*.csv)|*.csv|C# file (*.cs)|*.cs";
-            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            saveFileDialog.FileName = "dbLocations";
-            saveFileDialog.DefaultExt = ".csv";
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                Filter = "Comma separated text file (*.csv)|*.csv|Text file (*.txt)|*.txt",
+                DefaultExt = ".csv",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                FileName = "dbLocations",
+                Title = "Save locations data as:"
+            };
+
             Nullable<bool> result = saveFileDialog.ShowDialog(); // show saveFileDialog
             if (result == true)
             {
@@ -994,6 +1002,108 @@ namespace FrontendWPF
                 gifImage.StartAnimation();
             }
         }
+
+        private void Button_Import_Click(object sender, RoutedEventArgs e)
+        {
+
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Filter = "Comma separated file (*.csv) |*.csv|Text file (*.txt)|*.txt",
+                DefaultExt = ".csv",
+                Title = "Open file for import to 'Locations' table"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                StreamReader sr = new StreamReader(openFileDialog.FileName);
+                // check header correctness
+                string header_row = sr.ReadLine();
+                int first_colum = header_row.Split(';').Length == 2 ? 0 : 1; // 1 if Id column is provided
+
+                if (header_row != "Id;Name;Region" && header_row != "Name;Region")
+                {
+                    MessageBox.Show($"Incorrect file content! Expected header is 'Id;Name;Region' (Id is optional), but received '{header_row}'");
+                    return;
+                }
+
+                LocationService.Store location;
+                importList = new List<LocationService.Store>();
+                int row_index = 0;
+                string[] row;
+                int locationsAdded = 0;
+                string registerMessage = "";
+                string errorMessage = "";
+                int? id = dbLocationsList.Max(u => u.Id) + 1;
+                while (sr.EndOfStream == false)
+                {
+                    string error = "";
+                    row = sr.ReadLine().Split(';');
+                    if (row.Length != 2 + first_colum) // skip row if number of columns is incorrect
+                    {
+                        continue;
+                    }
+
+                    string name = row[first_colum];
+                    string region = row[first_colum + 1];
+
+                    // check data correctness
+                    if (name.Length < 3)
+                    {
+                        error += $"Name must be et least 3 characters long!\n";
+                    }
+                    if (dbLocationsList.Any(p => p.Name == name)) // if location already exists in database
+                    {
+                        error += $"The location '{name}' already exists, please enter another name!\n";
+                    }
+                    if (region.Length < 3)
+                    {
+                        error += $"Name must be et least 3 characters long!\n";
+                    }
+                    else if (dbRegionsList.Any(p => p.Name == region) == false) // if region does not exist in database
+                    {
+                        error += $"The region '{region}' does not exist!\n";
+                    }
+
+                    errorMessage += error;
+                    if (error != "") { continue; } // continue on error
+
+                    // ADD into database
+                    registerMessage = locationClient.AddLocation(Shared.uid, name, region);
+                    if (registerMessage != "Location successfully added!")
+                    {
+                        errorMessage += $"'{name}': {registerMessage}\n";
+                        continue;
+                    }
+
+                    location = new LocationService.Store
+                    {
+                        Id = id,
+                        Name = name,
+                        Region = region
+                    };
+
+                    locationsAdded++;
+                    importList.Add(location);
+                    id++;
+                    row_index++;
+                }
+                sr.Close();
+
+                if (errorMessage != "") { MessageBox.Show($"Following error occurred during the data import:\n\n{errorMessage}", caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning); }
+                if (importList.Count > 0)
+                {
+                    dataGrid1.ItemsSource = importList;
+
+                    TextBlock_message.Text = $"{locationsAdded} {(locationsAdded == 1 ? "record" : "records")} added into the 'Locations' table.";
+                    TextBlock_message.Foreground = Brushes.LightGreen;
+                    checkBox_fadeInOut.IsChecked = false;
+                    checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
+                    gifImage.StartAnimation();
+                }
+            }
+        }
+
+
     }
 }
 

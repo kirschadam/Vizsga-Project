@@ -24,15 +24,16 @@ namespace FrontendWPF
 
     public partial class ManageUsersWindow : Window
     {
-        private ServiceReference3.UserServiceClient client = new ServiceReference3.UserServiceClient();
+        private UserService.UserServiceClient client = new UserService.UserServiceClient();
         private bool closeCompleted = false;
 
-        private List<ServiceReference3.User> dbUsersList { get; set; }
+        private List<UserService.User> dbUsersList { get; set; }
         
         System.Collections.IList selectedItems;
-        List<ServiceReference3.User> selectedUsersList { get; set; }
-        List<ServiceReference3.User> filterUsersList { get; set; }
-        List<ServiceReference3.User> filteredUsersList { get; set; }
+        List<UserService.User> selectedUsersList { get; set; }
+        List<UserService.User> filterUsersList { get; set; }
+        List<UserService.User> filteredUsersList { get; set; }
+        List<UserService.User> importList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
@@ -89,17 +90,19 @@ namespace FrontendWPF
 
             if (window.IsLoaded == false) // run on the first time when window is not loaded
             {
-                filterUsersList = new List<ServiceReference3.User>();
+                filterUsersList = new List<UserService.User>();
 
                 Dispatcher.InvokeAsync(() => {
                     double stretch = (600 - 50) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
                     dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                     dataGrid0.Width = dataGrid1.Width;
+                    dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
                     // stretch columns to dataGrid1 width
                     for (int i = 1; i < dataGrid1.Columns.Count; i++)
                     {
                         dataGrid1.Columns[i].Width = dataGrid1.Columns[i].ActualWidth * stretch;
                         dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
+                        dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
                     }
                     dataGrid1.Items.Refresh();
                     ScrollDown();
@@ -109,7 +112,7 @@ namespace FrontendWPF
             ScrollDown();
 
             // create/reset user_filter item and add it to filter dataGrid0
-            user_filter = new ServiceReference3.User()
+            user_filter = new UserService.User()
             {
                 Id = null,
                 Username = "",
@@ -120,6 +123,7 @@ namespace FrontendWPF
             };
             filterUsersList.Clear();
             filterUsersList.Add(user_filter);
+            dataGrid0.ItemsSource = null; // to avoid IsEditingItem error
             dataGrid0.ItemsSource = filterUsersList;
             dataGrid0.Items.Refresh();
 
@@ -158,7 +162,7 @@ namespace FrontendWPF
                 IList<DataGridCellInfo> selectedcells = e.AddedCells;
                 if (selectedcells.Count > 0) // ignore new selection when button is pressed and selection becomes 0; 
                 {
-                    user_edited = (ServiceReference3.User)selectedcells[0].Item;
+                    user_edited = (UserService.User)selectedcells[0].Item;
                     user_edited0 = user_edited;
                 }
             }
@@ -178,8 +182,8 @@ namespace FrontendWPF
             
             if (selectedItems.Count > 0)
             {
-                selectedUsersList = new List<ServiceReference3.User>();
-                foreach (ServiceReference3.User user in selectedItems)
+                selectedUsersList = new List<UserService.User>();
+                foreach (UserService.User user in selectedItems)
                 {
                     selectedUsersList.Add(user);
                 }
@@ -324,7 +328,7 @@ namespace FrontendWPF
 
                 // in db select last user with highest Id
                 int? highestId = dbUsersList.Max(u => u.Id);
-                user_edited = new ServiceReference3.User() // create new user with suggested values
+                user_edited = new UserService.User() // create new user with suggested values
                 {
                     Id = highestId + 1,
                     Username = "",
@@ -356,7 +360,7 @@ namespace FrontendWPF
                     cell.IsEditing = true;
                     cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
                 },
-                DispatcherPriority.Loaded);
+                DispatcherPriority.Background); // Background to avoid row = null error
 
                 edit_mode = "insert";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
@@ -382,7 +386,7 @@ namespace FrontendWPF
         int column_index;
         int filterc_index;
         string changed_property_name;
-        ServiceReference3.User user_edited, user_edited0, user_filter;
+        UserService.User user_edited, user_edited0, user_filter;
 
         private void dataGrid1_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
@@ -414,7 +418,7 @@ namespace FrontendWPF
                 row_index = row.GetIndex();
                 column = e.Column;
                 column_index = column.DisplayIndex;
-                //user_edited = row.Item as ServiceReference3.User; //  user_edited and user_edited0 are already defined in UpdateUser and AddUser (read out current (old) values from the row, because the entry is a new value)
+                //user_edited = row.Item as UserService.User; //  user_edited and user_edited0 are already defined in UpdateUser and AddUser (read out current (old) values from the row, because the entry is a new value)
 
                 cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
                 textBox = (TextBox)cell.Content;
@@ -711,6 +715,10 @@ namespace FrontendWPF
             
             // prevent dataGrid to select lower cell on Enter if not editing (otherwise entire editing would stop
             if (e.Key == Key.Enter && (itemsView.IsAddingNew || itemsView.IsEditingItem) == false && edit_mode != "insert")
+            {
+
+            }
+
             if (e.Key == Key.Enter && itemsView.IsEditingItem == false && edit_mode != "insert")
             {
                 // e.Handled = true;
@@ -834,7 +842,7 @@ namespace FrontendWPF
         // show/hide dataGrid0 with filter row
         private void Button_Filter_Click(object sender, RoutedEventArgs e)
         {
-            filteredUsersList = new List<ServiceReference3.User>();
+            filteredUsersList = new List<UserService.User>();
 
             // show filter dataGrid0
             if (stackPanel1.Height == 442)
@@ -853,134 +861,113 @@ namespace FrontendWPF
             }
         }
 
-        private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        private void dataGrid0_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            if (e.EditAction == DataGridEditAction.Commit)
+            row = e.Row;
+            column = e.Column;
+        }
+
+        private void dataGrid0_KeyUp(object sender, KeyEventArgs e)
+        // private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            if (row == null || column == null) { return; } // stop if column or row is not selected or not in edit mode
+
+            // check wheter the pressed key is digit or number, otherwise stop
+                if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Subtract && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
             {
-                if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
-                {
-                    return;
-                }
-                else if (Button_Close.IsKeyboardFocused)
-                {
-                    CloseWindow();
-                    return;
-                }
+                return;
+            }
+             
+            // row = e.Row;
+            // column = e.Column;
+            filterc_index = column.DisplayIndex;
+            cell = dataGrid1.Columns[filterc_index].GetCellContent(row).Parent as DataGridCell;
+            if (cell.IsEditing == false) { return; } // stop if cell is not editing
+            textBox = (TextBox)cell.Content;
+            new_value = textBox.Text;
+            changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
 
-                row = e.Row;
-                column = e.Column;
-                filterc_index = column.DisplayIndex;
-                cell = dataGrid1.Columns[filterc_index].GetCellContent(row).Parent as DataGridCell;
-                textBox = (TextBox)cell.Content;
-                new_value = textBox.Text;
-                changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
+            // if any user_filter value is null, set it temporarily to -999 to avoid error when setting old value                
+            if (changed_property_name == "Id" && user_filter.Id == null) user_filter.Id = -999;
+            if (changed_property_name == "Permission" && user_filter.Permission == null) user_filter.Permission = -999;
+            if (changed_property_name == "Active" && user_filter.Active == null) user_filter.Active = -999;
+            //get old property value of user by property name
+            // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
 
-                // if any user_filter value is null, set it temporarily to -999 to avoid error when setting old value                
-                if (changed_property_name == "Id" && user_filter.Id == null) user_filter.Id = -999;
-                if (changed_property_name == "Permission" && user_filter.Permission == null) user_filter.Permission = -999;
-                if (changed_property_name == "Active" && user_filter.Active == null) user_filter.Active = -999;
-                //get old property value of user by property name
-                // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
+            int? int_val = Int32.TryParse(user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString(), out var tempVal0) ? tempVal0 : (int?)null;
 
-                int? int_val = Int32.TryParse(user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString(), out var tempVal0) ? tempVal0 : (int?)null;
+            old_value = int_val != null ? user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString() : "";
+            if (changed_property_name == "Id" && user_filter.Id == -999) user_filter.Id = null;
+            if (changed_property_name == "Permission" && user_filter.Permission == -999) user_filter.Permission = null;
+            if (changed_property_name == "Active" && user_filter.Active == -999) user_filter.Active = null;
 
-                old_value = int_val != null ? user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString() : "";
-                if (changed_property_name == "Id" && user_filter.Id == -999) user_filter.Id = null;
-                if (changed_property_name == "Permission" && user_filter.Permission == -999) user_filter.Permission = null;
-                if (changed_property_name == "Active" && user_filter.Active == -999) user_filter.Active = null;
+            if (old_value == "-999")
+            {
+                Dispatcher.InvokeAsync(() => {
+                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end
+                    Shared.SendKey(Key.End);
+                }, DispatcherPriority.Render);
+            }
 
+            // check data correctness
+            string stopMessage = "";
+            if (changed_property_name == "Id")
+            {
+                int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
+                {
+                    stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
+                }
+            }
+            else if (changed_property_name == "Permission" && (new_value != "" && Shared.permissionList.Any(p => p == new_value) == false)) // if wrong Permission value is entered
+            {
+                stopMessage = $"The Permission value '{new_value}' does not exist, please enter the correct value (between 0-9)!";
+            }
+            else if (changed_property_name == "Active" && (new_value != "" && (new_value == "0" || new_value == "1") == false)) // if wrong Active value is entered
+            {
+                stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
+            }
 
-                // check data correctness
-                string stopMessage = "";
-                if (changed_property_name == "Id")
-                {
-                    int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
-                    {
-                        stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
-                    }
-                }
-                else if (new_value != "" && changed_property_name == "Username" && new_value.Length < 5)
-                {
-                    stopMessage = $"The username must be at least 5 charachters long!";
-                }
-                else if (new_value != "" && new_value != "-1" && changed_property_name == "Password" && new_value.Length < 5)
-                {
-                    stopMessage = $"The password must be at least 5 charachters long!";
-                }
-                else if (new_value !="" && changed_property_name == "Location" && Shared.locationsList.Any(p => p == new_value) == false) // if wrong Location name is entered
-                {
-                    stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
-                }
-                else if (changed_property_name == "Permission" && (new_value != "" && Shared.permissionList.Any(p => p == new_value) == false)) // if wrong Permission value is entered
-                {
-                    stopMessage = $"The Permission value '{new_value}' does not exist, please enter the correct value (between 0-9)!";
-                }
-                else if (changed_property_name == "Active" && (new_value != "" && (new_value == "0" || new_value == "1") == false)) // if wrong Active value is entered
-                {
-                    stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
-                }
-
-                if (stopMessage != "")  // warn user, and stop
-                {
-                    MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
-                    return;
-                }
+            if (stopMessage != "")  // warn user, and stop
+            {
+                MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
+                return;
+            }
                 
-                /*
-                // stop if new and old value are the same 
-                else if (old_value == new_value)
-                {
-                    return;
-                }
-                */
-
-                if (new_value !="" && new_value != "-1" && changed_property_name == "Password" && new_value != old_value)
-                {
-                    new_value = Shared.CreateMD5(new_value); // encypt new password (the old password is already encrypted
-                }
-
-                if (filterc_index < 4 == filterc_index > 0) // // update string-type fields with new value (Username / Password / Location)
-                {
-                    user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, new_value);
-                }
-                else // update int?-type fields with new value (Permission / Active)
-                {
-                    int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, int_val);
-
-                }
-
-                // filter
-                filteredUsersList.Clear();
-                foreach (var user in dbUsersList)
-                {
-
-                    if ( ( user_filter.Id == null || user.Id == user_filter.Id) && (user_filter.Username == "" || user.Username == user_filter.Username) && (user_filter.Password == "" || user.Password == user_filter.Password) && (user_filter.Location == "" || user.Location == user_filter.Location) && (user_filter.Permission == null || user.Permission == user_filter.Permission) && (user_filter.Active == null || user.Active == user_filter.Active))
-                    {
-                        filteredUsersList.Add(user);
-                        continue;
-                    }
-                }
-                // update dataGrid1 with filtered items                    
-                dataGrid1.ItemsSource = filteredUsersList;
-                SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
-                dataGrid1.Items.Refresh();
-            }
-        }
-
-        private void dataGrid0_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            /*
-            // check wheter the pressed key ia digit or number
-            if ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+            if (filterc_index < 4 == filterc_index > 0) // // update string-type fields with new value (Username / Password / Location)
             {
-                string key = e.Key.ToString();
+                user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, new_value);
             }
-            */
-        }
+            else // update int?-type fields with new value (Permission / Active)
+            {
+                int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, int_val);
 
+            }
+
+            string password = ""; // encrypt only as a separate variable, leaving user_password unchanged
+            if (new_value !="" && new_value != "-1" && changed_property_name == "Password" && new_value != old_value)
+            {
+                password = Shared.CreateMD5(new_value); // encypt new password (the old password is already encrypted
+            }
+
+            // filter
+            filteredUsersList.Clear();
+            foreach (var user in dbUsersList)
+            {
+
+                if ((user_filter.Id == null || user.Id == user_filter.Id) && (user_filter.Username == "" || user.Username.ToLower().Contains(user_filter.Username.ToLower())) && (password == "" ||  user.Password == password) && (user_filter.Location == "" || user.Location.ToLower().Contains(user_filter.Location.ToLower())) && (user_filter.Permission == null || user.Permission == user_filter.Permission) && (user_filter.Active == null || user.Active == user_filter.Active))
+                {
+                    filteredUsersList.Add(user);
+                    continue;
+                }
+            }
+            // update dataGrid1 with filtered items                    
+            dataGrid1.ItemsSource = filteredUsersList;
+            SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
+            dataGrid1.Items.Refresh();
+        }
         private void SetUserAccess()
         {
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
@@ -1004,11 +991,15 @@ namespace FrontendWPF
         private void Button_Export_Click(object sender, RoutedEventArgs e)
         {
             
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Comma separated text file (*.csv)|*.csv|C# file (*.cs)|*.cs";
-            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            saveFileDialog.FileName = "dbUsers"; // Default file name
-            saveFileDialog.DefaultExt = ".csv"; // Default file extension
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                Filter = "Comma separated text file (*.csv)|*.csv|Text file (*.txt)|*.txt",
+                DefaultExt = ".csv",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                FileName = "dbUsers",
+                Title = "Save users data as:"
+            };
+
             Nullable<bool> result = saveFileDialog.ShowDialog(); // show saveFileDialog
             if (result == true)
             {
@@ -1028,11 +1019,11 @@ namespace FrontendWPF
 
                 // write file rows
                 string rows = "";
-                ServiceReference3.User user;
+                UserService.User user;
                 int i = 0;
                 for (i= 0; i < dataGrid1.Items.Count; i++)
                 {
-                   user = dataGrid1.Items[i] as ServiceReference3.User;
+                   user = dataGrid1.Items[i] as UserService.User;
                    rows += $"{user.Id};{user.Username};{user.Password};{user.Location};{user.Permission};{user.Active}\n";
                 }
                 sr.Write(rows);
@@ -1047,6 +1038,122 @@ namespace FrontendWPF
                 gifImage.StartAnimation();
             }
         }
+        private void Button_Import_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Encrypt password? (Choose No if passwords are already encrpyted!)", caption: "Question", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            bool encrypt = result == MessageBoxResult.Yes;
+            if (result == MessageBoxResult.Cancel) { return; }
+
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Filter = "Comma separated file (*.csv) |*.csv|Text file (*.txt)|*.txt",
+                DefaultExt = ".csv",
+                Title = "Open file for import to 'Users' table"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                StreamReader sr = new StreamReader(openFileDialog.FileName);
+                // check header correctness
+                string header_row = sr.ReadLine();
+                int first_colum = header_row.Split(';').Length == 5 ? 0 : 1; // 1 if Id column is provided
+
+                if (header_row != "Id;Username;Password;Location;Persmission;Active" && header_row != "Username;Password;Location;Persmission;Active")
+                {
+                    MessageBox.Show($"Incorrect file content! Expected header is 'Id; Username; Password; Location; Persmission; Active' (Id is optional), but received '{header_row}'");
+                    return;
+                }
+
+
+                UserService.User user;
+                importList = new List<UserService.User>();
+                int row_index = 0;
+                string[] row;
+                int usersAdded = 0;
+                string registerMessage = "";
+                string errorMessage = "";
+                int? id = dbUsersList.Max(u => u.Id) + 1;
+                while (sr.EndOfStream == false)
+                {
+                    string error = "";
+                    row = sr.ReadLine().Split(';');
+                    if (row.Length != 5 + first_colum) // skip row if number of columns is incorrect
+                    {
+                        continue;
+                    }
+                    string username = row[first_colum];
+                    string password = row[first_colum + 1];
+                    string location = row[first_colum + 2];
+                    string permission = row[first_colum + 3];
+                    string active = row[first_colum + 4];
+                    
+                    // check data correctness
+                    if (username.Length < 5)
+                    {
+                        error += $"'{username}': Username must be at least 5 charachters long!\n";
+                    }
+                    if (dbUsersList.Any(p => p.Username == username)) // if user already exists in database
+                    {
+                        error += $"'{username}': User already exists in database!\n";
+                    }
+                    if (password.Length < 5)
+                    {
+                        error += $"'{username}': Password must be at least 5 charachters long!\n";
+                    }
+                    if (Shared.locationsList.Any(p => p == location) == false) // if wrong Location name is entered
+                    {
+                        error += $"'{username}': Location '{location}' does not exist!\n";
+                    }
+                    if (Shared.permissionList.Any(p => p == permission) == false) // if wrong Permission value is entered
+                    {
+                        error += $"'{username}': Persmission value '{permission}' does not exist!\n";
+                    }
+                    if ((active == "0" || active == "1") == false) // if wrong Active value is entered
+                    {
+                        error += $"'{username}': Active value '{active}' does not exist!\n";
+                    }
+                    errorMessage += error;
+                    if (error != "") { continue; } // skip on error
+
+                    // REGISTER into database
+                    registerMessage = client.RegisterUser(Shared.uid, username, (encrypt ? Shared.CreateMD5(password) : password), location, permission);
+                    if (registerMessage != "User successfully registered!")
+                    {
+                        errorMessage += $"'{username}': {registerMessage}\n";
+                        continue;
+                    }
+
+                    user = new UserService.User
+                    {
+                        Id = id,
+                        Username = username,
+                        Password = password,
+                        Location = location,
+                        Permission = int.Parse(permission),
+                        Active = int.Parse(active)
+                    };
+
+                    usersAdded++;
+                    importList.Add(user);
+                    id++;
+                    row_index++;
+                }
+                sr.Close();
+
+                if (errorMessage != "") { MessageBox.Show($"Following error occurred during the data import:\n\n{errorMessage}", caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning); }
+                if (importList.Count > 0)
+                {
+                dataGrid1.ItemsSource = importList;
+                
+                TextBlock_message.Text = $"{usersAdded} {(usersAdded == 1 ? "record" : "records")} added into the 'Users' table.";
+                TextBlock_message.Foreground = Brushes.LightGreen;
+                checkBox_fadeInOut.IsChecked = false;
+                checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
+                gifImage.StartAnimation();
+                }
+            }
+        }
+
     }
 }
 

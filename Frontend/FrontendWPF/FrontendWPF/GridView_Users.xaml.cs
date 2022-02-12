@@ -28,8 +28,8 @@ namespace FrontendWPF
         //work, because lists don't inherit from INotifyCollectionChanged thus they cannot send
         //notifications when items get added or removed so the view does not know if things are
         //added or deleted
-        public ObservableCollection<ServiceReference3.User> AvailableNumbers { get; set; }
-        public List<ServiceReference3.User> dbUsersList { get; set; }
+        public ObservableCollection<UserService.User> AvailableNumbers { get; set; }
+        public List<UserService.User> dbUsersList { get; set; }
 
         public GridView_Users()
         {
@@ -37,9 +37,9 @@ namespace FrontendWPF
             //TODO: Step 6: Initialize the observable collection
             //and add elements to it
             // AvailableNumbers = new ObservableCollection<int>();
-            AvailableNumbers = new ObservableCollection<ServiceReference3.User>();
+            AvailableNumbers = new ObservableCollection<UserService.User>();
 
-            // usersList = new List<ServiceReference3.User>();
+            // usersList = new List<UserService.User>();
             // string query = $"WHERE 1";  // összes user lekérdezése
             dbUsersList = User.GetUsers("", "", "", "", "");
             
@@ -120,7 +120,7 @@ namespace FrontendWPF
         private void AddNumber(object sender, RoutedEventArgs e)
         {
 
-            ServiceReference3.User user = new ServiceReference3.User()
+            UserService.User user = new UserService.User()
             {
                 Id = 10,
                 Username = "user10",

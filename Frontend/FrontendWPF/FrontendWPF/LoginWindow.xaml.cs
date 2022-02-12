@@ -25,7 +25,7 @@ namespace FrontendWPF
 
     public partial class LoginWindow : Window
     {
-        public static ServiceReference3.UserServiceClient client;
+        public static UserService.UserServiceClient client;
         private bool closeCompleted = false;
 
         public LoginWindow()
@@ -37,10 +37,10 @@ namespace FrontendWPF
 
         private async void Button_Login_ClickAsync(object sender, RoutedEventArgs e)
         {
-            client = new ServiceReference3.UserServiceClient();
-            List<ServiceReference3.User> dbUsersList = new List<ServiceReference3.User>();
-            // ServiceReference3.Response_User responseUser = new ServiceReference3.Response_User();
-            ServiceReference3.Response_Login responseLogin = new ServiceReference3.Response_Login();
+            client = new UserService.UserServiceClient();
+            List<UserService.User> dbUsersList = new List<UserService.User>();
+            // UserService.Response_User responseUser = new UserService.Response_User();
+            UserService.Response_Login responseLogin = new UserService.Response_Login();
 
             // string uid = null;
             string username = Textbox_UserName.Text;
@@ -60,7 +60,7 @@ namespace FrontendWPF
                     errorMessage = $"The remote host is not accessible. Please check your Internet connection, or contact the service provider.";
                 }
                 */
-                if (responseLogin.Message == "There was a problem with your request!")
+                if (responseLogin.Message.Contains("Unable to connect"))
                 {
                     errorMessage = $"The remote database is not available. Please check your Internet connection, or contact the service provider.";
                 }
@@ -92,8 +92,8 @@ namespace FrontendWPF
 
             
             /*
-            client = new ServiceReference3.UserManagementClient();
-            ServiceReference3.User[] userArray = new ServiceReference3.User[0];
+            client = new UserService.UserManagementClient();
+            UserService.User[] userArray = new UserService.User[0];
             string query = $"WHERE Username='{userName}' AND Password='{Shared.CreateMD5(password)}'";
             try
             {

@@ -27,16 +27,16 @@ namespace FrontendWPF.Templates
         //work, because lists don't inherit from INotifyCollectionChanged thus they cannot send
         //notifications when items get added or removed so the view does not know if things are
         //added or deleted
-        public ObservableCollection<ServiceReference3.User> AvailableNumbers { get; set; }
+        public ObservableCollection<UserService.User> AvailableNumbers { get; set; }
 
         public DataBinding_ObservableCollection_Users()
         {
             //TODO: Step 6: Initialize the observable collection
             //and add elements to it
             // AvailableNumbers = new ObservableCollection<int>();
-            AvailableNumbers = new ObservableCollection<ServiceReference3.User>();
+            AvailableNumbers = new ObservableCollection<UserService.User>();
 
-            List<ServiceReference3.User> usersList = new List<ServiceReference3.User>();
+            List<UserService.User> usersList = new List<UserService.User>();
             usersList = Templates.Users.GetUsers();
 
             // usersList.OrderBy(p => p.Username);
@@ -71,7 +71,7 @@ namespace FrontendWPF.Templates
         private void AddNumber(object sender, RoutedEventArgs e)
         {
 
-            ServiceReference3.User user = new ServiceReference3.User()
+            UserService.User user = new UserService.User()
             {
                 Id = 10,
                 Username = "user10",

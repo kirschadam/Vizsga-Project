@@ -19,8 +19,8 @@ namespace FrontendWPF
     /// </summary>
     public partial class ViewUsers : Window
     {
-        // public static ServiceReference3.UserManagementClient client;
-        // public ServiceReference3.User[] user = { };
+        // public static UserService.UserManagementClient client;
+        // public UserService.User[] user = { };
 
         public ViewUsers()
         {
@@ -39,13 +39,13 @@ namespace FrontendWPF
 
         private void ReadDatabase()
         {
-            ServiceReference3.UserServiceClient client = new ServiceReference3.UserServiceClient();
-            ServiceReference3.User[] user = { };
+            UserService.UserServiceClient client = new UserService.UserServiceClient();
+            UserService.User[] user = { };
 
             // string query = $"WHERE Username='{userName}' AND Password='{CreateMD5(password)}'";
             string query = $"WHERE 1";  // összes user lekérdezése
 
-            // ServiceReference3.User[] user = { };
+            // UserService.User[] user = { };
             try
             {
                 //user = client.UserList(query);

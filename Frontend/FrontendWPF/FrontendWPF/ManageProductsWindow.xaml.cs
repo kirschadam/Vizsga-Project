@@ -31,6 +31,7 @@ namespace FrontendWPF
         List<StockService.Product> filterProductsList { get; set; }
         List<StockService.Product> filteredProductsList { get; set; }
         List<StockService.Product> selectedProductsList { get; set; }
+        List<StockService.Product> importList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
@@ -94,11 +95,13 @@ namespace FrontendWPF
                     double stretch = (600 - 58) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
                     dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                     dataGrid0.Width = dataGrid1.Width;
+                    dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
                     // stretch columns to dataGrid1 width
                     for (int i = 1; i < dataGrid1.Columns.Count; i++)
                     {
                         dataGrid1.Columns[i].Width = dataGrid1.Columns[i].ActualWidth * stretch;
                         dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
+                        dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
                     }
                     dataGrid1.Items.Refresh();
                     ScrollDown();
@@ -116,6 +119,7 @@ namespace FrontendWPF
             };
             filterProductsList.Clear();
             filterProductsList.Add(product_filter);
+            dataGrid0.ItemsSource = null; // to avoid IsEditingItem error
             dataGrid0.ItemsSource = filterProductsList;
             dataGrid0.Items.Refresh();
 
@@ -350,7 +354,7 @@ namespace FrontendWPF
                     cell.IsEditing = true;
                     cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
                 },
-                DispatcherPriority.Loaded);
+                DispatcherPriority.Background); // Background to avoid row = null error
 
                 edit_mode = "insert";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
@@ -846,120 +850,106 @@ namespace FrontendWPF
             }
         }
 
-        private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        private void dataGrid0_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            if (e.EditAction == DataGridEditAction.Commit)
-            {
-                if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
-                {
-                    return;
-                }
-                else if (Button_Close.IsKeyboardFocused)
-                {
-                    CloseWindow();
-                    return;
-                }
-
-                row = e.Row;
-                column = e.Column;
-                filterc_index = column.DisplayIndex;
-                cell = dataGrid1.Columns[filterc_index].GetCellContent(row).Parent as DataGridCell;
-                textBox = (TextBox)cell.Content;
-                new_value = textBox.Text;
-                changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
-                if (changed_property_name == "Unit price") { changed_property_name = "UnitPrice"; }
-
-                // if any product_filter value is null, set it temporarily to -999 to avoid error when setting old value                
-                if (changed_property_name == "Id" && product_filter.Id == null) product_filter.Id = -999;
-                if (changed_property_name == "UnitPrice" && product_filter.UnitPrice == null) product_filter.UnitPrice = -999;
-                //get old property value of product by property name
-                // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-                old_value = product_filter.GetType().GetProperty(changed_property_name).GetValue(product_filter).ToString();
-                if (changed_property_name == "Id" && product_filter.Id == -999) product_filter.Id = null;
-                if (changed_property_name == "UnitPrice" && product_filter.UnitPrice == -999) product_filter.UnitPrice = null;
-
-                // check data correctness
-                string stopMessage = "";
-                if (changed_property_name == "Id")
-                {
-                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
-                    {
-                        stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
-                    }
-                }
-                else if (new_value != "" && new_value != "-1" && changed_property_name == "Name" && new_value.Length < 5)
-                {
-                    stopMessage = $"The name must be at least 5 charachters long!";
-                }
-                else if (changed_property_name == "UnitPrice" && new_value != "") // if wrong UnitPrice value is entered
-                {
-                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if ((new_value != "" && int_val == null) || int_val < 0)
-                    {
-                        stopMessage = $"The Unit price '{new_value}' does not exist, please enter a correct value for the Unit price!";
-                    }
-                    else if (int_val > 10000000)
-                    {
-                        stopMessage = $"Price cannot exceed 10,000,000!";
-                    }
-                }
-
-                if (stopMessage != "")  // warn user, and stop
-                {
-                    MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
-                    return;
-                }
-
-                /*
-                // stop if new and old value are the same 
-                else if (old_value == new_value)
-                {
-                    return;
-                }
-                */
-
-
-                if (filterc_index < 2 && filterc_index > 0) // // update string-type fields with new value (Name)
-                {
-                    product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, new_value);
-                }
-                else // update int?-type fields with new value (Id, UnitPrice)
-                {
-                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, int_val);
-
-                }
-
-                // filter
-                filteredProductsList.Clear();
-                foreach (var product in dbProductsList)
-                {
-
-                    if ((product_filter.Id == null || product.Id == product_filter.Id) && (product_filter.Name == "" || product.Name == product_filter.Name) && (product_filter.UnitPrice == null || product.UnitPrice == product_filter.UnitPrice))
-                    {
-                        filteredProductsList.Add(product);
-                        continue;
-                    }
-                }
-                // update dataGrid1 with filtered items                    
-                dataGrid1.ItemsSource = filteredProductsList;
-                SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
-                dataGrid1.Items.Refresh();
-            }
+            row = e.Row;
+            column = e.Column;
         }
 
-
-        private void dataGrid0_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void dataGrid0_KeyUp(object sender, KeyEventArgs e)
+        // private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            /*
-            // check wheter the pressed key ia digit or number
-            if ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+            if (row == null || column == null) { return; } // stop if column or row is not selected or not in edit mode
+
+            // check wheter the pressed key is digit or number, otherwise stop
+            if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Subtract && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
             {
-                string key = e.Key.ToString();
+                return;
             }
-            */
+
+            // row = e.Row;
+            // column = e.Column;
+            filterc_index = column.DisplayIndex;
+            cell = dataGrid1.Columns[filterc_index].GetCellContent(row).Parent as DataGridCell;
+            if (cell.IsEditing == false) { return; } // stop if cell is not editing
+            textBox = (TextBox)cell.Content;
+            new_value = textBox.Text;
+            changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
+            if (changed_property_name == "Unit price") { changed_property_name = "UnitPrice"; }
+
+            // if any product_filter value is null, set it temporarily to -999 to avoid error when setting old value                
+            if (changed_property_name == "Id" && product_filter.Id == null) product_filter.Id = -999;
+            if (changed_property_name == "UnitPrice" && product_filter.UnitPrice == null) product_filter.UnitPrice = -999;
+            //get old property value of product by property name
+            // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
+            old_value = product_filter.GetType().GetProperty(changed_property_name).GetValue(product_filter).ToString();
+            if (changed_property_name == "Id" && product_filter.Id == -999) product_filter.Id = null;
+            if (changed_property_name == "UnitPrice" && product_filter.UnitPrice == -999) product_filter.UnitPrice = null;
+
+            if (old_value == "-999")
+            {
+                Dispatcher.InvokeAsync(() => {
+                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end
+                    Shared.SendKey(Key.End);
+                }, DispatcherPriority.Render);
+            }
+
+            // check data correctness
+            string stopMessage = "";
+            if (changed_property_name == "Id")
+            {
+                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
+                {
+                    stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
+                }
+            }
+            else if (changed_property_name == "UnitPrice" && new_value != "") // if wrong UnitPrice value is entered
+            {
+                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                if ((new_value != "" && int_val == null) || int_val < 0)
+                {
+                    stopMessage = $"The Unit price '{new_value}' does not exist, please enter a correct value for the Unit price!";
+                }
+                else if (int_val > 10000000)
+                {
+                    stopMessage = $"Price cannot exceed 10,000,000!";
+                }
+            }
+
+            if (stopMessage != "")  // warn user, and stop
+            {
+                MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
+                return;
+            }
+
+            if (filterc_index < 2 && filterc_index > 0) // // update string-type fields with new value (Name)
+            {
+                product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, new_value);
+            }
+            else // update int?-type fields with new value (Id, UnitPrice)
+            {
+                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, int_val);
+
+            }
+
+            // filter
+            filteredProductsList.Clear();
+            foreach (var product in dbProductsList)
+            {
+
+                if ((product_filter.Id == null || product.Id == product_filter.Id) && (product_filter.Name == "" || product.Name.ToLower().Contains(product_filter.Name.ToLower())) && (product_filter.UnitPrice == null || product.UnitPrice == product_filter.UnitPrice))
+                {
+                    filteredProductsList.Add(product);
+                    continue;
+                }
+            }
+            // update dataGrid1 with filtered items                    
+            dataGrid1.ItemsSource = filteredProductsList;
+            SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
+            dataGrid1.Items.Refresh();
         }
 
         private void SetUserAccess()
@@ -985,11 +975,15 @@ namespace FrontendWPF
         private void Button_Export_Click(object sender, RoutedEventArgs e)
         {
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Comma separated text file (*.csv)|*.csv|C# file (*.cs)|*.cs";
-            saveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            saveFileDialog.FileName = "dbProducts"; 
-            saveFileDialog.DefaultExt = ".csv";
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                Filter = "Comma separated text file (*.csv)|*.csv|Text file (*.txt)|*.txt",
+                DefaultExt = ".csv",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                FileName = "dbProducts",
+                Title = "Save products data as:"
+            };
+
             Nullable<bool> result = saveFileDialog.ShowDialog(); // show saveFileDialog
             if (result == true)
             {
@@ -1016,6 +1010,106 @@ namespace FrontendWPF
                 checkBox_fadeInOut.IsChecked = false;
                 checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
                 gifImage.StartAnimation();
+            }
+        }
+
+        private void Button_Import_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Filter = "Comma separated file (*.csv) |*.csv|Text file (*.txt)|*.txt",
+                DefaultExt = ".csv",
+                Title = "Open file for import to 'Products' table"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                StreamReader sr = new StreamReader(openFileDialog.FileName);
+                // check header correctness
+                string header_row = sr.ReadLine();
+                int first_colum = header_row.Split(';').Length == 2 ? 0 : 1; // 1 if Id column is provided
+
+                if (header_row != "Id;Name;UnitPrice" && header_row != "Name;UnitPrice")
+                {
+                    MessageBox.Show($"Incorrect file content! Expected header is 'Id;Name;UnitPrice' (Id is optional), but received '{header_row}'");
+                    return;
+                }
+
+                StockService.Product product;
+                importList = new List<StockService.Product>();
+                int row_index = 0;
+                string[] row;
+                int productsAdded = 0;
+                string registerMessage = "";
+                string errorMessage = "";
+                int? id = dbProductsList.Max(u => u.Id) + 1;
+                while (sr.EndOfStream == false)
+                {
+                    string error = "";
+                    row = sr.ReadLine().Split(';');
+                    if (row.Length != 2 + first_colum) // skip row if number of columns is incorrect
+                    {
+                        continue;
+                    }
+
+                    string name = row[first_colum];
+                    string unitprice = row[first_colum + 1];
+                    
+                    // check data correctness
+                    if (dbProductsList.Any(p => p.Name == name)) // if product already exists in database
+                    {
+                        error += $"'{name}': Product already exists in database!\n";
+                    }
+                    if (name.Length < 5)
+                    {
+                        error += $"'{name}': Name must be et least 5 characters long!\n";
+                    }
+                    int? int_val = Int32.TryParse(unitprice, out var tempVal) ? tempVal : (int?)null;
+                    if (int_val == null || int_val <= 0)
+                    {
+                        error += $"'{name}': UnitPrice '{unitprice}' is incorrect!\n";
+                    }
+                    else if (int_val > 10000000)
+                    {
+                        error += $"'{name}': UnitPrice '{unitprice}' cannot exceed 10,000,000!\n";
+                    }
+
+                    errorMessage += error;
+                    if (error != "") { continue; } // continue on error
+
+                    // ADD into database
+                    registerMessage = stockClient.AddProduct(Shared.uid, name, unitprice);
+                    if (registerMessage != "Product successfully added!")
+                    {
+                        errorMessage += $"'{name}': {registerMessage}\n";
+                        continue;
+                    }
+
+                    product = new StockService.Product
+                    {
+                        Id = id,
+                        Name = name,
+                        UnitPrice = int.Parse(unitprice)
+                    };
+
+                    productsAdded++;
+                    importList.Add(product);
+                    id++;
+                    row_index++;
+                }
+                sr.Close();
+
+                if (errorMessage != "") { MessageBox.Show($"Following error occurred during the data import:\n\n{errorMessage}", caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning); }
+                if (importList.Count > 0)
+                {
+                    dataGrid1.ItemsSource = importList;
+
+                    TextBlock_message.Text = $"{productsAdded} {(productsAdded == 1 ? "record" : "records")} added into the 'Products' table.";
+                    TextBlock_message.Foreground = Brushes.LightGreen;
+                    checkBox_fadeInOut.IsChecked = false;
+                    checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
+                    gifImage.StartAnimation();
+                }
             }
         }
 
