@@ -147,8 +147,9 @@ namespace Base_service
             }
 
             var result = BaseInsert("users", "`username`, `password`, `locationId`, `permission`, `active`", values + "'1'");
-            if (result.Item2 != null && result.Item1 > 0) return "User successfully registered!";
-            else return result.Item2;
+
+            if (result.Item2 != "") return result.Item2;
+            else return "User successfully registered!";
         }
 
 
@@ -180,8 +181,9 @@ namespace Base_service
             };
 
             var result = BaseUpdate("users", changes, $"`id`='{id}'");
-            if (result.Item1 != null && result.Item1 > 0) return "User successfully updated!";
-            else return result.Item2;
+
+            if (result.Item2 != "") return result.Item2;
+            else return "User successfully updated!";
         }
 
 
@@ -197,9 +199,8 @@ namespace Base_service
             else if (username != null && username != "") result = BaseDelete("users", $"`username`='{username}'");
             else return "Give either a username or an id!";
 
-
-            if (result.Item1 != null && result.Item1 > 0) return "User successfully deleted!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "User successfully deleted!";
         }
     }
 }

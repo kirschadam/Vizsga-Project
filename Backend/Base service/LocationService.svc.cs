@@ -22,8 +22,8 @@ namespace Base_service
 
             var result = BaseInsert("locations", "`name`,`regionId`", $"'{location}','{regionId}'");
 
-            if (result.Item1 != null && result.Item1 > 0) return "Location successfully added!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Location successfully added!";
         }
 
 
@@ -35,8 +35,8 @@ namespace Base_service
 
             var result = BaseInsert("regions", "name", $"'{region}'");
 
-            if (result.Item1 != null && result.Item1 > 0) return "Region successfully added!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Region successfully added!";
         }
 
 
@@ -161,8 +161,8 @@ namespace Base_service
             else if (location != null && location != "") result = BaseDelete("locations", $"`name`='{location}'");
             else return "Give either a location name or an id!";
 
-            if (result.Item1 != null && result.Item1 > 0) return "Location successfully removed!"; 
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Location successfully removed!";
         }
 
 
@@ -178,8 +178,8 @@ namespace Base_service
             else if (region != null && region != "") result = BaseDelete("regions", $"`name`='{region}'");
             else return "Give either a region name or an id!";
 
-            if (result.Item1 != null && result.Item1 > 0) return "Region successfully removed!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Region successfully removed!";
         }
 
 
@@ -208,8 +208,8 @@ namespace Base_service
 
             var result = BaseUpdate("locations", changes, $"`id`='{id}'");
 
-            if (result.Item1 != null && result.Item1 > 0) return "Location successfully updated!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Location successfully updated!";
         }
 
 
@@ -221,11 +221,8 @@ namespace Base_service
 
             var result = BaseUpdate("regions", new string[,]{ { "`name`", $"'{region}'" } }, $"`id`='{id}'");
 
-            if (result.Item1 != null && result.Item1 > 0)
-            {
-                return "Region successfully updated!";
-            }
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Region successfully updated!";
         }
     }
 }

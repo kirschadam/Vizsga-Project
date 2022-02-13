@@ -12,9 +12,9 @@ namespace Base_service
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
 
             var result = BaseInsert("products", "`name`, `unitPrice`", $"'{name}','{unitPrice}'");
-            
-            if (result.Item1 != null && result.Item1 > 0) return "Product successfully added!";
-            else return result.Item2;
+
+            if (result.Item2 != "") return result.Item2;
+            else return "Product successfully added!";
         }
 
 
@@ -47,8 +47,9 @@ namespace Base_service
             int? id = Current_users[uid].Id;
 
             var result = BaseInsert(type + "s", "`productId`, `quantity`, `date`, `locationId`, `userId`", $"'{productId}','{quantity}','{date}','{locationId}','{id}'");
-            if (result.Item1 != null && result.Item1 > 0) return "Sale/Purchase successfully added!";
-            else return result.Item2;
+
+            if (result.Item2 != "") return result.Item2;
+            else return "Sale/Purchase successfully added!";
         }
 
 
@@ -76,8 +77,9 @@ namespace Base_service
 
 
             var result = BaseInsert("stocks", "`productId`,`locationId`,`quantity`", $"'{productId}','{locationId}','0'");
-            if (result.Item1 != null && result.Item1 > 0)  return "Stock successfully added!";
-            else return result.Item2;
+
+            if (result.Item2 != "") return result.Item2;
+            else return "Stock successfully added!";
         }
 
 
@@ -182,7 +184,7 @@ namespace Base_service
                 }
             }
 
-            if (response.SalesPurchases.Count != 0) response.Message += result.Item2;
+            if (result.Item2 != "") response.Message += result.Item2;
             else response.Message += $"Number of sales/purchases found: {response.SalesPurchases.Count}";
 
             return response;
@@ -236,7 +238,7 @@ namespace Base_service
                 }
             }
 
-            if (response.Stocks.Count != 0) response.Message += result.Item2;
+            if (result.Item2 != "") response.Message += result.Item2;
             else response.Message += $"Number of stocks found: {response.Stocks.Count}";
 
             return response;
@@ -276,9 +278,8 @@ namespace Base_service
             }
             else return "Give an id or location to delete!";
 
-
-            if (result.Item1 != null && result.Item1 > 0) return "Sale(s)/purchase(s) successfully removed!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Sale(s)/purchase(s) successfully removed!";
         }
 
 
@@ -301,8 +302,8 @@ namespace Base_service
             }
             else return "Give an id or location to delete!";
 
-            if (result.Item1 != null && result.Item1 > 0)return "Stock(s) successfully removed!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Stock(s) successfully removed!";
         }
 
 
@@ -320,8 +321,8 @@ namespace Base_service
 
             var result = BaseUpdate("products", changes, $"`id`='{id}'");
 
-            if (result.Item1 != null && result.Item1 > 0) return "Product successfully updated!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Product successfully updated!";
         }
 
 
@@ -379,8 +380,8 @@ namespace Base_service
 
             var result = BaseUpdate(type + "s", changes, $"`id`='{id}'");
 
-            if (result.Item1 != null && result.Item1 > 0) return "Sale/Purchase successfully updated!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Sale/Purchase successfully updated!";
         }
 
 
@@ -421,8 +422,8 @@ namespace Base_service
 
             var result = BaseUpdate("stocks", changes, $"`id`='{id}'");
 
-            if (result.Item1 != null && result.Item1 > 0) return "Stock successfully updated!";
-            else return result.Item2;
+            if (result.Item2 != "") return result.Item2;
+            else return "Stock successfully updated!";
         }
     }
 }
