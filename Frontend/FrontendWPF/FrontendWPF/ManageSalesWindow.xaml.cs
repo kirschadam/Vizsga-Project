@@ -34,6 +34,7 @@ namespace FrontendWPF
         List<StockService.Product> dbProductsList { get; set; }
         List<UserService.User> dbUsersList { get; set; }
         List<StockService.SalePurchase> importList { get; set; }
+        List<LocationService.Store> dbLocationsList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
@@ -70,7 +71,7 @@ namespace FrontendWPF
             
             // query all sales from database
             dbSalesList = SalePurchase.GetSalesPurchases(type: "sale", id: "", product: "", qOver: "", qUnder: "", before: "", after: "", location: "", user: "", limit: "");
-            if (dbSalesList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
+            if (dbSalesList == null) { IsEnabled = false; Close(); return; } // stop on any error
 
             // close window and stop if no sale is retrieved
             /*
@@ -488,9 +489,14 @@ namespace FrontendWPF
                         stopMessage = $"Date cannot be earlier than 30 days!";
                     }
                 }
-                else if (changed_property_name == "Location" && Shared.locationsList.Any(p => p == new_value) == false) // if wrong Location name is entered
+                else if (changed_property_name == "Location") // if wrong Location name is entered
                 {
-                    stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
+                    dbLocationsList = Location.GetLocations("", "", "", "");
+                    if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
+                    if (dbLocationsList.Any(p => p.Name == new_value) == false)
+                    {
+                        stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
+                    }
                 }
                 else if (changed_property_name == "Username" && new_value.Length < 5)
                 {
@@ -1135,6 +1141,8 @@ namespace FrontendWPF
                 string registerMessage = "";
                 string errorMessage = "";
                 int? id = dbSalesList.Max(u => u.Id) + 1;
+                dbLocationsList = Location.GetLocations("", "", "", "");
+                if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
                 dbProductsList = Product.GetProducts("", "", "", "", "");
                 dbUsersList = User.GetUsers("", "", "", "", "");
                 while (sr.EndOfStream == false)
@@ -1185,7 +1193,7 @@ namespace FrontendWPF
                     {
                         error += $"Sale in line {row_index}: Date '{date}' cannot be earlier than 30 days!\n";
                     }
-                    if (Shared.locationsList.Any(p => p == location) == false) // if wrong Location name is entered
+                    if (dbLocationsList.Any(p => p.Name == location) == false) // if wrong Location name is entered
                     {
                         error += $"Sale in line {row_index}: Location '{location}' does not exist!\n";
                     }

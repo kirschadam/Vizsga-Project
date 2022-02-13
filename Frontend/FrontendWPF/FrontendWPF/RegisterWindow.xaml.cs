@@ -23,7 +23,8 @@ namespace FrontendWPF
 
     public partial class RegisterWindow : Window
     {
-        public static UserService.UserServiceClient client;
+        UserService.UserServiceClient client;
+        List<LocationService.Store> dbLocationsList { get; set; }
         public RegisterWindow()
         {
             InitializeComponent();
@@ -49,7 +50,9 @@ namespace FrontendWPF
                 errorMessage = "Username and password must be at least 4 characters!";
                 TextBlock_Register.Foreground = Brushes.LightSalmon;
             }
-            else if (!Shared.locationsList.Contains(location))
+            dbLocationsList = Location.GetLocations("", "", "", "");
+            if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
+            else if (dbLocationsList.Any(p => p.Name == location) == false)
             {
                errorMessage = "Please enter a valid location.";
             }

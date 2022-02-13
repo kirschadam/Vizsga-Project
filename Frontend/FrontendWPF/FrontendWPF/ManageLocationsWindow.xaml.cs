@@ -64,7 +64,7 @@ namespace FrontendWPF
             
             // query all locations from database
             dbLocationsList = Location.GetLocations("", "", "", "");
-            if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
+            if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
 
             // close window and stop if no location is retrieved
             /*
@@ -91,6 +91,7 @@ namespace FrontendWPF
             {
                 filterLocationsList = new List<LocationService.Store>();
                 dbRegionsList = Region.GetRegions("", "", "", "");
+                if (dbRegionsList == null) { IsEnabled = false; Close(); return; } // stop on any error
 
                 Dispatcher.InvokeAsync(() => {
                     double stretch = (600 - 65) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged

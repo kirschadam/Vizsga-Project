@@ -13,10 +13,10 @@ namespace FrontendWPF.Classes
     public class Shared
     {
         public static StartWindow StartWindow;
-        public static List<string> locationsList = new List<string> { "Budapest", "Debrecen", "Szeged", "Miskolc", "Pécs", "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely","Érd", "Szolnok", "Tatabánya", "Sopron", "Kaposvár", "Veszprém", "Békéscsaba", "Zalaegerszeg", "Eger", "Nagykanizsa" };
-        /*
-        public static List<string> regionsList = new List<string> { "Pest", "Hajdú-Bihar", "Csongrád-Csanád", "Borsod-Abaúj", "Pécs", "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely", "Érd", "Szolnok", "Tatabánya", "Sopron", "Kaposvár", "Veszprém", "Békéscsaba", "Zalaegerszeg", "Eger", "Nagykanizsa" };
-        */
+        // public static List<string> locationsList = new List<string> { "Budapest", "Debrecen", "Szeged", "Miskolc", "Pécs", "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely","Érd", "Szolnok", "Tatabánya", "Sopron", "Kaposvár", "Veszprém", "Békéscsaba", "Zalaegerszeg", "Eger", "Nagykanizsa" };
+
+        // public static List<string> regionsList = new List<string> { "Pest", "Hajdú-Bihar", "Csongrád-Csanád", "Borsod-Abaúj", "Pécs", "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely", "Érd", "Szolnok", "Tatabánya", "Sopron", "Kaposvár", "Veszprém", "Békéscsaba", "Zalaegerszeg", "Eger", "Nagykanizsa" };
+
         public static List<string> permissionList = new List<string> { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
         public static UserService.User loggedInUser = null;
         public static string uid;

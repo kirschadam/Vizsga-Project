@@ -66,7 +66,7 @@ namespace FrontendWPF
             
             // query all products from database
             dbProductsList = Product.GetProducts("", "", "", "", "");
-            if (dbProductsList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
+            if (dbProductsList == null) { IsEnabled = false; Close(); return; } // stop on any error
 
             // close window and stop if no product is retrieved
             if (dbProductsList.Count == 0)

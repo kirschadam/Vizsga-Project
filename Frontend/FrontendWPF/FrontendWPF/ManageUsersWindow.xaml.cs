@@ -34,6 +34,7 @@ namespace FrontendWPF
         List<UserService.User> filterUsersList { get; set; }
         List<UserService.User> filteredUsersList { get; set; }
         List<UserService.User> importList { get; set; }
+        List<LocationService.Store> dbLocationsList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
@@ -68,7 +69,7 @@ namespace FrontendWPF
             
             // query all users from database
             dbUsersList = User.GetUsers("", "", "", "", "");
-            if (dbUsersList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
+            if (dbUsersList == null) { IsEnabled = false; Close(); return; } // stop on any error
 
             // close window and stop if no user is retrieved
             /*
@@ -466,9 +467,14 @@ namespace FrontendWPF
                 {
                     stopMessage = $"The password must be at least 5 charachters long!";
                 }
-                else if (changed_property_name == "Location" && Shared.locationsList.Any(p => p == new_value) == false) // if wrong Location name is entered
+                else if (changed_property_name == "Location") // if wrong Location name is entered
                 {
-                    stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
+                    dbLocationsList = Location.GetLocations("", "", "", "");
+                    if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
+                    if (dbLocationsList.Any(p => p.Name == new_value) == false)
+                    {
+                        stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
+                    }
                 }
                 else if (changed_property_name == "Permission" && Shared.permissionList.Any(p => p == new_value) == false) // if wrong Permission value is entered
                 {
@@ -1099,6 +1105,8 @@ namespace FrontendWPF
                 int usersAdded = 0;
                 string registerMessage = "";
                 string errorMessage = "";
+                dbLocationsList = Location.GetLocations("", "", "", "");
+                if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
                 int? id = dbUsersList.Max(u => u.Id) + 1;
                 while (sr.EndOfStream == false)
                 {
@@ -1127,7 +1135,7 @@ namespace FrontendWPF
                     {
                         error += $"'{username}': Password must be at least 5 charachters long!\n";
                     }
-                    if (Shared.locationsList.Any(p => p == location) == false) // if wrong Location name is entered
+                    if (dbLocationsList.Any(p => p.Name == location) == false) // if wrong Location name is entered
                     {
                         error += $"'{username}': Location '{location}' does not exist!\n";
                     }

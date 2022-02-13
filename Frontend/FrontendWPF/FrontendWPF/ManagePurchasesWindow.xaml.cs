@@ -34,6 +34,7 @@ namespace FrontendWPF
         List<StockService.Product> dbProductsList { get; set; }
         List<UserService.User> dbUsersList { get; set; }
         List<StockService.SalePurchase> importList { get; set; }
+        List<LocationService.Store> dbLocationsList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
@@ -70,7 +71,7 @@ namespace FrontendWPF
             
             // query all purchases from database
             dbPurchasesList = SalePurchase.GetSalesPurchases(type: "purchase", id: "", product: "", qOver: "", qUnder: "", before: "", after: "", location: "", user: "", limit: "");
-            if (dbPurchasesList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
+            if (dbPurchasesList == null) { IsEnabled = false; Close(); return; } // stop on any error
 
             // close window and stop if no purchase is retrieved
             /*
@@ -489,9 +490,14 @@ namespace FrontendWPF
                         stopMessage = $"Date cannot be earlier than 30 days!";
                     }
                 }
-                else if (changed_property_name == "Location" && Shared.locationsList.Any(p => p == new_value) == false) // if wrong Location name is entered
+                else if (changed_property_name == "Location") // if wrong Location name is entered
                 {
-                    stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
+                    dbLocationsList = Location.GetLocations("", "", "", "");
+                    if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
+                    if (dbLocationsList.Any(p => p.Name == new_value) == false)
+                    {
+                        stopMessage = $"The location '{new_value}' does not exist, please enter the correct location!";
+                    }
                 }
                 else if (changed_property_name == "Username" && new_value.Length < 5)
                 {
@@ -1136,6 +1142,10 @@ namespace FrontendWPF
                 string registerMessage = "";
                 string errorMessage = "";
                 int? id = dbPurchasesList.Max(u => u.Id) + 1;
+                dbLocationsList = Location.GetLocations("", "", "", "");
+                if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
+                dbProductsList = Product.GetProducts("", "", "", "", "");
+                dbUsersList = User.GetUsers("", "", "", "", "");
                 while (sr.EndOfStream == false)
                 {
                     row_index++;
@@ -1158,7 +1168,6 @@ namespace FrontendWPF
                     {
                         error += $"Purchase in line {row_index}: Product name must be at least 5 characters!\n";
                     }
-                    dbProductsList = Product.GetProducts("", "", "", "", "");
                     if (dbProductsList.Any(p => p.Name == product) == false)
                     {
                         error += $"Purchase in line {row_index}: product '{product}' does not exist!\n";
@@ -1185,7 +1194,7 @@ namespace FrontendWPF
                     {
                         error += $"Purchase in line {row_index}: Date '{date}' cannot be earlier than 30 days!\n";
                     }
-                    if (Shared.locationsList.Any(p => p == location) == false) // if wrong Location name is entered
+                    if (dbLocationsList.Any(p => p.Name == location) == false) // if wrong Location name is entered
                     {
                         error += $"Purchase in line {row_index}: Location '{location}' does not exist!\n";
                     }
@@ -1193,7 +1202,6 @@ namespace FrontendWPF
                     {
                         error += $"Purchase in line {row_index}: Username '{username}' must be at least 5 charachters long!\n";
                     }
-                    dbUsersList = User.GetUsers("", "", "", "", "");
                     if (dbUsersList.Any(p => p.Username == username ) == false) // if user does not exist in database
                     {
                         error += $"Purchase in line {row_index + 1}: User '{username}' does not exist!\n";
