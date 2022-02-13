@@ -63,8 +63,10 @@ namespace FrontendWPF
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
+            
             // query all products from database
             dbProductsList = Product.GetProducts("", "", "", "", "");
+            if (dbProductsList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
 
             // close window and stop if no product is retrieved
             if (dbProductsList.Count == 0)
@@ -323,7 +325,7 @@ namespace FrontendWPF
             {
 
                 // in db select last product with highest Id
-                int? highestId = dbProductsList.Max(u => u.Id);
+                int? highestId = dbProductsList.Count > 0 ? dbProductsList.Max(u => u.Id) : 0;
                 product_edited = new StockService.Product() // create new product with suggested values
                 {
                     Id = highestId + 1,

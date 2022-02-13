@@ -34,20 +34,16 @@ namespace FrontendWPF.Classes
  
             try
             {
-                // string query = $"WHERE name='{locationName}' AND unitPrice='{CreateMD5(unitprice)}'";
-                locationsArray = client.ListLocation(Shared.uid, id, location, region, limit).Locations;
-                // UserService.Response_Location response_Location = new UserService.Response_Location();
-                // string uid = response_Location.Uid;
-
-                // if (locationsArray == null)
-                if (locationsArray.Length == 0) // { FrontendWPF.UserService.Location[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
-
+                string hostMessage = client.ListLocation(Shared.uid, id, location, region, limit).Message;
+                if (hostMessage.Contains("Unable to connect")) // temporary solultion, { FrontendWPF.UserService.Location[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
                 {
                     MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
-                    // return;
+                    return null;
                 }
                 else
                 {
+                    // string query = $"WHERE name='{locationName}' AND unitPrice='{CreateMD5(unitprice)}'";
+                    locationsArray = client.ListLocation(Shared.uid, id, location, region, limit).Locations;
                     locationsList = locationsArray.ToList();
                 }
             }

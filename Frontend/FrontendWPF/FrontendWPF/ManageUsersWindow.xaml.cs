@@ -65,10 +65,13 @@ namespace FrontendWPF
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
+            
             // query all users from database
             dbUsersList = User.GetUsers("", "", "", "", "");
+            if (dbUsersList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
 
             // close window and stop if no user is retrieved
+            /*
             if (dbUsersList.Count == 0)
             {
                 IsEnabled = false;
@@ -77,7 +80,7 @@ namespace FrontendWPF
                 Close();
                 return;
             }
-
+            */
             usersList = new List<User>();
             for (int i = 0; i < dbUsersList.Count; i++)
             {
@@ -185,7 +188,10 @@ namespace FrontendWPF
                 selectedUsersList = new List<UserService.User>();
                 foreach (UserService.User user in selectedItems)
                 {
+                    if (selectedItems.Count == 1 || user.Username != "admin") // skip admin when more users are selected
+                    {
                     selectedUsersList.Add(user);
+                    }
                 }
                 dataGrid1.ItemsSource = selectedUsersList;
 
@@ -197,11 +203,20 @@ namespace FrontendWPF
                     }
 
                     int selectedUsers = selectedUsersList.Count;
-                    string deleteMessage = selectedUsers == 1 ? "Are you sure to delete the selected user?" : $"Are you sure to delete the selected {selectedUsers} users?";
+                    string deleteMessage = "";
+                    // admin cannot be deleted
+                    if (selectedUsers == 1 && selectedUsersList[0].Username == "admin")
+                    {
+                        deleteMessage = "The user 'admin' cannot be deleted!";
+                    }
+                    else
+                    {
+                        deleteMessage = selectedUsers == 1 ? "Are you sure to delete the selected user?" : $"Are you sure to delete the selected {selectedUsers} users?";
 
-                    TextBlock_message.Text = selectedUsers == 1 ? "Delete user?" : $"Delete {selectedUsers} users?";
-                    TextBlock_message.Foreground = Brushes.Salmon;
-                    MessageBoxResult result = MessageBox.Show(deleteMessage, caption: "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                        TextBlock_message.Text = selectedUsers == 1 ? "Delete user?" : $"Delete {selectedUsers} users?";
+                        TextBlock_message.Foreground = Brushes.Salmon;
+                    }
+                    MessageBoxResult result = MessageBox.Show(deleteMessage, caption: "Warning", deleteMessage != "The user 'admin' cannot be deleted!" ? MessageBoxButton.YesNo : MessageBoxButton.OK, MessageBoxImage.Warning);
 
                     if (result == MessageBoxResult.Yes)
                     {
@@ -443,6 +458,10 @@ namespace FrontendWPF
                 {
                     stopMessage = $"The username '{new_value}' is already taken, please enter another username!";
                 }
+                else if (changed_property_name == "Username" && old_value == "admin") // admin cannot be renamed
+                {
+                    stopMessage = $"The user '{old_value}' cannot be renamed!";
+                }
                 else if (changed_property_name == "Password" && new_value.Length < 5)
                 {
                     stopMessage = $"The password must be at least 5 charachters long!";
@@ -455,9 +474,17 @@ namespace FrontendWPF
                 {
                     stopMessage = $"The Permission value '{new_value}' does not exist, please enter the correct value (between 0-9)!";
                 }
+                else if (changed_property_name == "Permission" && row_index == 0) // admin's permission level cannot be changed
+                {
+                    stopMessage = $"The Permission value of admin cannot be changed!";
+                }
                 else if (changed_property_name == "Active" && (new_value == "0" || new_value == "1") == false) // if wrong Active value is entered
                 {
                     stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
+                }
+                else if (changed_property_name == "Active" && row_index == 0) // admin's active value cannot be changed
+                {
+                    stopMessage = $"The Active value of admin cannot be changed!";
                 }
 
                 if (stopMessage != "")  // warn user, and stop

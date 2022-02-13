@@ -34,20 +34,16 @@ namespace FrontendWPF.Classes
  
             try
             {
-                // string query = $"WHERE Username='{userName}' AND Password='{CreateMD5(password)}'";
-                usersArray = client.ListUser(Shared.uid, id, username, location, region, limit).Users;
-                // UserService.Response_User response_User = new UserService.Response_User();
-                // string uid = response_User.Uid;
-
-                // if (usersArray == null)
-                if (usersArray.Length == 0) // { FrontendWPF.UserService.User[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
-
+                string hostMessage = client.ListUser(Shared.uid, id, username, location, region, limit).Message;
+                if (hostMessage.Contains("Unable to connect")) // { FrontendWPF.UserService.User[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
                 {
                     MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
-                    // return;
+                    return null;
                 }
                 else
                 {
+                    // string query = $"WHERE Username='{userName}' AND Password='{CreateMD5(password)}'";
+                    usersArray = client.ListUser(Shared.uid, id, username, location, region, limit).Users;
                     usersList = usersArray.ToList();
                 }
             }

@@ -61,10 +61,13 @@ namespace FrontendWPF
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
+            
             // query all locations from database
             dbLocationsList = Location.GetLocations("", "", "", "");
+            if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
 
             // close window and stop if no location is retrieved
+            /*
             if (dbLocationsList.Count == 0)
             {
                 IsEnabled = false;
@@ -73,7 +76,7 @@ namespace FrontendWPF
                 Close();
                 return;
             }
-
+            */
 
 
 
@@ -320,7 +323,7 @@ namespace FrontendWPF
             {
 
                 // in db select last location with highest Id
-                int? highestId = dbLocationsList.Max(u => u.Id);
+                int? highestId = dbLocationsList.Count > 0 ? dbLocationsList.Max(u => u.Id) : 0;
                 location_edited = new LocationService.Store() // create new location with suggested values
                 {
                     Id = highestId + 1,

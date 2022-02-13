@@ -34,20 +34,18 @@ namespace FrontendWPF.Classes
  
             try
             {
-                // string query = $"WHERE name='{productName}' AND unitPrice='{CreateMD5(unitprice)}'";
-                productsArray = client.ListProduct(Shared.uid, id, name, qOver, qUnder, limit).Products;
-                // UserService.Response_Product response_Product = new UserService.Response_Product();
-                // string uid = response_Product.Uid;
-
-                // if (productsArray == null)
-                if (productsArray.Length == 0) // { FrontendWPF.UserService.Product[0]} // TODO: ez jön vissza akkor is, ha elérhető az adatbázis, de üres a lekérés! Módosítani kellene, hogy null értékkel térjen vissza, ha nem tud kapcsolódni az adatbázishoz!
-
+                string hostMessage = client.ListProduct(Shared.uid, id, name, qOver, qUnder, limit).Message;
+                if (hostMessage.Contains("Unable to connect"))
                 {
                     MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
-                    // return;
+                    return null;
                 }
                 else
                 {
+                    // string query = $"WHERE name='{productName}' AND unitPrice='{CreateMD5(unitprice)}'";
+                    productsArray = client.ListProduct(Shared.uid, id, name, qOver, qUnder, limit).Products;
+                    // UserService.Response_Product response_Product = new UserService.Response_Product();
+                    // string uid = response_Product.Uid;
                     productsList = productsArray.ToList();
                 }
             }

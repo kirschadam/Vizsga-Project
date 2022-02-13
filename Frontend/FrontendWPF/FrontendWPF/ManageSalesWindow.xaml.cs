@@ -67,10 +67,13 @@ namespace FrontendWPF
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
+            
             // query all sales from database
             dbSalesList = SalePurchase.GetSalesPurchases(type: "sale", id: "", product: "", qOver: "", qUnder: "", before: "", after: "", location: "", user: "", limit: "");
+            if (dbSalesList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
 
             // close window and stop if no sale is retrieved
+            /*
             if (dbSalesList.Count == 0)
             {
                 IsEnabled = false;
@@ -79,7 +82,7 @@ namespace FrontendWPF
                 Close();
                 return;
             }
-
+            */
 
 
 
@@ -328,7 +331,7 @@ namespace FrontendWPF
             {
 
                 // in db select last sale with highest Id
-                int? highestId = dbSalesList.Max(u => u.Id);
+                int? highestId = dbSalesList.Count > 0 ? dbSalesList.Max(u => u.Id) : 0;
                 sale_edited = new StockService.SalePurchase() // create new sale with suggested values
                 {
                     Id = highestId + 1,

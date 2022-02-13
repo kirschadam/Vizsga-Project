@@ -67,10 +67,13 @@ namespace FrontendWPF
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
+            
             // query all purchases from database
             dbPurchasesList = SalePurchase.GetSalesPurchases(type: "purchase", id: "", product: "", qOver: "", qUnder: "", before: "", after: "", location: "", user: "", limit: "");
+            if (dbPurchasesList == null) { IsEnabled = false; Close(); return; } // stop if no database connection
 
             // close window and stop if no purchase is retrieved
+            /*
             if (dbPurchasesList.Count == 0)
             {
                 IsEnabled = false;
@@ -79,7 +82,7 @@ namespace FrontendWPF
                 Close();
                 return;
             }
-
+            */
 
 
 
@@ -130,6 +133,7 @@ namespace FrontendWPF
             dataGrid0.Items.Refresh();
 
             SetUserAccess();
+
         }
 
         // https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically
@@ -328,7 +332,7 @@ namespace FrontendWPF
             {
 
                 // in db select last purchase with highest Id
-                int? highestId = dbPurchasesList.Max(u => u.Id);
+                int? highestId = dbPurchasesList.Count > 0 ? dbPurchasesList.Max(u => u.Id) : 0;
                 purchase_edited = new StockService.SalePurchase() // create new purchase with suggested values
                 {
                     Id = highestId + 1,
