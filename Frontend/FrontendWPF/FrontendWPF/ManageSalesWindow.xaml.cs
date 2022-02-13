@@ -1135,6 +1135,8 @@ namespace FrontendWPF
                 string registerMessage = "";
                 string errorMessage = "";
                 int? id = dbSalesList.Max(u => u.Id) + 1;
+                dbProductsList = Product.GetProducts("", "", "", "", "");
+                dbUsersList = User.GetUsers("", "", "", "", "");
                 while (sr.EndOfStream == false)
                 {
                     row_index++;
@@ -1157,7 +1159,6 @@ namespace FrontendWPF
                     {
                         error += $"Sale in line {row_index}: Product name must be at least 5 characters!\n";
                     }
-                    dbProductsList = Product.GetProducts("", "", "", "", "");
                     if (dbProductsList.Any(p => p.Name == product) == false)
                     {
                         error += $"Sale in line {row_index}: Product '{product}' does not exist!\n";
@@ -1192,7 +1193,6 @@ namespace FrontendWPF
                     {
                         error += $"Sale in line {row_index}: Username '{username}' must be at least 5 charachters long!\n";
                     }
-                    dbUsersList = User.GetUsers("", "", "", "", "");
                     if (dbUsersList.Any(p => p.Username == username) == false) // if user does not exist in database
                     {
                         error += $"Sale in line {row_index}: User '{username}' does not exist!\n";
