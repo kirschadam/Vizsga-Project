@@ -7,6 +7,8 @@ using System.ServiceModel.Dispatcher;
 
 namespace Base_service
 {
+    //https://stackoverflow.com/questions/60615806/wcf-host-to-add-custom-http-header-to-response
+
     public class CustomHeaderMessageInspector : IDispatchMessageInspector
     {
         readonly Dictionary<string, string> requiredHeaders;
