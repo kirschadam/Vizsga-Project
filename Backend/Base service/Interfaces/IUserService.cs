@@ -6,6 +6,7 @@ using System.ServiceModel.Web;
 namespace Base_service.Interfaces
 {
     [ServiceContract]
+    [MyBehavior]
     public interface IUserService
     {
         [OperationContract]

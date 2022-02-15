@@ -116,17 +116,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Global.asax" />
     <Content Include="LocationService.svc" />
     <Content Include="StorageService.svc" />
     <Content Include="UserService.svc" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CorsHeaders.cs" />
     <Compile Include="DatabaseManager\BaseDatabaseCommands.cs" />
-    <Compile Include="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
     <Compile Include="Interfaces\ILocationService.cs" />
     <Compile Include="Interfaces\IStorageService.cs" />
     <Compile Include="JsonClasses\Location.cs" />
