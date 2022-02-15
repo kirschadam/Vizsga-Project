@@ -18,7 +18,7 @@ namespace Base_service
         }
         public object AfterReceiveRequest(ref Message request, IClientChannel channel, InstanceContext instanceContext)
         {
-            string displayText = $"Server has received the following message:\n{request}\n";
+            string displayText = $"Server has received a request to the following address:\n{request.Headers.To.ToString().Split('?')[0]}\n";
             Console.WriteLine(displayText);
             return null;
         }
@@ -34,7 +34,7 @@ namespace Base_service
                 httpHeader.Headers.Add(item.Key, item.Value);
             }
 
-            string displayText = $"Server has replied the following message:\n{reply}\n";
+            string displayText = "\nServer responded to request.";
             Console.WriteLine(displayText);
 
         }
