@@ -28,8 +28,12 @@ namespace Base_service
             //Checking the name of the product to find the corresponding product Id
             var result_read = BaseSelect("products", "`id`", new string[,] { {"`name`", "=", $"'{product}'" } }, "");
 
-            string productId;
-            if (result_read.Item1.Rows.Count != 0) productId = result_read.Item1.Rows[0]["id"].ToString();
+            string productId; int? price;
+            if (result_read.Item1.Rows.Count != 0) 
+            { 
+                productId = result_read.Item1.Rows[0]["id"].ToString();
+                price = int.Parse(result_read.Item1.Rows[0]["price"].ToString());
+            }
             else if (result_read.Item2 != "") return result_read.Item2;
             else return "Product not found in database!";
 
@@ -46,7 +50,7 @@ namespace Base_service
             else date = DateTime.Parse(date).ToString("yyyy-MM-dd HH:mm:ss.fff");
             int? id = Current_users[uid].Id;
 
-            var result = BaseInsert(type + "s", "`productId`, `quantity`, `date`, `locationId`, `userId`", $"'{productId}','{quantity}','{date}','{locationId}','{id}'");
+            var result = BaseInsert(type + "s", "`productId`, `quantity`,`price`, `date`, `locationId`, `userId`", $"'{productId}','{quantity}','{price}','{date}','{locationId}','{id}'");
 
             if (result.Item2 != "") return result.Item2;
             else return "Sale/Purchase successfully added!";
@@ -148,8 +152,8 @@ namespace Base_service
             {
                 { $"`{type}s`.`id`", "=", $"'{id}'" },
                 { "`products`.`name`", "=", $"'{product}'" },
-                { "`quantity`", ">", $"'{qOver}'" },
-                { "`quantity", "<", $"'{qUnder}'" },
+                { "`price`", ">", $"'{qOver}'" },
+                { "`price`", "<", $"'{qUnder}'" },
                 { "`date`", ">", $"'{before}'" },
                 { "`date`", "<", $"'{after}'" },
                 { "`locations`.`name`", "=", $"'{location}'" },
@@ -172,6 +176,7 @@ namespace Base_service
                         int.Parse(reader["id"].ToString()),
                         reader["product"].ToString(),
                         int.Parse(reader["quantity"].ToString()),
+                        int.Parse(reader["price"].ToString()),
                         DateTime.Parse(reader["date"].ToString()),
                         reader["location"].ToString(),
                         reader["user"].ToString()
@@ -328,7 +333,7 @@ namespace Base_service
 
 
 
-        public string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string date, [Optional] string location, [Optional] string username)
+        public string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string price, [Optional] string date, [Optional] string location, [Optional] string username)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
             if (type == null || type == "") return "State if the transaction is a sale or a purchase!";
@@ -372,6 +377,7 @@ namespace Base_service
             {
                 { "`productId`", $"'{productId}'" },
                 { "`quantity`", $"'{quantity}'" },
+                { "`price`", $"'{price}'" },
                 { "`date`", $"'{date}'" },
                 { "`locationId`", $"'{locationId}'" },
                 { "`userId`", $"'{userId}'" },

@@ -104,9 +104,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/updatesalepurchase?uid={uid}&id={id}&type={type}&product={product}&quantity={quantity}&date={date}&location={location}&username={username}"
+            UriTemplate = "/updatesalepurchase?uid={uid}&id={id}&type={type}&product={product}&quantity={quantity}&price={price}&date={date}&location={location}&username={username}"
             )]
-        string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string date, [Optional] string location, [Optional] string username);
+        string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string price, [Optional] string date, [Optional] string location, [Optional] string username);
 
         [OperationContract]
         [WebInvoke(Method = "DELETE",
