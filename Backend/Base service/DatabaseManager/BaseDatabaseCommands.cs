@@ -11,6 +11,14 @@ namespace Base_service.DatabaseManager
 
         public static MySqlConnection BaseConnection { get; } = new MySqlConnection("SERVER=localhost; DATABASE=assets; UID=root; PASSWORD=; SSL MODE = none;");
 
+        /// <summary>
+        /// The base function for getting rows in tables.<br/>
+        /// <paramref name="table"/>: The table to make an update in.<br/>
+        /// <paramref name="columns"/>: The columns that we want to get from the query.<br/>
+        /// <paramref name="condition_array"/>: The conditions in a 3 dimensional array. (column, <br/>
+        /// <paramref name="inner_joins"/>: The inner joins to other tables that may be needed for the desired results.
+        /// </summary>
+        /// <returns>A Tuple with an DaTatable containing the results and a string (error message, if there is one).</returns>
         public Tuple<DataTable, string> BaseSelect(string table, string columns, string[,] condition_array, string inner_joins)
         {
             //put the conditions together into a string
@@ -43,7 +51,13 @@ namespace Base_service.DatabaseManager
         }
 
 
-
+        /// <summary>
+        /// The base function for inserting rows in tables.<br/>
+        /// <paramref name="table"/>: The table to make an update in.<br/>
+        /// <paramref name="columns"/>: The columns that are inserted into the new row.<br/>
+        /// <paramref name="values"/>: The values of those columns.
+        /// </summary>
+        /// <returns>A Tuple with an int (affected rows) and a string (error message, if there is one).</returns>
         public Tuple<int?, string> BaseInsert(string table, string columns, string values)
         {
             string query = $"INSERT INTO `{table}`({columns}) VALUES ({values});";
@@ -68,7 +82,13 @@ namespace Base_service.DatabaseManager
         }
 
 
-
+        /// <summary>
+        /// The base function for updating rows in tables.<br/>
+        /// <paramref name="table"/>: The table to make an update in.<br/>
+        /// <paramref name="sets"/>: The columns and their updated values in a 2 dimensional array.<br/>
+        /// <paramref name="conditions"/>: The conditions under which the rows are updated, usually the Id.
+        /// </summary>
+        /// <returns>A Tuple with an int (affected rows) and a string (error message, if there is one).</returns>
         public Tuple<int?, string> BaseUpdate(string table, string[,] sets, string conditions)
         {
             //put the conditions together into a string
@@ -103,7 +123,12 @@ namespace Base_service.DatabaseManager
         }
 
 
-
+        /// <summary>
+        /// The base function for deleting rows in tables.<br/>
+        /// <paramref name="table"/>: The table to make an update in.<br/>
+        /// <paramref name="conditions"/>: The conditions under which the rows are deleted, usually the Id.
+        /// </summary>
+        /// <returns>A Tuple with an int (affected rows) and a string (error message, if there is one).</returns>
         public Tuple<int?, string> BaseDelete(string table, string conditions)
         {
             string query = $"DELETE FROM `{table}` WHERE {conditions};";

@@ -24,7 +24,7 @@ namespace Base_service.Interfaces
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
             UriTemplate = "/addproduct?uid={uid}&name={name}&buyunitprice={buyunitprice}&sellunitprice={sellunitprice}"
             )]
-        string AddProduct(string uid, string name, string BuyUnitPrice, string SellUnitPrice);
+        string AddProduct(string uid, string name, string buyUnitPrice, string sellUnitPrice);
 
         /// <summary>
         /// POST function for sales and purchases tables.<br/>
@@ -73,7 +73,7 @@ namespace Base_service.Interfaces
         /// <paramref name="sellUnder"/>: Products with selling price under this value. (Optional)<br/>
         /// <paramref name="limit"/>: Limit query results to this value. (Optional)
         /// </summary>
-        /// <returns>A message or error of the query and a List with Product classes.</returns>
+        /// <returns>A message or error of the query and a <see cref="System.Collections.Generic.List{T}"/> filled with <see cref="Product"/> classes.</returns>
         [OperationContract]
         [WebInvoke(Method = "GET",
             RequestFormat = WebMessageFormat.Json,
@@ -99,7 +99,7 @@ namespace Base_service.Interfaces
         /// <paramref name="username"/>: User who uploaded sale or purchase into database. (Optional)<br/>
         /// <paramref name="limit"/>: Limit query results to this value. (Optional)<br/>
         /// </summary>
-        /// <returns>A message or error of the query and a List with SalePurchase classes.</returns>
+        /// <returns>A message or error of the query and a <see cref="System.Collections.Generic.List{T}"/> filled with <see cref="SalePurchase"/> classes.</returns>
         [OperationContract]
         [WebInvoke(Method = "GET",
             RequestFormat = WebMessageFormat.Json,
@@ -119,13 +119,13 @@ namespace Base_service.Interfaces
         ///<paramref name="quantityUnder"/>: Stock with number of products under this value. (Optional)<br/>
         ///<paramref name="limit"/>: Limit query results to this value. (Optional)
         ///</summary>
-        ///<returns>A message or error of the query and a List with Stock classes.</returns>
+        ///<returns>A message or error of the query and a <see cref="System.Collections.Generic.List{T}"/> filled with <see cref="Stock"/> classes.</returns>
         [OperationContract]
         [WebInvoke(Method = "GET",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/liststock?uid={uid}&id={id}&product={product}&location={location}&qover={qover}&qunder={qunder}&limit={limit}"
+            UriTemplate = "/liststock?uid={uid}&id={id}&product={product}&location={location}&quantityover={quantityover}&quantityunder={quantityunder}&limit={limit}"
             )]
         Response_Stock ListStock(string uid, [Optional] string id, [Optional] string product, [Optional] string location, [Optional] string quantityOver, [Optional] string quantityUnder, [Optional] string limit);
 
