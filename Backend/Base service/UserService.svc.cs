@@ -6,6 +6,9 @@ using System.Data;
 
 namespace Base_service
 {
+    /// <summary>
+    /// Class for the various database queries related to user management, and handling logins and logouts of users.
+    /// </summary>
     public class UserService : DatabaseManager.BaseDatabaseCommands, Interfaces.IUserService
     {
         public Response_User ListUser(string uid, [Optional] string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit)

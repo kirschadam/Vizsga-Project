@@ -5,6 +5,9 @@ using System.ServiceModel.Web;
 
 namespace Base_service.Interfaces
 {
+    /// <summary>
+    /// Interface for the various database queries related to store locations and administrative regions.
+    /// </summary>
     [ServiceContract]
     [MyBehavior]
     public interface ILocationService

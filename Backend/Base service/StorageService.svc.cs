@@ -5,13 +5,16 @@ using System.Runtime.InteropServices;
 
 namespace Base_service
 {
+    /// <summary>
+    /// Class for the various database queries related to products in the store catalog, stocks of various stores and sales/purchases of those stores.
+    /// </summary>
     public class StockService : DatabaseManager.BaseDatabaseCommands, Interfaces.IStockService
     {
-        public string AddProduct(string uid, string name, string unitPrice)
+        public string AddProduct(string uid, string name, string buyUnitPrice, string sellUnitPrice)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
 
-            var result = BaseInsert("products", "`name`, `unitPrice`", $"'{name}','{unitPrice}'");
+            var result = BaseInsert("products", "`name`, `buyUnitPrice`, `sellUnitPrice`", $"'{name}','{buyUnitPrice}','{sellUnitPrice}'");
 
             if (result.Item2 != "") return result.Item2;
             else return "Product successfully added!";
@@ -20,7 +23,7 @@ namespace Base_service
 
 
 
-        public string AddSalePurchase(string uid, string type, string product, string quantity, string location, [Optional] string date)
+        public string AddSalePurchase(string uid, string type, string product, string quantity, string location, [Optional] string unitPrice , [Optional] string date)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
             if (type == null || type == "") return "State if the transaction is a sale or a purchase!";
@@ -28,11 +31,20 @@ namespace Base_service
             //Checking the name of the product to find the corresponding product Id
             var result_read = BaseSelect("products", "`id`", new string[,] { {"`name`", "=", $"'{product}'" } }, "");
 
-            string productId; int? price;
+            if(unitPrice != null && unitPrice != "")
+            {
+                unitPrice = (int.Parse(unitPrice) * int.Parse(quantity)).ToString();
+            }
+
+            string productId;
             if (result_read.Item1.Rows.Count != 0) 
             { 
                 productId = result_read.Item1.Rows[0]["id"].ToString();
-                price = int.Parse(result_read.Item1.Rows[0]["price"].ToString());
+                if (unitPrice == null || unitPrice == "")
+                {
+                    unitPrice = result_read.Item1.Rows[0][$"{(type == "purchase" ? "buyUnitPrice" : "sellUnitPrice")}"].ToString();
+                    unitPrice = (int.Parse(unitPrice) * int.Parse(quantity)).ToString();
+                }
             }
             else if (result_read.Item2 != "") return result_read.Item2;
             else return "Product not found in database!";
@@ -48,9 +60,10 @@ namespace Base_service
             //Formatting current time to sql accepted format if user didn't give date
             if (date == null || date == "") date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             else date = DateTime.Parse(date).ToString("yyyy-MM-dd HH:mm:ss.fff");
-            int? id = Current_users[uid].Id;
 
-            var result = BaseInsert(type + "s", "`productId`, `quantity`,`price`, `date`, `locationId`, `userId`", $"'{productId}','{quantity}','{price}','{date}','{locationId}','{id}'");
+            int? userId = Current_users[uid].Id;
+
+            var result = BaseInsert(type + "s", "`productId`, `quantity`, `totalPrice`, `date`, `locationId`, `userId`", $"'{productId}','{quantity}','{unitPrice}','{date}','{locationId}','{userId}'");
 
             if (result.Item2 != "") return result.Item2;
             else return "Sale/Purchase successfully added!";
@@ -80,7 +93,7 @@ namespace Base_service
             else return "Location not found in database!";
 
 
-            var result = BaseInsert("stocks", "`productId`,`locationId`,`quantity`", $"'{productId}','{locationId}','0'");
+            var result = BaseInsert("stocks", "`productId`, `locationId`, `quantity`", $"'{productId}','{locationId}','0'");
 
             if (result.Item2 != "") return result.Item2;
             else return "Stock successfully added!";
@@ -89,7 +102,7 @@ namespace Base_service
 
 
 
-        public Response_Product ListProduct(string uid, [Optional] string id, [Optional] string name, [Optional] string qOver, [Optional] string qUnder, [Optional] string limit)
+        public Response_Product ListProduct(string uid, [Optional] string id, [Optional] string name, [Optional] string buyOver, [Optional] string buyUnder, [Optional] string sellOver, [Optional] string sellUnder, [Optional] string limit)
         {
             Response_Product response = new Response_Product();
 
@@ -103,8 +116,10 @@ namespace Base_service
             {
                 { "`id`", "=", $"'{id}'" },
                 { "`name`", "=", $"'{name}'" },
-                { "`unitPrice`", ">", $"'{qOver}'" },
-                { "`unitPrice`", "<", $"'{qUnder}'" },
+                { "`buyUnitPrice`", ">", $"'{buyOver}'" },
+                { "`buyUnitPrice`", "<", $"'{buyUnder}'" },
+                { "`sellUnitPrice`", ">", $"'{sellOver}'" },
+                { "`sellUnitPrice`", "<", $"'{sellUnder}'"},
                 { " LIMIT", " ", $"'{limit}'" }
             };
 
@@ -117,7 +132,8 @@ namespace Base_service
                     response.Products.Add(new Product(
                         int.Parse(reader["id"].ToString()),
                         reader["name"].ToString(),
-                        int.Parse(reader["unitPrice"].ToString())
+                        int.Parse(reader["buyPrice"].ToString()),
+                        int.Parse(reader["sellPrice"].ToString())
                         ));
                 }
                 catch (Exception ex)
@@ -136,7 +152,7 @@ namespace Base_service
 
 
 
-        public Response_SalePurchase ListSalePurchase(string uid, string type, [Optional] string id, [Optional] string product, [Optional] string qOver, [Optional] string qUnder, [Optional] string before, [Optional] string after, [Optional] string location, [Optional] string username, [Optional] string limit)
+        public Response_SalePurchase ListSalePurchase(string uid, string type, [Optional] string id, [Optional] string product, [Optional] string quantityOver, [Optional] string quantityUnder, [Optional] string priceOver, [Optional] string priceUnder, [Optional] string before, [Optional] string after, [Optional] string location, [Optional] string username, [Optional] string limit)
         {
             Response_SalePurchase response = new Response_SalePurchase();
 
@@ -152,8 +168,10 @@ namespace Base_service
             {
                 { $"`{type}s`.`id`", "=", $"'{id}'" },
                 { "`products`.`name`", "=", $"'{product}'" },
-                { "`price`", ">", $"'{qOver}'" },
-                { "`price`", "<", $"'{qUnder}'" },
+                { "`quantity`", ">", $"'{quantityOver}'" },
+                { "`quantity`", "<", $"'{quantityUnder}'" },
+                { "`totalPrice`", ">", $"'{priceOver}'" },
+                { "`totalPrice`", "<", $"'{priceUnder}'" },
                 { "`date`", ">", $"'{before}'" },
                 { "`date`", "<", $"'{after}'" },
                 { "`locations`.`name`", "=", $"'{location}'" },
@@ -163,7 +181,7 @@ namespace Base_service
             
             var result = BaseSelect(
                 type + "s",
-                $"`{type}s`.`id` AS 'id',`products`.`name` AS 'product',`quantity`,`date`,`locations`.`name` AS 'location',`users`.`username` AS 'user'",
+                $"`{type}s`.`id` AS 'id',`products`.`name` AS 'product',`totalPrice`,`quantity`,`date`,`locations`.`name` AS 'location',`users`.`username` AS 'user'",
                 conditions,
                 $"INNER JOIN `products` ON `{type}s`.`productId` = `products`.`id` INNER JOIN `locations` ON `{type}s`.`locationId` = `locations`.`id` INNER JOIN `users` ON `{type}s`.`userId` = `users`.`id`");
 
@@ -176,7 +194,7 @@ namespace Base_service
                         int.Parse(reader["id"].ToString()),
                         reader["product"].ToString(),
                         int.Parse(reader["quantity"].ToString()),
-                        int.Parse(reader["price"].ToString()),
+                        int.Parse(reader["totalPrice"].ToString()),
                         DateTime.Parse(reader["date"].ToString()),
                         reader["location"].ToString(),
                         reader["user"].ToString()
@@ -198,7 +216,7 @@ namespace Base_service
 
 
 
-        public Response_Stock ListStock(string uid, [Optional] string id, [Optional] string product, [Optional] string location, [Optional] string qOver, [Optional] string qUnder, [Optional] string limit)
+        public Response_Stock ListStock(string uid, [Optional] string id, [Optional] string product, [Optional] string location, [Optional] string quantityOver, [Optional] string quantityUnder, [Optional] string limit)
         {
             Response_Stock response = new Response_Stock();
 
@@ -213,8 +231,8 @@ namespace Base_service
                 {"`stocks`.`id`", "=", $"'{id}'" },
                 {"`products`.`name`", "=", $"'{product}'" },
                 {"`locations`.`name`", "=", $"'{location}'" },
-                {"`quantity`", ">", $"'{qOver}'" },
-                {"`quantity`", "<", $"'{qUnder}'" },
+                {"`quantity`", ">", $"'{quantityOver}'" },
+                {"`quantity`", "<", $"'{quantityUnder}'" },
                 {" LIMIT", " ", $"'{limit}'" }
             };
             
@@ -314,14 +332,15 @@ namespace Base_service
 
 
 
-        public string UpdateProduct(string uid, string id, [Optional] string name, [Optional] string unitPrice)
+        public string UpdateProduct(string uid, string id, [Optional] string name, [Optional] string buyPrice, [Optional] string sellPrice)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
 
             string[,] changes = 
             { 
                 { "`name`", $"'{name}'" }, 
-                { "`unitPrice`", $"'{unitPrice}'" } 
+                { "`buyPrice`", $"'{buyPrice}'" },
+                { "`sellPrice`", $"'{sellPrice}'" }
             };
 
             var result = BaseUpdate("products", changes, $"`id`='{id}'");
@@ -333,7 +352,7 @@ namespace Base_service
 
 
 
-        public string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string price, [Optional] string date, [Optional] string location, [Optional] string username)
+        public string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string totalPrice, [Optional] string date, [Optional] string location, [Optional] string username)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
             if (type == null || type == "") return "State if the transaction is a sale or a purchase!";
@@ -377,7 +396,7 @@ namespace Base_service
             {
                 { "`productId`", $"'{productId}'" },
                 { "`quantity`", $"'{quantity}'" },
-                { "`price`", $"'{price}'" },
+                { "`totalPrice`", $"'{totalPrice}'" },
                 { "`date`", $"'{date}'" },
                 { "`locationId`", $"'{locationId}'" },
                 { "`userId`", $"'{userId}'" },

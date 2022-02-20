@@ -5,6 +5,9 @@ using System.Runtime.InteropServices;
 
 namespace Base_service
 {
+    /// <summary>
+    /// Class for the various database queries related to store locations and administrative regions.
+    /// </summary>
     public class LocationService : DatabaseManager.BaseDatabaseCommands, Interfaces.ILocationService
     {
         public string AddLocation(string uid, string location, string region)

@@ -28,7 +28,8 @@ CREATE TABLE `users` (
 CREATE TABLE `products` (
   `id` int(12) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50) UNIQUE,
-  `unitPrice` int(12)
+  `buyUnitPrice` int(12),
+  `sellUnitPrice` int(12)
 );
 
 CREATE TABLE `stocks` (
@@ -44,7 +45,7 @@ CREATE TABLE `purchases` (
   `id` int(12) PRIMARY KEY AUTO_INCREMENT,
   `productId` int(12),
   `quantity` int(12),
-  `price` int(12),
+  `totalPrice` int(12),
   `date` datetime,
   `locationId` int(12),
   `userId` int(12),
@@ -71,7 +72,7 @@ CREATE TABLE `sales` (
   `id` int(12) PRIMARY KEY AUTO_INCREMENT,
   `productId` int(12),
   `quantity` int(12),
-  `price` int(12),
+  `totalPrice` int(12),
   `date` datetime,
   `locationId` int(12),
   `userId` int(12),

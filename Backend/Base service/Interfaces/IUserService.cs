@@ -5,6 +5,9 @@ using System.ServiceModel.Web;
 
 namespace Base_service.Interfaces
 {
+    /// <summary>
+    /// Interface for the various database queries related to user management, and handling logins and logouts of users.
+    /// </summary>
     [ServiceContract]
     [MyBehavior]
     public interface IUserService

@@ -110,7 +110,7 @@ namespace Base_service.JsonClasses
     [DataContract]
     public class Product
     {
-        private int? id = null, unitPrice = null;
+        private int? id = null, buyUnitPrice = null, sellUnitPrice = null;
         private string name = null;
 
         [DataMember]
@@ -128,19 +128,27 @@ namespace Base_service.JsonClasses
         }
 
         [DataMember]
-        public int? UnitPrice
+        public int? BuyUnitPrice
         {
-            get { return unitPrice; }
-            set { unitPrice = value; }
+            get { return buyUnitPrice; }
+            set { buyUnitPrice = value; }
+        }
+
+        [DataMember]
+        public int? SellUnitPrice
+        {
+            get { return sellUnitPrice; }
+            set { sellUnitPrice = value; }
         }
 
         public Product() { }
 
-        public Product(int? id, string name, int? unitPrice)
+        public Product(int? id, string name, int? buyUnitPrice, int? sellUnitPrice)
         {
             Id = id;
             Name = name;
-            UnitPrice = unitPrice;
+            BuyUnitPrice = buyUnitPrice;
+            SellUnitPrice = sellUnitPrice;
         }
     }
 
@@ -176,7 +184,7 @@ namespace Base_service.JsonClasses
     [DataContract]
     public class SalePurchase
     {
-        private int? id = null, quantity = null, price = null;
+        private int? id = null, quantity = null, totalPrice = null;
         private string product = null, location = null, username = null;
         private DateTime? date = null;
 
@@ -202,10 +210,10 @@ namespace Base_service.JsonClasses
         }
 
         [DataMember]
-        public int? Price
+        public int? TotalPrice
         {
-            get { return price; }
-            set { price = value; }
+            get { return totalPrice; }
+            set { totalPrice = value; }
         }
 
         [DataMember]
@@ -232,12 +240,12 @@ namespace Base_service.JsonClasses
 
         public SalePurchase() { }
 
-        public SalePurchase(int? id, string product, int? quantity, int? price, DateTime? date, string location, string username)
+        public SalePurchase(int? id, string product, int? quantity, int? totalPrice, DateTime? date, string location, string username)
         {
             Id = id;
             Product = product;
             Quantity = quantity;
-            Price = price;
+            TotalPrice = totalPrice;
             Date = date;
             Location = location;
             Username = username;
