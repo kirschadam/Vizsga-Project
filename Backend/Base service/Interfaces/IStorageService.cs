@@ -33,7 +33,7 @@ namespace Base_service.Interfaces
         /// <paramref name="product"/>: Name of product.<br/>
         /// <paramref name="quantity"/>: Quantity of product.<br/>
         /// <paramref name="location"/>: Location where sale/purchase is added to.<br/>
-        /// <paramref name="unitPrice"/>: Buying or selling price of a single product.(Optional)<br/>
+        /// <paramref name="totalPrice"/>: Buying or selling price of transaction.(Optional)<br/>
         /// <paramref name="date"/>: Date at which sale/purchase happened. (format: yyyy-MM-dd HH:mm:ss.fff) (Optional)<br/>
         /// </summary>
         /// <returns>Message or error of query.</returns>
@@ -42,9 +42,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/addsalepurchase?uid={uid}&type={type}&product={product}&quantity={quantity}&location={location}&unitprice={unitprice}&date={date}"
+            UriTemplate = "/addsalepurchase?uid={uid}&type={type}&product={product}&quantity={quantity}&location={location}&totalprice={totalprice}&date={date}"
             )]
-        string AddSalePurchase(string uid, string type, string product, string quantity, string location, [Optional] string unitPrice, [Optional] string date);
+        string AddSalePurchase(string uid, string type, string product, string quantity, string location, [Optional] string totalPrice, [Optional] string date);
 
         /// <summary>
         /// POST function for the stocks table.<br/>

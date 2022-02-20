@@ -23,7 +23,7 @@ namespace Base_service
 
 
 
-        public string AddSalePurchase(string uid, string type, string product, string quantity, string location, [Optional] string unitPrice , [Optional] string date)
+        public string AddSalePurchase(string uid, string type, string product, string quantity, string location, [Optional] string totalPrice , [Optional] string date)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
             if (type == null || type == "") return "State if the transaction is a sale or a purchase!";
@@ -31,19 +31,14 @@ namespace Base_service
             //Checking the name of the product to find the corresponding product Id
             var result_read = BaseSelect("products", "`id`", new string[,] { {"`name`", "=", $"'{product}'" } }, "");
 
-            if(unitPrice != null && unitPrice != "")
-            {
-                unitPrice = (int.Parse(unitPrice) * int.Parse(quantity)).ToString();
-            }
-
             string productId;
             if (result_read.Item1.Rows.Count != 0) 
             { 
                 productId = result_read.Item1.Rows[0]["id"].ToString();
-                if (unitPrice == null || unitPrice == "")
+                if (totalPrice == null || totalPrice == "")
                 {
-                    unitPrice = result_read.Item1.Rows[0][$"{(type == "purchase" ? "buyUnitPrice" : "sellUnitPrice")}"].ToString();
-                    unitPrice = (int.Parse(unitPrice) * int.Parse(quantity)).ToString();
+                    totalPrice = result_read.Item1.Rows[0][$"{(type == "purchase" ? "buyUnitPrice" : "sellUnitPrice")}"].ToString();
+                    totalPrice = (int.Parse(totalPrice) * int.Parse(quantity)).ToString();
                 }
             }
             else if (result_read.Item2 != "") return result_read.Item2;
@@ -63,7 +58,7 @@ namespace Base_service
 
             int? userId = Current_users[uid].Id;
 
-            var result = BaseInsert(type + "s", "`productId`, `quantity`, `totalPrice`, `date`, `locationId`, `userId`", $"'{productId}','{quantity}','{unitPrice}','{date}','{locationId}','{userId}'");
+            var result = BaseInsert(type + "s", "`productId`, `quantity`, `totalPrice`, `date`, `locationId`, `userId`", $"'{productId}','{quantity}','{totalPrice}','{date}','{locationId}','{userId}'");
 
             if (result.Item2 != "") return result.Item2;
             else return "Sale/Purchase successfully added!";
