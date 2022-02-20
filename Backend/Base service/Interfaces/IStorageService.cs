@@ -13,8 +13,8 @@ namespace Base_service.Interfaces
         /// POST function for products table.<br/>
         /// <paramref name="uid"/>: UID of current user.<br/>
         /// <paramref name="name"/>: Name of product.<br/>
-        /// <paramref name="BuyUnitPrice"/>: Buying price of product.<br/>
-        /// <paramref name="SellUnitPrice"/>: Selling price of product.
+        /// <paramref name="buyUnitPrice"/>: Buying price of product.<br/>
+        /// <paramref name="sellUnitPrice"/>: Selling price of product.
         /// </summary>
         /// <returns>Message or error of query.</returns>
         [OperationContract]
@@ -184,8 +184,8 @@ namespace Base_service.Interfaces
         /// <paramref name="uid"/>: UID of current user.<br/>
         /// <paramref name="id"/>: Id of stock to update.<br/>
         /// <paramref name="name"/>: Name of product. (Optional)<br/>
-        /// <paramref name="buyPrice"/>: Buying price of product. (Optional)<br/>
-        /// <paramref name="sellPrice"/>: Selling price of product. (Optional)
+        /// <paramref name="buyUnitPrice"/>: Buying price of product. (Optional)<br/>
+        /// <paramref name="sellUnitPrice"/>: Selling price of product. (Optional)
         /// </summary>
         /// <returns>Message or error of query.</returns>
         [OperationContract]
@@ -193,9 +193,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/updateproduct?uid={uid}&id={id}&name={name}&buyprice={buyprice}&sellprice={sellprice}"
+            UriTemplate = "/updateproduct?uid={uid}&id={id}&name={name}&buyunitprice={buyunitprice}&sellunitprice={sellunitprice}"
             )]
-        string UpdateProduct(string uid, string id, [Optional] string name, [Optional] string buyPrice, [Optional] string sellPrice);
+        string UpdateProduct(string uid, string id, [Optional] string name, [Optional] string buyUnitPrice, [Optional] string sellUnitPrice);
 
         /// <summary>
         /// PUT function for sales and purchases tables.<br/>

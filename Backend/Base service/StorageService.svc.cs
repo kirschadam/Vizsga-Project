@@ -132,8 +132,8 @@ namespace Base_service
                     response.Products.Add(new Product(
                         int.Parse(reader["id"].ToString()),
                         reader["name"].ToString(),
-                        int.Parse(reader["buyPrice"].ToString()),
-                        int.Parse(reader["sellPrice"].ToString())
+                        int.Parse(reader["buyUnitPrice"].ToString()),
+                        int.Parse(reader["sellUnitPrice"].ToString())
                         ));
                 }
                 catch (Exception ex)
@@ -332,15 +332,15 @@ namespace Base_service
 
 
 
-        public string UpdateProduct(string uid, string id, [Optional] string name, [Optional] string buyPrice, [Optional] string sellPrice)
+        public string UpdateProduct(string uid, string id, [Optional] string name, [Optional] string buyUnitPrice, [Optional] string sellUnitPrice)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
 
             string[,] changes = 
             { 
                 { "`name`", $"'{name}'" }, 
-                { "`buyPrice`", $"'{buyPrice}'" },
-                { "`sellPrice`", $"'{sellPrice}'" }
+                { "`buyUnitPrice`", $"'{buyUnitPrice}'" },
+                { "`sellUnitPrice`", $"'{sellUnitPrice}'" }
             };
 
             var result = BaseUpdate("products", changes, $"`id`='{id}'");
