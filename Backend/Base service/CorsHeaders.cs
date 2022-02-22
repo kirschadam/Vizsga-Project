@@ -57,7 +57,8 @@ namespace Base_service
             {
                 { "Access-Control-Allow-Origin", "*" },
                 { "Access-Control-Request-Method", "POST,GET,PUT,DELETE,OPTIONS" },
-                { "Access-Control-Allow-Headers", "X-Requested-With,Content-Type" }
+                { "Access-Control-Allow-Headers", "X-Requested-With,Content-Type" },
+                { "Access-Control-Allow-Credentials", "true" }
             };
 
             dispatchRuntime.MessageInspectors.Add(new CustomHeaderMessageInspector(requiredHeaders));

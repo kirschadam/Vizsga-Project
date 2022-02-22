@@ -35,11 +35,11 @@ namespace Base_service.Interfaces
         /// </summary>
         /// <returns>A message or error of the query, the <see cref="System.Guid"/> of the user and a <see cref="User"/> class.</returns>
         [OperationContract]
-        [WebInvoke(Method = "POST",
+        [WebInvoke(Method = "GET",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/loginuser"
+            UriTemplate = "/loginuser?username={username}&password={password}"
             )]
         Response_Login LoginUser(string username, string password);
 
