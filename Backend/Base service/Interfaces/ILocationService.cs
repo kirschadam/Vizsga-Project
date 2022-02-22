@@ -21,7 +21,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/addlocation?uid={uid}&location={location}&region={region}"
+            UriTemplate = "/addlocation"
             )]
         string AddLocation(string uid, string location, string region);
 
@@ -36,7 +36,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/addregion?uid={uid}&region={region}"
+            UriTemplate = "/addregion"
             )]
         string AddRegion(string uid, string region);
 
@@ -88,7 +88,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/deletelocation?uid={uid}&id={id}&location={location}"
+            UriTemplate = "/deletelocation"
             )]
         string RemoveLocation(string uid, [Optional] string id, [Optional] string location);
 
@@ -105,7 +105,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/deleteregion?uid={uid}&id={id}&region={region}"
+            UriTemplate = "/deleteregion"
             )]
         string RemoveRegion(string uid, [Optional] string id, [Optional] string region);
 
@@ -122,7 +122,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/updatelocation?uid={uid}&id={id}&location={location}&region={region}"
+            UriTemplate = "/updatelocation"
             )]
         string UpdateLocation(string uid, string id, [Optional] string location, [Optional] string region);
 
@@ -138,7 +138,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/updateregion?uid={uid}&id={id}&region={region}"
+            UriTemplate = "/updateregion"
             )]
         string UpdateRegion(string uid, string id, string region);
     }

@@ -22,7 +22,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/addproduct?uid={uid}&name={name}&buyunitprice={buyunitprice}&sellunitprice={sellunitprice}"
+            UriTemplate = "/addproduct"
             )]
         string AddProduct(string uid, string name, string buyUnitPrice, string sellUnitPrice);
 
@@ -42,7 +42,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/addsalepurchase?uid={uid}&type={type}&product={product}&quantity={quantity}&location={location}&totalprice={totalprice}&date={date}"
+            UriTemplate = "/addsalepurchase"
             )]
         string AddSalePurchase(string uid, string type, string product, string quantity, string location, [Optional] string totalPrice, [Optional] string date);
 
@@ -58,7 +58,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/addstock?uid={uid}&product={product}&location={location}"
+            UriTemplate = "/addstock"
             )]
         string AddStock(string uid, string product, string location);
 
@@ -79,7 +79,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/listproduct?uid={uid}&id={id}&name={name}&buyover={buyover}&buyunder={buyunder}&sellover={sellover}&sellunder={sellunder}&limit={limit}"
+            UriTemplate = 
+            "/listproduct?uid={uid}&id={id}&name={name}&buyover={buyover}&buyunder={buyunder}" +
+            "&sellover={sellover}&sellunder={sellunder}&limit={limit}"
             )]
         Response_Product ListProduct(string uid, [Optional] string id, [Optional] string name, [Optional] string buyOver, [Optional] string buyUnder, [Optional] string sellOver, [Optional] string sellUnder, [Optional] string limit);
 
@@ -105,7 +107,10 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/listsalepurchase?uid={uid}&id={id}&type={type}&product={product}&quantityover={quantityover}&quantityunder={quantityunder}&priceover={priceover}&priceunder={priceunder}&before={before}&after={after}&location={location}&username={username}&limit={limit}"
+            UriTemplate = 
+            "/listsalepurchase?uid={uid}&id={id}&type={type}&product={product}&quantityover={quantityover}" +
+            "&quantityunder={quantityunder}&priceover={priceover}&priceunder={priceunder}&before={before}" +
+            "&after={after}&location={location}&username={username}&limit={limit}"
             )]
         Response_SalePurchase ListSalePurchase(string uid, string type, [Optional] string id, [Optional] string product, [Optional] string quantityOver, [Optional] string quantityUnder, [Optional] string priceOver, [Optional] string priceUnder, [Optional] string before, [Optional] string after, [Optional] string location, [Optional] string username, [Optional] string limit);
 
@@ -125,7 +130,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/liststock?uid={uid}&id={id}&product={product}&location={location}&quantityover={quantityover}&quantityunder={quantityunder}&limit={limit}"
+            UriTemplate = 
+            "/liststock?uid={uid}&id={id}&product={product}&location={location}" +
+            "&quantityover={quantityover}&quantityunder={quantityunder}&limit={limit}"
             )]
         Response_Stock ListStock(string uid, [Optional] string id, [Optional] string product, [Optional] string location, [Optional] string quantityOver, [Optional] string quantityUnder, [Optional] string limit);
 
@@ -140,7 +147,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/deleteproduct?uid={uid}&id={id}"
+            UriTemplate = "/deleteproduct"
             )]
         string RemoveProduct(string uid, string id);
 
@@ -158,7 +165,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/deletesalepurchase?uid={uid}&type={type}&id={id}&location={location}"
+            UriTemplate = "/deletesalepurchase"
             )]
         string RemoveSalePurchase(string uid, string type, [Optional] string id, [Optional] string location);
 
@@ -175,7 +182,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/deletestock?uid={uid}&id={id}&location={location}"
+            UriTemplate = "/deletestock"
             )]
         string RemoveStock(string uid, [Optional] string id, [Optional] string location);
 
@@ -193,7 +200,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/updateproduct?uid={uid}&id={id}&name={name}&buyunitprice={buyunitprice}&sellunitprice={sellunitprice}"
+            UriTemplate = "/updateproduct"
             )]
         string UpdateProduct(string uid, string id, [Optional] string name, [Optional] string buyUnitPrice, [Optional] string sellUnitPrice);
 
@@ -215,7 +222,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/updatesalepurchase?uid={uid}&id={id}&type={type}&product={product}&quantity={quantity}&totalprice={totalprice}&date={date}&location={location}&username={username}"
+            UriTemplate = "/updatesalepurchase"
             )]
         string UpdateSalePurchase(string uid, string id, string type, [Optional] string product, [Optional] string quantity, [Optional] string totalPrice, [Optional] string date, [Optional] string location, [Optional] string username);
 
@@ -233,7 +240,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/updatestock?uid={uid}&id={id}&product={product}&location={location}&quantity={quantity}"
+            UriTemplate = "/updatestock"
             )]
         string UpdateStock(string uid, string id, [Optional] string product, [Optional] string location, [Optional] string quantity);
     }

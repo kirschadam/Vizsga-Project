@@ -24,7 +24,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/list?uid={uid}&id={id}&username={username}&location={location}&region={region}&limit={limit}"
+            UriTemplate = "/listuser?uid={uid}&id={id}&username={username}&location={location}&region={region}&limit={limit}"
             )]
         Response_User ListUser(string uid, [Optional] string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit);
 
@@ -39,7 +39,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/login?username={username}&password={password}"
+            UriTemplate = "/loginuser"
             )]
         Response_Login LoginUser(string username, string password);
 
@@ -53,7 +53,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/logout?uid={uid}"
+            UriTemplate = "/logoutuser"
             )]
         string LogoutUser(string uid);
 
@@ -71,7 +71,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/register?uid={uid}&username={username}&password={password}&location={location}&permission={permission}"
+            UriTemplate = "/registeruser"
             )]
         string RegisterUser(string uid, string username, string password, string location, string permission);
 
@@ -91,7 +91,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/update?uid={uid}&id={id}&username={username}&password={password}&location={location}&permission={permission}&active={active}"
+            UriTemplate = "/updateuser"
             )]
         string UpdateUser(string uid, string id, [Optional] string username, [Optional] string password, [Optional] string location, [Optional] string permission, [Optional] string active);
 
@@ -107,7 +107,7 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/delete?uid={uid}&id={id}&username={username}"
+            UriTemplate = "/deleteuser"
             )]
         string DeleteUser(string uid, [Optional] string id, [Optional] string username);
     }
