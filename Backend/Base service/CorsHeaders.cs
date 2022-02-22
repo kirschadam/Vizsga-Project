@@ -9,6 +9,7 @@ namespace Base_service
 {
     //https://stackoverflow.com/questions/60615806/wcf-host-to-add-custom-http-header-to-response
 
+    //Class responsible for checking each incoming message, and sending messages to the console about recieving requests and sending responses
     public class CustomHeaderMessageInspector : IDispatchMessageInspector
     {
         readonly Dictionary<string, string> requiredHeaders;
@@ -40,6 +41,8 @@ namespace Base_service
         }
     }
 
+    //Custom made behavior, it's function is to put the CORS headers as headers into the responses,
+    //because WCF does not have an integrated CORS support like ASP.net does
     public class MyBehaviorAttribute : Attribute, IContractBehavior, IContractBehaviorAttribute
     {
         public Type TargetContract => typeof(MyBehaviorAttribute);
