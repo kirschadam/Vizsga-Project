@@ -7,7 +7,7 @@
         xmlns:localComponents="clr-namespace:FrontendWPF.Components"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        Title="Manage purchases Window" Height="500" MinHeight="300" Width="800" MinWidth="600"
+        Title="Manage Purchases Window" Height="500" MinHeight="500" Width="900" MinWidth="600"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
         WindowStyle="None"
@@ -18,6 +18,7 @@
         Closing="Window_Closing"
         x:Name="window"
         KeyDown="Window_KeyDown"
+        SizeChanged="window_SizeChanged"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
         >
 
@@ -26,6 +27,188 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Styles/ButtonThemeModern.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <Style x:Key="DatePickerStyle1" TargetType="{x:Type DatePicker}">
+                <Setter Property="Foreground" Value="#FF333333"/>
+                <Setter Property="IsTodayHighlighted" Value="False"/>
+                <Setter Property="SelectedDateFormat" Value="Short"/>
+                <Setter Property="SelectedDateFormat" Value="Short"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="BorderBrush">
+                    <Setter.Value>
+                        <LinearGradientBrush EndPoint=".5,0" StartPoint=".5,1">
+                            <GradientStop Color="#FFA3AEB9" Offset="0"/>
+                            <GradientStop Color="#FF8399A9" Offset="0.375"/>
+                            <GradientStop Color="#FF718597" Offset="0.375"/>
+                            <GradientStop Color="#FF617584" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type DatePicker}">
+                            <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" >
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="Disabled">
+                                            <Storyboard>
+                                                <DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="PART_DisabledVisual"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <Grid x:Name="PART_Root" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                                    <Grid.Resources>
+                                        <SolidColorBrush x:Key="DisabledBrush" Color="#A5FFFFFF"/>
+                                        <ControlTemplate x:Key="DropDownButtonTemplate" TargetType="{x:Type Button}">
+                                            <Grid>
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroup x:Name="CommonStates">
+                                                        <VisualStateGroup.Transitions>
+                                                            <VisualTransition GeneratedDuration="0"/>
+                                                            <VisualTransition GeneratedDuration="0:0:0.1" To="MouseOver"/>
+                                                            <VisualTransition GeneratedDuration="0:0:0.1" To="Pressed"/>
+                                                        </VisualStateGroup.Transitions>
+                                                        <VisualState x:Name="Normal"/>
+                                                        <VisualState x:Name="MouseOver">
+                                                            <Storyboard>
+                                                                <ColorAnimation Duration="0" To="#FF448DCA" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" Storyboard.TargetName="Background"/>
+                                                                <ColorAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(Border.Background).(GradientBrush.GradientStops)[3].(GradientStop.Color)" Storyboard.TargetName="BackgroundGradient">
+                                                                    <SplineColorKeyFrame KeyTime="0" Value="#FFECA1A1"/>
+                                                                </ColorAnimationUsingKeyFrames>
+                                                                <ColorAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(Border.Background).(GradientBrush.GradientStops)[2].(GradientStop.Color)" Storyboard.TargetName="BackgroundGradient">
+                                                                    <SplineColorKeyFrame KeyTime="0" Value="#FFECA1A1"/>
+                                                                </ColorAnimationUsingKeyFrames>
+                                                                <ColorAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(Border.Background).(GradientBrush.GradientStops)[1].(GradientStop.Color)" Storyboard.TargetName="BackgroundGradient">
+                                                                    <SplineColorKeyFrame KeyTime="0" Value="#FFECA1A1"/>
+                                                                </ColorAnimationUsingKeyFrames>
+                                                            </Storyboard>
+                                                        </VisualState>
+                                                        <VisualState x:Name="Pressed">
+                                                            <Storyboard>
+                                                                <ColorAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" Storyboard.TargetName="Background">
+                                                                    <SplineColorKeyFrame KeyTime="0" Value="#FF448DCA"/>
+                                                                </ColorAnimationUsingKeyFrames>
+                                                                <DoubleAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(UIElement.Opacity)" Storyboard.TargetName="Highlight">
+                                                                    <SplineDoubleKeyFrame KeyTime="0" Value="1"/>
+                                                                </DoubleAnimationUsingKeyFrames>
+                                                                <ColorAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(Border.Background).(GradientBrush.GradientStops)[1].(GradientStop.Color)" Storyboard.TargetName="BackgroundGradient">
+                                                                    <SplineColorKeyFrame KeyTime="0" Value="#EAFFFFFF"/>
+                                                                </ColorAnimationUsingKeyFrames>
+                                                                <ColorAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(Border.Background).(GradientBrush.GradientStops)[2].(GradientStop.Color)" Storyboard.TargetName="BackgroundGradient">
+                                                                    <SplineColorKeyFrame KeyTime="0" Value="#C6FFFFFF"/>
+                                                                </ColorAnimationUsingKeyFrames>
+                                                                <ColorAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(Border.Background).(GradientBrush.GradientStops)[3].(GradientStop.Color)" Storyboard.TargetName="BackgroundGradient">
+                                                                    <SplineColorKeyFrame KeyTime="0" Value="#6BFFFFFF"/>
+                                                                </ColorAnimationUsingKeyFrames>
+                                                                <ColorAnimationUsingKeyFrames BeginTime="0" Duration="00:00:00.001" Storyboard.TargetProperty="(Border.Background).(GradientBrush.GradientStops)[0].(GradientStop.Color)" Storyboard.TargetName="BackgroundGradient">
+                                                                    <SplineColorKeyFrame KeyTime="0" Value="#F4FFFFFF"/>
+                                                                </ColorAnimationUsingKeyFrames>
+                                                            </Storyboard>
+                                                        </VisualState>
+                                                        <VisualState x:Name="Disabled"/>
+                                                    </VisualStateGroup>
+                                                </VisualStateManager.VisualStateGroups>
+                                                <Grid Background="#11FFFFFF" FlowDirection="LeftToRight" HorizontalAlignment="Center" Height="18" Margin="0" VerticalAlignment="Center" Width="19">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="20*"/>
+                                                        <ColumnDefinition Width="20*"/>
+                                                        <ColumnDefinition Width="20*"/>
+                                                        <ColumnDefinition Width="20*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="23*"/>
+                                                        <RowDefinition Height="19*"/>
+                                                        <RowDefinition Height="19*"/>
+                                                        <RowDefinition Height="19*"/>
+                                                    </Grid.RowDefinitions>
+                                                    <Border x:Name="Highlight" BorderBrush="#FF45D6FA" BorderThickness="1" Grid.ColumnSpan="4" CornerRadius="0,0,1,1" Margin="-1" Opacity="0" Grid.Row="0" Grid.RowSpan="4"/>
+                                                    <Border x:Name="Background" BorderBrush="#FFFFFFFF" BorderThickness="1" Background="#FF1F3B53" Grid.ColumnSpan="4" CornerRadius=".5" Margin="0,-1,0,0" Opacity="1" Grid.Row="1" Grid.RowSpan="3"/>
+                                                    <Border x:Name="BackgroundGradient" BorderBrush="#BF000000" BorderThickness="1" Grid.ColumnSpan="4" CornerRadius=".5" Margin="0,-1,0,0" Opacity="1" Grid.Row="1" Grid.RowSpan="3">
+                                                        <Border.Background>
+                                                            <LinearGradientBrush EndPoint=".7,1" StartPoint=".7,0">
+                                                                <GradientStop Color="#FFFFFFFF" Offset="0"/>
+                                                                <GradientStop Color="#F9FFFFFF" Offset="0.375"/>
+                                                                <GradientStop Color="#E5FFFFFF" Offset="0.625"/>
+                                                                <GradientStop Color="#C6FFFFFF" Offset="1"/>
+                                                            </LinearGradientBrush>
+                                                        </Border.Background>
+                                                    </Border>
+                                                    <Rectangle Grid.ColumnSpan="4" Grid.RowSpan="1" StrokeThickness="1">
+                                                        <Rectangle.Fill>
+                                                            <LinearGradientBrush EndPoint="0.3,-1.1" StartPoint="0.46,1.6">
+                                                                <GradientStop Color="#FF4084BD"/>
+                                                                <GradientStop Color="#FFAFCFEA" Offset="1"/>
+                                                            </LinearGradientBrush>
+                                                        </Rectangle.Fill>
+                                                        <Rectangle.Stroke>
+                                                            <LinearGradientBrush EndPoint="0.48,-1" StartPoint="0.48,1.25">
+                                                                <GradientStop Color="#FF494949"/>
+                                                                <GradientStop Color="#FF9F9F9F" Offset="1"/>
+                                                            </LinearGradientBrush>
+                                                        </Rectangle.Stroke>
+                                                    </Rectangle>
+                                                    <Ellipse Grid.ColumnSpan="4" Fill="#FFFFFFFF" HorizontalAlignment="Center" Height="3" StrokeThickness="0" VerticalAlignment="Center" Width="3"/>
+                                                    <Border x:Name="DisabledVisual" BorderBrush="#B2FFFFFF" BorderThickness="1" Grid.ColumnSpan="4" CornerRadius="0,0,.5,.5" Opacity="0" Grid.Row="0" Grid.RowSpan="4"/>
+                                                </Grid>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Grid.Resources>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button x:Name="PART_Button" Grid.Column="1" Foreground="{TemplateBinding Foreground}" Focusable="False" HorizontalAlignment="Left" Margin="3,0,3,0" Grid.Row="0" Template="{StaticResource DropDownButtonTemplate}" VerticalAlignment="Top" Width="20"/>
+                                    <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0" Focusable="{TemplateBinding Focusable}" HorizontalContentAlignment="Center" Grid.Row="0"  VerticalContentAlignment="Stretch"/>
+                                    <Grid x:Name="PART_DisabledVisual" Grid.ColumnSpan="2" Grid.Column="0" IsHitTestVisible="False" Opacity="0" Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Rectangle Grid.Column="0" Fill="#A5FFFFFF" RadiusY="1" Grid.Row="0" RadiusX="1"/>
+                                        <Rectangle Grid.Column="1" Fill="#A5FFFFFF" Height="18" Margin="0,0,3,0" RadiusY="1" Grid.Row="0" RadiusX="1" Width="19"/>
+                                        <Popup x:Name="PART_Popup" AllowsTransparency="True" Placement="Bottom" HorizontalOffset="-155" VerticalOffset="24" PlacementTarget="{Binding ElementName=PART_TextBox}" StaysOpen="False" />
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Source={x:Static SystemParameters.HighContrast}}" Value="false">
+                                    <Setter Property="Foreground" TargetName="PART_TextBox" Value="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                </DataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--https://tarundotnet.wordpress.com/2011/12/19/how-to-enlarge-or-re-size-calendar-in-wpf-datepicker/-->
+            <Style x:Key="styleCalendar" TargetType="{x:Type Calendar}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Calendar}">
+                            <!-- Wrapping in ViewBox will enlarge calendar of that size.-->
+                            <Viewbox Height="230" Width="420">
+                                <CalendarItem x:Name="PART_CalendarItem"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}" Margin="0,1" FontSize="13" Background="#FFF7D2C7"/>
+                            </Viewbox>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!--<Style TargetType="DataGridColumnHeader">
+                <Setter Property="FontSize" Value="{Binding columnFontSize, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="Navy"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="Margin" Value="3,0,0,0"/>
+            </Style>-->
+
         </ResourceDictionary>
     </Window.Resources>
 
@@ -62,7 +245,7 @@
 
         <Grid Grid.ColumnSpan="1" Grid.Column="0">
 
-            <Border CornerRadius="10" RenderTransformOrigin="0.495,0.636" BorderThickness="1" BorderBrush="Aqua">
+            <Border Name="borderLeft" CornerRadius="10" RenderTransformOrigin="0.495,0.636" BorderThickness="1" BorderBrush="Aqua">
                 <Border.Background>
                     <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
                         <GradientStop Color="#FF8E52F7"/>
@@ -87,7 +270,8 @@
                 <DataGrid Name="dataGrid0" Background="AliceBlue" FontSize="14" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="2" Margin="10,0,0,0" HorizontalScrollBarVisibility="Hidden"
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserDeleteRows="False"
                   BeginningEdit="dataGrid0_BeginningEdit"
-                  KeyUp="dataGrid0_KeyUp"   
+                  KeyUp="dataGrid0_KeyUp" 
+                  PreviewTextInput="dataGrid0_PreviewTextInput"
                   HeadersVisibility="Row"
                   SelectionUnit="Cell"
                   SelectionMode="Single"
@@ -151,6 +335,7 @@
                         <DataGridTextColumn Header="Id" Binding="{Binding Id}" MinWidth="47" />
                         <DataGridTextColumn Header="Product name" Binding="{Binding Product}" />
                         <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" />
+                        <DataGridTextColumn Header="Total price" Binding="{Binding TotalPrice}" />
                         <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yy.MM.dd HH:mm\}}" />
                         <DataGridTextColumn Header="Location" Binding="{Binding Location}" />
                         <DataGridTextColumn Header="User name" Binding="{Binding Username}" />
@@ -160,9 +345,9 @@
             </StackPanel>
 
             <StackPanel x:Name="stackPanel1" VerticalAlignment="Top" Margin="0,45,0,0" Height="442" Orientation="Horizontal">
-                
+
                 <DataGrid Name="dataGrid1" Background="AliceBlue" FontSize="14" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="2" Margin="10,0,0,0" HorizontalScrollBarVisibility="Visible" IsReadOnly="True"
-                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserDeleteRows="False"
+                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserDeleteRows="False"
                   SelectedCellsChanged="dataGrid1_SelectedCellsChanged"
                   CellEditEnding="dataGrid1_CellEditEnding"
                   BeginningEdit="dataGrid1_BeginningEdit" 
@@ -226,11 +411,25 @@
 
                     <DataGrid.Columns >
                         <DataGridTextColumn Header="Id" Binding="{Binding Id}" MinWidth="47" />
-                        <DataGridTextColumn Header="Product name" Binding="{Binding Product}" MinWidth="100" />
-                        <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" MinWidth="70"/>
-                        <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yy.MM.dd HH:mm\}}" MinWidth="70"/>
+                        <DataGridTextColumn Header="Product name" Binding="{Binding Product}" MinWidth="110" />
+                        <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" MinWidth="70"  x:Name="QuantityHeader">
+                            
+                            <!--<DataGridTextColumn.HeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    --><!--<Setter Property="FontSize" Value="{Binding columnFontSize, RelativeSource={RelativeSource AncestorType=Window}}"/>--><!--
+                                    <Setter Property="FontSize" Value="15"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                    <Setter Property="Foreground" Value="Navy"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                    <Setter Property="Margin" Value="3,0,0,0"/>
+                                </Style>
+                            </DataGridTextColumn.HeaderStyle>-->
+
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Total price" Binding="{Binding TotalPrice}" MinWidth="80" />
+                        <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yy.MM.dd HH:mm\}}" MinWidth="105" />
                         <DataGridTextColumn Header="Location" Binding="{Binding Location}" MinWidth="80" />
-                        <DataGridTextColumn Header="User name" Binding="{Binding Username}" MinWidth="80" />
+                        <DataGridTextColumn Header="User name" Binding="{Binding Username}" MinWidth="85" />
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -255,7 +454,22 @@
 
 
             <StackPanel Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0" Width="247">
-                <Button Name="Button_Close" Click="Button_Close_Click" Width="45" Height="40" Margin="0,0,6,0" Content="&#xf410;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSalmon" FontSize="24" HorizontalAlignment="Right"/>
+                <Button Name="Button_DatePicker" Click="Button_DatePicker_Click" Width="45" Height="40" Margin="6,0,6,0" Content="&#xf073;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSkyBlue" FontSize="24" HorizontalAlignment="Left"/>
+
+                <TextBlock Name="TextBlock_datePicker" Text="Pick start date"
+                           Margin="0, -42, 5, 0"
+                           TextWrapping="Wrap"
+                           FontWeight="Medium"
+                           FontFamily="helvetica"
+                           FontSize="14"
+                           Foreground="White"
+                           Visibility="Hidden"
+                           HorizontalAlignment="Center"/>
+                <DatePicker Height="25" HorizontalAlignment="Left" Margin="65,-26,0,0" Name="datePicker" VerticalAlignment="Top" Width="115" FirstDayOfWeek="Monday"  Loaded="datePicker_Loaded" SelectedDateChanged="datePicker_SelectedDateChanged" Style="{DynamicResource DatePickerStyle1}" CalendarStyle="{StaticResource styleCalendar}" Visibility="Hidden"/>
+
+
+
+                <Button Name="Button_Close" Click="Button_Close_Click" Width="45" Height="40" Margin="0,-40,6,0" Content="&#xf410;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSalmon" FontSize="24" HorizontalAlignment="Right"/>
 
                 <!--<Image Name="Image_Login" Source="/Resources/Images/login.gif" Width="160"/>-->
                 <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="60" Opacity="0" Margin="0,-30,0,0"/>
@@ -265,7 +479,7 @@
                            TextWrapping="Wrap"
                            FontWeight="Medium"
                            FontFamily="helvetica"
-                           FontSize="18"
+                           FontSize="17"
                            Foreground="White"
                            HorizontalAlignment="Center"/>
             </StackPanel>

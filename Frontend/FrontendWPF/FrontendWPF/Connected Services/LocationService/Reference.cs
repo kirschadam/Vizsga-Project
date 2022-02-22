@@ -293,35 +293,11 @@ namespace FrontendWPF.LocationService {
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="LocationService.ILocationService")]
     public interface ILocationService {
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/ListLocation", ReplyAction="http://tempuri.org/ILocationService/ListLocationResponse")]
-        FrontendWPF.LocationService.Response_Location ListLocation(string uid, string id, string location, string region, string limit);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/ListLocation", ReplyAction="http://tempuri.org/ILocationService/ListLocationResponse")]
-        System.Threading.Tasks.Task<FrontendWPF.LocationService.Response_Location> ListLocationAsync(string uid, string id, string location, string region, string limit);
-        
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/AddLocation", ReplyAction="http://tempuri.org/ILocationService/AddLocationResponse")]
         string AddLocation(string uid, string location, string region);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/AddLocation", ReplyAction="http://tempuri.org/ILocationService/AddLocationResponse")]
         System.Threading.Tasks.Task<string> AddLocationAsync(string uid, string location, string region);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/UpdateLocation", ReplyAction="http://tempuri.org/ILocationService/UpdateLocationResponse")]
-        string UpdateLocation(string uid, string id, string location, string region);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/UpdateLocation", ReplyAction="http://tempuri.org/ILocationService/UpdateLocationResponse")]
-        System.Threading.Tasks.Task<string> UpdateLocationAsync(string uid, string id, string location, string region);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/RemoveLocation", ReplyAction="http://tempuri.org/ILocationService/RemoveLocationResponse")]
-        string RemoveLocation(string uid, string id, string location);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/RemoveLocation", ReplyAction="http://tempuri.org/ILocationService/RemoveLocationResponse")]
-        System.Threading.Tasks.Task<string> RemoveLocationAsync(string uid, string id, string location);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/ListRegion", ReplyAction="http://tempuri.org/ILocationService/ListRegionResponse")]
-        FrontendWPF.LocationService.Response_Region ListRegion(string uid, string id, string region, string limit);
-        
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/ListRegion", ReplyAction="http://tempuri.org/ILocationService/ListRegionResponse")]
-        System.Threading.Tasks.Task<FrontendWPF.LocationService.Response_Region> ListRegionAsync(string uid, string id, string region, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/AddRegion", ReplyAction="http://tempuri.org/ILocationService/AddRegionResponse")]
         string AddRegion(string uid, string region);
@@ -329,17 +305,41 @@ namespace FrontendWPF.LocationService {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/AddRegion", ReplyAction="http://tempuri.org/ILocationService/AddRegionResponse")]
         System.Threading.Tasks.Task<string> AddRegionAsync(string uid, string region);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/UpdateRegion", ReplyAction="http://tempuri.org/ILocationService/UpdateRegionResponse")]
-        string UpdateRegion(string uid, string id, string region);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/ListLocation", ReplyAction="http://tempuri.org/ILocationService/ListLocationResponse")]
+        FrontendWPF.LocationService.Response_Location ListLocation(string uid, string id, string location, string region, string limit);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/UpdateRegion", ReplyAction="http://tempuri.org/ILocationService/UpdateRegionResponse")]
-        System.Threading.Tasks.Task<string> UpdateRegionAsync(string uid, string id, string region);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/ListLocation", ReplyAction="http://tempuri.org/ILocationService/ListLocationResponse")]
+        System.Threading.Tasks.Task<FrontendWPF.LocationService.Response_Location> ListLocationAsync(string uid, string id, string location, string region, string limit);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/ListRegion", ReplyAction="http://tempuri.org/ILocationService/ListRegionResponse")]
+        FrontendWPF.LocationService.Response_Region ListRegion(string uid, string id, string region, string limit);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/ListRegion", ReplyAction="http://tempuri.org/ILocationService/ListRegionResponse")]
+        System.Threading.Tasks.Task<FrontendWPF.LocationService.Response_Region> ListRegionAsync(string uid, string id, string region, string limit);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/RemoveLocation", ReplyAction="http://tempuri.org/ILocationService/RemoveLocationResponse")]
+        string RemoveLocation(string uid, string id, string location);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/RemoveLocation", ReplyAction="http://tempuri.org/ILocationService/RemoveLocationResponse")]
+        System.Threading.Tasks.Task<string> RemoveLocationAsync(string uid, string id, string location);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/RemoveRegion", ReplyAction="http://tempuri.org/ILocationService/RemoveRegionResponse")]
         string RemoveRegion(string uid, string id, string region);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/RemoveRegion", ReplyAction="http://tempuri.org/ILocationService/RemoveRegionResponse")]
         System.Threading.Tasks.Task<string> RemoveRegionAsync(string uid, string id, string region);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/UpdateLocation", ReplyAction="http://tempuri.org/ILocationService/UpdateLocationResponse")]
+        string UpdateLocation(string uid, string id, string location, string region);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/UpdateLocation", ReplyAction="http://tempuri.org/ILocationService/UpdateLocationResponse")]
+        System.Threading.Tasks.Task<string> UpdateLocationAsync(string uid, string id, string location, string region);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/UpdateRegion", ReplyAction="http://tempuri.org/ILocationService/UpdateRegionResponse")]
+        string UpdateRegion(string uid, string id, string region);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILocationService/UpdateRegion", ReplyAction="http://tempuri.org/ILocationService/UpdateRegionResponse")]
+        System.Threading.Tasks.Task<string> UpdateRegionAsync(string uid, string id, string region);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -369,44 +369,12 @@ namespace FrontendWPF.LocationService {
                 base(binding, remoteAddress) {
         }
         
-        public FrontendWPF.LocationService.Response_Location ListLocation(string uid, string id, string location, string region, string limit) {
-            return base.Channel.ListLocation(uid, id, location, region, limit);
-        }
-        
-        public System.Threading.Tasks.Task<FrontendWPF.LocationService.Response_Location> ListLocationAsync(string uid, string id, string location, string region, string limit) {
-            return base.Channel.ListLocationAsync(uid, id, location, region, limit);
-        }
-        
         public string AddLocation(string uid, string location, string region) {
             return base.Channel.AddLocation(uid, location, region);
         }
         
         public System.Threading.Tasks.Task<string> AddLocationAsync(string uid, string location, string region) {
             return base.Channel.AddLocationAsync(uid, location, region);
-        }
-        
-        public string UpdateLocation(string uid, string id, string location, string region) {
-            return base.Channel.UpdateLocation(uid, id, location, region);
-        }
-        
-        public System.Threading.Tasks.Task<string> UpdateLocationAsync(string uid, string id, string location, string region) {
-            return base.Channel.UpdateLocationAsync(uid, id, location, region);
-        }
-        
-        public string RemoveLocation(string uid, string id, string location) {
-            return base.Channel.RemoveLocation(uid, id, location);
-        }
-        
-        public System.Threading.Tasks.Task<string> RemoveLocationAsync(string uid, string id, string location) {
-            return base.Channel.RemoveLocationAsync(uid, id, location);
-        }
-        
-        public FrontendWPF.LocationService.Response_Region ListRegion(string uid, string id, string region, string limit) {
-            return base.Channel.ListRegion(uid, id, region, limit);
-        }
-        
-        public System.Threading.Tasks.Task<FrontendWPF.LocationService.Response_Region> ListRegionAsync(string uid, string id, string region, string limit) {
-            return base.Channel.ListRegionAsync(uid, id, region, limit);
         }
         
         public string AddRegion(string uid, string region) {
@@ -417,12 +385,28 @@ namespace FrontendWPF.LocationService {
             return base.Channel.AddRegionAsync(uid, region);
         }
         
-        public string UpdateRegion(string uid, string id, string region) {
-            return base.Channel.UpdateRegion(uid, id, region);
+        public FrontendWPF.LocationService.Response_Location ListLocation(string uid, string id, string location, string region, string limit) {
+            return base.Channel.ListLocation(uid, id, location, region, limit);
         }
         
-        public System.Threading.Tasks.Task<string> UpdateRegionAsync(string uid, string id, string region) {
-            return base.Channel.UpdateRegionAsync(uid, id, region);
+        public System.Threading.Tasks.Task<FrontendWPF.LocationService.Response_Location> ListLocationAsync(string uid, string id, string location, string region, string limit) {
+            return base.Channel.ListLocationAsync(uid, id, location, region, limit);
+        }
+        
+        public FrontendWPF.LocationService.Response_Region ListRegion(string uid, string id, string region, string limit) {
+            return base.Channel.ListRegion(uid, id, region, limit);
+        }
+        
+        public System.Threading.Tasks.Task<FrontendWPF.LocationService.Response_Region> ListRegionAsync(string uid, string id, string region, string limit) {
+            return base.Channel.ListRegionAsync(uid, id, region, limit);
+        }
+        
+        public string RemoveLocation(string uid, string id, string location) {
+            return base.Channel.RemoveLocation(uid, id, location);
+        }
+        
+        public System.Threading.Tasks.Task<string> RemoveLocationAsync(string uid, string id, string location) {
+            return base.Channel.RemoveLocationAsync(uid, id, location);
         }
         
         public string RemoveRegion(string uid, string id, string region) {
@@ -431,6 +415,22 @@ namespace FrontendWPF.LocationService {
         
         public System.Threading.Tasks.Task<string> RemoveRegionAsync(string uid, string id, string region) {
             return base.Channel.RemoveRegionAsync(uid, id, region);
+        }
+        
+        public string UpdateLocation(string uid, string id, string location, string region) {
+            return base.Channel.UpdateLocation(uid, id, location, region);
+        }
+        
+        public System.Threading.Tasks.Task<string> UpdateLocationAsync(string uid, string id, string location, string region) {
+            return base.Channel.UpdateLocationAsync(uid, id, location, region);
+        }
+        
+        public string UpdateRegion(string uid, string id, string region) {
+            return base.Channel.UpdateRegion(uid, id, region);
+        }
+        
+        public System.Threading.Tasks.Task<string> UpdateRegionAsync(string uid, string id, string region) {
+            return base.Channel.UpdateRegionAsync(uid, id, region);
         }
     }
 }

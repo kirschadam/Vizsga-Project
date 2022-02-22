@@ -7,7 +7,7 @@
         xmlns:localComponents="clr-namespace:FrontendWPF.Components"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        Title="Manage products Window" Height="500" MinHeight="300" Width="800" MinWidth="600"
+        Title="Manage products Window" Height="500" MinHeight="500" Width="800" MinWidth="600"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip"
         WindowStyle="None"
@@ -18,6 +18,7 @@
         Closing="Window_Closing"
         x:Name="window"
         KeyDown="Window_KeyDown"
+        SizeChanged="window_SizeChanged"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
         >
 
@@ -62,7 +63,7 @@
 
         <Grid Grid.ColumnSpan="1" Grid.Column="0">
 
-            <Border CornerRadius="10" RenderTransformOrigin="0.495,0.636" BorderThickness="1" BorderBrush="Aqua">
+            <Border Name="borderLeft"  CornerRadius="10" RenderTransformOrigin="0.495,0.636" BorderThickness="1" BorderBrush="Aqua">
                 <Border.Background>
                     <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
                         <GradientStop Color="#FF8E52F7"/>
@@ -88,6 +89,7 @@
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserDeleteRows="False"
                   BeginningEdit="dataGrid0_BeginningEdit"
                   KeyUp="dataGrid0_KeyUp"
+                  PreviewTextInput="dataGrid0_PreviewTextInput"
                   HeadersVisibility="Row"
                   SelectionUnit="Cell"
                   SelectionMode="Single"
@@ -150,7 +152,8 @@
                     <DataGrid.Columns >
                         <DataGridTextColumn Header="Id" Binding="{Binding Id}" MinWidth="47" />
                         <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                        <DataGridTextColumn Header="Unit price" Binding="{Binding UnitPrice}" />
+                        <DataGridTextColumn Header="Purchase price" Binding="{Binding BuyUnitPrice}" />
+                        <DataGridTextColumn Header="Sales price" Binding="{Binding SellUnitPrice}" />
                     </DataGrid.Columns>
 
                 </DataGrid>
@@ -159,7 +162,7 @@
             <StackPanel x:Name="stackPanel1" VerticalAlignment="Top" Margin="0,45,0,0" Height="442" Orientation="Horizontal">
                 
                 <DataGrid Name="dataGrid1" Background="AliceBlue" FontSize="14" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="2" Margin="10,0,0,0" HorizontalScrollBarVisibility="Visible" IsReadOnly="True"
-                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserDeleteRows="False"
+                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserDeleteRows="False"
                   SelectedCellsChanged="dataGrid1_SelectedCellsChanged"
                   CellEditEnding="dataGrid1_CellEditEnding"
                   BeginningEdit="dataGrid1_BeginningEdit" 
@@ -224,7 +227,8 @@
                     <DataGrid.Columns >
                         <DataGridTextColumn Header="Id" Binding="{Binding Id}" IsReadOnly="True" MinWidth="47" />
                         <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="350" MinWidth="200" />
-                        <DataGridTextColumn Header="Unit price" Binding="{Binding UnitPrice}" MinWidth="100" />
+                        <DataGridTextColumn Header="Purchase price" Binding="{Binding BuyUnitPrice}" MinWidth="112" />
+                        <DataGridTextColumn Header="Sales price" Binding="{Binding SellUnitPrice}" MinWidth="100" />
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -259,7 +263,7 @@
                            TextWrapping="Wrap"
                            FontWeight="Medium"
                            FontFamily="helvetica"
-                           FontSize="18"
+                           FontSize="17"
                            Foreground="White"
                            HorizontalAlignment="Center"/>
             </StackPanel>

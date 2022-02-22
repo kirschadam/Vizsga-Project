@@ -11,22 +11,24 @@ namespace FrontendWPF.Classes
     public class Product
     {
         public int Id;
-        public string name;
-        public int unitPrice;
+        public string Name;
+        public int BuyUnitPrice;
+        public int SellUnitPrice;
 
         public Product()
         {
         }
 
-        public Product(int id, string productname, int unitprice)
+        public Product(int id, string name, int buyUnitPrice, int sellUnitPrice)
         {
             Id = id;
-            name = productname;
-            unitPrice = unitprice;
+            Name = name;
+            BuyUnitPrice = buyUnitPrice;
+            SellUnitPrice = sellUnitPrice;
         }
 
         // returns a list of products
-        public static List<StockService.Product> GetProducts(string id, string name, string qOver, string qUnder, string limit)
+        public static List<StockService.Product> GetProducts(string id, string name, string buyOver, string buyUnder, string sellOver, string sellUnder, string limit)
         {
             StockService.StockServiceClient client = new StockService.StockServiceClient();
 
@@ -35,7 +37,7 @@ namespace FrontendWPF.Classes
  
             try
             {
-                string hostMessage = client.ListProduct(Shared.uid, id, name, qOver, qUnder, limit).Message;
+                string hostMessage = client.ListProduct(Shared.uid, id, name, buyOver, buyUnder, sellOver, sellUnder, limit).Message;
                 if (hostMessage.Contains("Unable to connect"))
                 {
                     MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
@@ -71,7 +73,7 @@ namespace FrontendWPF.Classes
                 else
                 {
                     // string query = $"WHERE name='{productName}' AND unitPrice='{CreateMD5(unitprice)}'";
-                    productsArray = client.ListProduct(Shared.uid, id, name, qOver, qUnder, limit).Products;
+                    productsArray = client.ListProduct(Shared.uid, id, name, buyOver, buyUnder, sellOver, sellUnder, limit).Products;
                     // UserService.Response_Product response_Product = new UserService.Response_Product();
                     // string uid = response_Product.Uid;
                     productsList = productsArray.ToList();

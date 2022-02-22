@@ -36,11 +36,16 @@ namespace FrontendWPF
         int PK_column_index = 0;
         string edit_mode;
         private List<Product> productsList { get; set; }
-        private int[] fieldsEntered = new int[2]; // Name, UnitPrice
+        private int[] fieldsEntered = new int[3]; // Name, BuyUnitPrice, SellUnitPrice
         ScrollViewer scrollViewer;
         string lastName = "";
         int lastNameIndex = 1;
-        int? lastUnitPrice = null;
+        int? lastBuyUnitPrice = null;
+        int? lastSellUnitPrice = null;
+        string input = "";
+        string opId = "=";
+        string opBuyUnitPrice = "=";
+        string opSellUnitPrice = "=";
 
         public ManageProductsWindow()
         {
@@ -65,7 +70,7 @@ namespace FrontendWPF
             TextBlock_message.Foreground = Brushes.White;
             
             // query all products from database
-            dbProductsList = Product.GetProducts("", "", "", "", "");
+            dbProductsList = Product.GetProducts("", "", "", "", "", "", "");
             if (dbProductsList == null) { IsEnabled = false; Close(); return; } // stop on any error
 
             // close window and stop if no product is retrieved
@@ -88,28 +93,29 @@ namespace FrontendWPF
 
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
 
-            if (window.IsLoaded == false) // run on the first time when window is not loaded
-            {
-                filterProductsList = new List<StockService.Product>();
+            filterProductsList = new List<StockService.Product>();
 
-                Dispatcher.InvokeAsync(() =>
+            Dispatcher.InvokeAsync(() => {
+                double stretch = Math.Max((borderLeft.ActualWidth - 10 - 74) / (550 - 10 - 128), 1); // Border width - left margin - a bit more because first column remains unchanged
+                dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
+                dataGrid0.Width = dataGrid1.Width;
+                dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
+
+                stackPanel1.Height = 442 + window.ActualHeight - 500; // original window.Height
+                
+                // stretch columns to dataGrid1 width
+                for (int i = 1; i < dataGrid1.Columns.Count; i++)
                 {
-                    double stretch = (600 - 58) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
-                    dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
-                    dataGrid0.Width = dataGrid1.Width;
-                    dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
-                    // stretch columns to dataGrid1 width
-                    for (int i = 1; i < dataGrid1.Columns.Count; i++)
-                    {
-                        dataGrid1.Columns[i].Width = dataGrid1.Columns[i].ActualWidth * stretch;
-                        dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
-                        dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
-                    }
-                    dataGrid1.Items.Refresh();
-                    ScrollDown();
-                    selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
-                }, DispatcherPriority.Loaded);
-            }
+                    dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * stretch;
+                    dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
+                    // dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
+                }
+                dataGrid1.FontSize = 14 * Math.Min(stretch, 1);
+                dataGrid1.Items.Refresh();
+                ScrollDown();
+                selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
+            }, DispatcherPriority.Loaded);
+
             ScrollDown();
 
             // create/reset product_filter item and add it to filter dataGrid0
@@ -117,7 +123,8 @@ namespace FrontendWPF
             {
                 Id = null,
                 Name = "",
-                UnitPrice = null
+                BuyUnitPrice = null,
+                SellUnitPrice = null
             };
             filterProductsList.Clear();
             filterProductsList.Add(product_filter);
@@ -330,7 +337,9 @@ namespace FrontendWPF
                 {
                     Id = highestId + 1,
                     Name = lastName != "" ? lastName : "",
-                    UnitPrice = lastUnitPrice != null ? lastUnitPrice : 1
+                    BuyUnitPrice = lastBuyUnitPrice != null ? lastBuyUnitPrice : 1,
+                    SellUnitPrice = lastSellUnitPrice != null ? lastSellUnitPrice : 1,
+                    
                 };
                 product_edited0 = product_edited;
 
@@ -421,7 +430,8 @@ namespace FrontendWPF
                 new_value = textBox.Text;
 
                 changed_property_name = dataGrid1.Columns[column_index].Header.ToString();
-                if (changed_property_name == "Unit price") { changed_property_name = "UnitPrice"; }
+                if (changed_property_name == "Purchase price") { changed_property_name = "BuyUnitPrice"; }
+                if (changed_property_name == "Sales price") { changed_property_name = "SellUnitPrice"; }
                 // get old property value of product by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
                 old_value = product_edited.GetType().GetProperty(changed_property_name).GetValue(product_edited).ToString();
@@ -441,12 +451,12 @@ namespace FrontendWPF
                 {
                     stopMessage = $"The name must be at least 5 charachters long!";
                 }
-                else if (changed_property_name == "UnitPrice") // if wrong UnitPrice value is entered
+                else if (changed_property_name.Contains("price")) // if wrong BuyUnitPrice or SellUnitPrice value is entered
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
                     if (int_val == null || int_val <= 0)
                     {
-                        stopMessage = $"Please enter a correct value for the Unit price!";
+                        stopMessage = $"Please enter a correct value for the price!";
                     }
                     else if (int_val > 10000000)
                     {
@@ -479,8 +489,8 @@ namespace FrontendWPF
                     }, DispatcherPriority.Loaded);
                     return;
                 }
-                // stop in insert mode if new and old value are the same AND the field was already updated (in insert mode the suggested old values of columns Location, Permission and Active can be same as old values if accepted) OR in each case in update mode; 
-                else if (old_value == new_value && (fieldsEntered[column_index - 1] == 1 || edit_mode == "update")) // && column_index < 3
+                // stop in insert mode if new and old value are the same AND the field was already updated (in insert mode the suggested old values of columns Name, BuyUnitPrice, SellUnitPrice can be same as old values if accepted) OR in each case in update mode; 
+                else if (old_value == new_value && (fieldsEntered[column_index - 1] == 1 || edit_mode == "update")) // && column_index < 4
                 {
                     MoveToNextCell();
                     return;
@@ -504,7 +514,7 @@ namespace FrontendWPF
                 {
                     product_edited.GetType().GetProperty(changed_property_name).SetValue(product_edited, new_value);
                 }
-                else // update int?-type fields with new value (UnitPrice)
+                else // update int?-type fields with new value (BuyUnitPrice, SellUnitPrice)
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
                     product_edited.GetType().GetProperty(changed_property_name).SetValue(product_edited, Convert.ToInt32(new_value));
@@ -521,7 +531,7 @@ namespace FrontendWPF
                         if (edit_mode == "insert")
                         {
                             // ADD into database
-                            registerMessage = stockClient.AddProduct(Shared.uid, product_edited.Name, product_edited.UnitPrice.ToString());
+                            registerMessage = stockClient.AddProduct(Shared.uid, product_edited.Name, product_edited.BuyUnitPrice.ToString(), product_edited.SellUnitPrice.ToString());
                             if (registerMessage != "Product successfully added!")
                             {
                                 MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -532,7 +542,7 @@ namespace FrontendWPF
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = stockClient.UpdateProduct(Shared.uid, product_edited.Id.ToString(), product_edited.Name, product_edited.UnitPrice.ToString());
+                            updateMessage = stockClient.UpdateProduct(Shared.uid, product_edited.Id.ToString(), product_edited.Name, product_edited.BuyUnitPrice.ToString(), product_edited.SellUnitPrice.ToString());
                             if (updateMessage != "Product successfully updated!")
                             {
                                 MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -559,9 +569,10 @@ namespace FrontendWPF
 
                     if (edit_mode == "insert")
                     {
-                        lastNameIndex++;
+                        lastNameIndex++; // running number suffix to Product name 
                         lastName = lastNameIndex == 2 ? product_edited.Name + " " + lastNameIndex : product_edited.Name.Substring(0, product_edited.Name.Length - lastNameIndex.ToString().Length - 1) + " " + lastNameIndex; // save last data to suggest them for next record
-                        lastUnitPrice = product_edited.UnitPrice;
+                        lastBuyUnitPrice = product_edited.BuyUnitPrice;
+                        lastSellUnitPrice = product_edited.SellUnitPrice;
 
                         // set background color of added product to green
                         for (int i = 0; i < dataGrid1.Columns.Count; i++)
@@ -583,7 +594,7 @@ namespace FrontendWPF
                     }
                     else if (edit_mode == "update")
                     {
-                        TextBlock_message.Text = $"The product '{product_edited.Name}' has been updated with {changed_property_name}.";
+                        TextBlock_message.Text = $"The product '{product_edited.Name}' has been updated with {(changed_property_name == "BuyUnitPrice" ? "Purchase price" : changed_property_name == "SellUnitPrice" ? "Sales price" : changed_property_name)  }.";
 
                         // cell.Background = Brushes.OliveDrab;
                         Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
@@ -605,11 +616,11 @@ namespace FrontendWPF
 
                         cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
 
-                        // select next unchanged column; if last 'UnitPrice' column is reached, return to first 'Name' column
+                        // select next unchanged column; if last 'SellUnitPrice' column is reached, return to first 'Name' column
                         int column_shift = 0;
                         while (fieldsEntered[column_index + column_shift - 1] != 0)
                         {
-                            column_shift = column_index + column_shift == 2 ? -column_index + 1 : column_shift + 1;
+                            column_shift = column_index + column_shift == 3 ? -column_index + 1 : column_shift + 1;
                         }
                         cell = dataGrid1.Columns[column_index + column_shift].GetCellContent(row).Parent as DataGridCell;
 
@@ -721,7 +732,7 @@ namespace FrontendWPF
         {
             dataGrid1.Dispatcher.InvokeAsync(() =>
             {
-                // select next  column; if last 'UnitPrice' column is reached, return to first 'Name' column
+                // select next  column; if last 'SellUnitPrice' column is reached, return to first 'Name' column
                 if (column_index == dataGrid1.Columns.Count - 1)
                 {
                     column_index = 1;
@@ -836,10 +847,10 @@ namespace FrontendWPF
             filteredProductsList = new List<StockService.Product>();
 
             // show filter dataGrid0
-            if (stackPanel1.Height == 442)
+            if (stackPanel1.Height == 442 + window.ActualHeight - 500)
             {
                 stackPanel1.Margin = new Thickness(0, 45 + 30, 0, 0);
-                stackPanel1.Height = 442 - 30;
+                stackPanel1.Height = 442 - 30 + window.ActualHeight - 500;
                 ScrollDown();
                 TextBlock_message.Text = "Enter filter value(s).";
 
@@ -847,7 +858,7 @@ namespace FrontendWPF
             else
             {
                 stackPanel1.Margin = new Thickness(0, 45, 0, 0);
-                stackPanel1.Height = 442;
+                stackPanel1.Height = 442 + window.ActualHeight - 500;
                 TextBlock_message.Text = "Select an option.";
             }
         }
@@ -858,13 +869,29 @@ namespace FrontendWPF
             column = e.Column;
         }
 
+        private void dataGrid0_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            input = e.Text; // get character entered
+        }
+
         private void dataGrid0_KeyUp(object sender, KeyEventArgs e)
         // private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (row == null || column == null) { return; } // stop if column or row is not selected or not in edit mode
 
-            // check wheter the pressed key is digit or number, otherwise stop
-            if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Subtract && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
+            // check whether the pressed key is digit or number, otherwise stop
+            if (input.Length == 0)
+            {
+                return; // should not happen
+            }
+            int ASCII = (int)input[0];
+            input = " "; // reset input to empty to avoid false value, becasuse KeyUp event may run on function keys as well
+            if ((ASCII > 31 && ASCII < 256) == false) { return; } // stop if not number or digit
+            // if (ASCII == 43 || ASCII == 60 || ASCII == 61 || ASCII == 62) { return; } // stop if +, <, =, >
+            bool key = e.Key == Key.Back;
+
+            // stop on most function keys
+            if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Oem102 && e.Key != Key.Subtract && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
             {
                 return;
             }
@@ -876,28 +903,58 @@ namespace FrontendWPF
             if (cell.IsEditing == false) { return; } // stop if cell is not editing
             textBox = (TextBox)cell.Content;
             new_value = textBox.Text;
-            changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
-            if (changed_property_name == "Unit price") { changed_property_name = "UnitPrice"; }
+            if (new_value != "" && new_value.Length == 1 && (textBox.Text == "<" || textBox.Text == ">" || textBox.Text == "=") && e.Key != Key.Back && e.Key != Key.Delete) { return; } // stop if < or > in empty cell (but continue to recalculate if last key was Key.Back or Key.Delete)
+            if (new_value != "" && new_value.Length < 3 && (textBox.Text.Substring(1) == "=")) { return; } // stop if '=' when there are no more characters       
 
-            // if any product_filter value is null, set it temporarily to -999 to avoid error when setting old value                
+            string firstChar = new_value != "" ? new_value.ToString().Substring(0, 1) : "";
+            string op = firstChar != ">" && firstChar != "<" ? "=" : firstChar;
+            if (new_value.Length > 1 && new_value.ToString().Substring(1, 1) == "=")
+            {
+                op = op == ">" ? ">=" : op == "<" ? "<=" : op; // setting >= or <= operator values
+            }
+
+            changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
+            if (changed_property_name == "Purchase price") { changed_property_name = "BuyUnitPrice"; }
+            if (changed_property_name == "Sales price") { changed_property_name = "SellUnitPrice"; }
+
+            // remove operator for integer columns Id and UnitPrice
+            if (changed_property_name == "Id" || changed_property_name == "BuyUnitPrice" || changed_property_name == "SellUnitPrice")
+            {
+                if (op != "=" || (new_value !="" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
+
+                switch (changed_property_name)
+                {
+                    case "Id": opId = op; break;
+                    case "BuyUnitPrice": opBuyUnitPrice = op; break;
+                    case "SellUnitPrice": opSellUnitPrice = op; break;
+                    default: break;
+                }
+            }
+
+            // if any product_filter value is null, set it temporarily to -999 to avoid error when setting old value         
             if (changed_property_name == "Id" && product_filter.Id == null) product_filter.Id = -999;
-            if (changed_property_name == "UnitPrice" && product_filter.UnitPrice == null) product_filter.UnitPrice = -999;
-            //get old property value of product by property name
+            if (changed_property_name == "BuyUnitPrice" && product_filter.BuyUnitPrice == null) product_filter.BuyUnitPrice = -999;
+            if (changed_property_name == "SellUnitPrice" && product_filter.SellUnitPrice == null) product_filter.SellUnitPrice = -999;
+            //get old property value of Product by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
             old_value = product_filter.GetType().GetProperty(changed_property_name).GetValue(product_filter).ToString();
             if (changed_property_name == "Id" && product_filter.Id == -999) product_filter.Id = null;
-            if (changed_property_name == "UnitPrice" && product_filter.UnitPrice == -999) product_filter.UnitPrice = null;
+            if (changed_property_name == "BuyUnitPrice" && product_filter.BuyUnitPrice == -999) product_filter.BuyUnitPrice = null;
+            if (changed_property_name == "SellUnitPrice" && product_filter.SellUnitPrice == -999) product_filter.SellUnitPrice = null;
 
-            if (old_value == "-999")
+            string stopMessage = "";
+            if (old_value == "-999" || op != "=")
             {
                 Dispatcher.InvokeAsync(() => {
-                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end
+                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end; skip if an operator is entered into cell
+
+                    if (op != "=" && stopMessage == "") { textBox.Text = op + new_value; } // restore operator into cell, only if there is no error message (because it restores the old value);
+
                     Shared.SendKey(Key.End);
-                }, DispatcherPriority.Render);
+                }, DispatcherPriority.Input);
             }
 
             // check data correctness
-            string stopMessage = "";
             if (changed_property_name == "Id")
             {
                 int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
@@ -922,7 +979,11 @@ namespace FrontendWPF
             if (stopMessage != "")  // warn user, and stop
             {
                 MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
+                if (old_value != "-999")
+                {
+                    textBox.Text = op == "=" ? old_value : op + old_value; // restore correct cell value if old value is not null, plus the operator if any
+                    Shared.SendKey(Key.End);
+                }
                 return;
             }
 
@@ -930,7 +991,7 @@ namespace FrontendWPF
             {
                 product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, new_value);
             }
-            else // update int?-type fields with new value (Id, UnitPrice)
+            else // update int?-type fields with new value (Id, BuyUnitPrice, SellUnitPrice)
             {
                 int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
                 product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, int_val);
@@ -942,7 +1003,7 @@ namespace FrontendWPF
             foreach (var product in dbProductsList)
             {
 
-                if ((product_filter.Id == null || product.Id == product_filter.Id) && (product_filter.Name == "" || product.Name.ToLower().Contains(product_filter.Name.ToLower())) && (product_filter.UnitPrice == null || product.UnitPrice == product_filter.UnitPrice))
+                if ((product_filter.Id == null || Compare(product.Id, product_filter.Id, opId)) && (product_filter.Name == "" || product.Name.ToLower().Contains(product_filter.Name.ToLower())) && (product_filter.BuyUnitPrice == null || Compare(product.BuyUnitPrice, product_filter.BuyUnitPrice, opBuyUnitPrice)) && (product_filter.SellUnitPrice == null || Compare(product.SellUnitPrice, product_filter.SellUnitPrice, opSellUnitPrice)))
                 {
                     filteredProductsList.Add(product);
                     continue;
@@ -952,6 +1013,19 @@ namespace FrontendWPF
             dataGrid1.ItemsSource = filteredProductsList;
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
             dataGrid1.Items.Refresh();
+        }
+
+        private bool Compare(int? a, int? b, string op)
+        {
+            switch (op)
+            {
+                case "=": return a == b;
+                case ">": return a > b;
+                case "<": return a < b;
+                case ">=": return a >= b;
+                case "<=": return a <= b;
+                default: return false;
+            }
         }
 
         private void SetUserAccess()
@@ -992,7 +1066,7 @@ namespace FrontendWPF
                 // create file content
                 StreamWriter sr = new StreamWriter(saveFileDialog.FileName, append: false, encoding: Encoding.UTF8);
                 // write file header line
-                string header_row = "Id;Name;UnitPrice";
+                string header_row = "Id;Name;BuyUnitPrice;SellUnitPrice";
                 sr.WriteLine(header_row);
 
                 // write file rows
@@ -1002,7 +1076,7 @@ namespace FrontendWPF
                 for (i = 0; i < dataGrid1.Items.Count; i++)
                 {
                     product = dataGrid1.Items[i] as StockService.Product;
-                    rows += $"{product.Id};{product.Name};{product.UnitPrice}\n";
+                    rows += $"{product.Id};{product.Name};{product.BuyUnitPrice};{product.SellUnitPrice}\n";
                 }
                 sr.Write(rows);
                 sr.Close();
@@ -1031,9 +1105,9 @@ namespace FrontendWPF
                 string header_row = sr.ReadLine();
                 int first_colum = header_row.Split(';').Length == 2 ? 0 : 1; // 1 if Id column is provided
 
-                if (header_row != "Id;Name;UnitPrice" && header_row != "Name;UnitPrice")
+                if (header_row != "Id;Name;BuyUnitPrice;SellUnitPrice" && header_row != "Name;BuyUnitPrice;SellUnitPrice")
                 {
-                    MessageBox.Show($"Incorrect file content! Expected header is 'Id;Name;UnitPrice' (Id is optional), but received '{header_row}'");
+                    MessageBox.Show($"Incorrect file content! Expected header is 'Id;Name;BuyUnitPrice;SellUnitPrice' (Id is optional), but received '{header_row}'");
                     return;
                 }
 
@@ -1049,13 +1123,14 @@ namespace FrontendWPF
                 {
                     string error = "";
                     row = sr.ReadLine().Split(';');
-                    if (row.Length != 2 + first_colum) // skip row if number of columns is incorrect
+                    if (row.Length != 3 + first_colum) // skip row if number of columns is incorrect
                     {
                         continue;
                     }
 
                     string name = row[first_colum];
-                    string unitprice = row[first_colum + 1];
+                    string buyUnitPrice = row[first_colum + 1];
+                    string sellUnitPrice = row[first_colum + 2];
                     
                     // check data correctness
                     if (dbProductsList.Any(p => p.Name == name)) // if product already exists in database
@@ -1066,21 +1141,30 @@ namespace FrontendWPF
                     {
                         error += $"'{name}': Name must be et least 5 characters long!\n";
                     }
-                    int? int_val = Int32.TryParse(unitprice, out var tempVal) ? tempVal : (int?)null;
+                    int? int_val = Int32.TryParse(buyUnitPrice, out var tempVal) ? tempVal : (int?)null;
                     if (int_val == null || int_val <= 0)
                     {
-                        error += $"'{name}': UnitPrice '{unitprice}' is incorrect!\n";
+                        error += $"'{name}': BuyUnitPrice '{buyUnitPrice}' is incorrect!\n";
                     }
-                    else if (int_val > 10000000)
+                    else if (int_val > 1000000000)
                     {
-                        error += $"'{name}': UnitPrice '{unitprice}' cannot exceed 10,000,000!\n";
+                        error += $"'{name}': BuyUnitPrice '{buyUnitPrice}' cannot exceed 1000,000,000!\n";
+                    }
+                    int_val = Int32.TryParse(buyUnitPrice, out var tempVal1) ? tempVal1 : (int?)null;
+                    if (int_val == null || int_val <= 0)
+                    {
+                        error += $"'{name}': SellUnitPrice '{sellUnitPrice}' is incorrect!\n";
+                    }
+                    else if (int_val > 1000000000)
+                    {
+                        error += $"'{name}': SellUnitPrice '{sellUnitPrice}' cannot exceed 1000,000,000!\n";
                     }
 
                     errorMessage += error;
                     if (error != "") { continue; } // continue on error
 
                     // ADD into database
-                    registerMessage = stockClient.AddProduct(Shared.uid, name, unitprice);
+                    registerMessage = stockClient.AddProduct(Shared.uid, name, buyUnitPrice, sellUnitPrice);
                     if (registerMessage != "Product successfully added!")
                     {
                         errorMessage += $"'{name}': {registerMessage}\n";
@@ -1091,7 +1175,8 @@ namespace FrontendWPF
                     {
                         Id = id,
                         Name = name,
-                        UnitPrice = int.Parse(unitprice)
+                        BuyUnitPrice = int.Parse(buyUnitPrice),
+                        SellUnitPrice = int.Parse(sellUnitPrice)
                     };
 
                     productsAdded++;
@@ -1114,6 +1199,26 @@ namespace FrontendWPF
                 }
             }
         }
+
+        private void window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            double stretch = Math.Max((borderLeft.ActualWidth - 10 - 74) / (550 - 10 - 128), 1); // Border width - left margin - a bit more because first column remains unchanged
+            dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
+            dataGrid0.Width = dataGrid1.Width;
+            dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
+
+            stackPanel1.Height = 442 + window.ActualHeight - 500; // original window.Height
+
+            // stretch columns to dataGrid1 width
+            for (int i = 1; i < dataGrid1.Columns.Count; i++)
+            {
+                dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * stretch;
+                dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
+                // dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
+            }
+            dataGrid1.FontSize = 14 * Math.Max(stretch * 0.95, 0.9);
+        }
+
 
     }
 }

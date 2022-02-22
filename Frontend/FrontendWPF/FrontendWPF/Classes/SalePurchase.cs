@@ -13,6 +13,7 @@ namespace FrontendWPF.Classes
         public int Id;
         public int ProductId;
         public int Quantity;
+        public int UnitPrice;
         public DateTime Date;
         public int LocationId;
         public int UserId;
@@ -21,18 +22,19 @@ namespace FrontendWPF.Classes
         {
         }
 
-        public SalePurchase(int id, int productId, int quantity, DateTime date, int locationId, int userId)
+        public SalePurchase(int id, int productId, int quantity, int unitPrice, DateTime date, int locationId, int userId)
         {
             Id = id;
             ProductId = productId;
             Quantity = quantity;
+            UnitPrice = unitPrice;
             Date = date;
             LocationId = locationId;
             UserId = userId;
         }
 
         // returns a list of sales/purchases
-        public static List<StockService.SalePurchase> GetSalesPurchases(string type, string id, string product, string qOver, string qUnder, string before, string after, string location, string user, string limit)
+        public static List<StockService.SalePurchase> GetSalesPurchases(string type, string id, string product, string qOver, string qUnder, string priceOver, string priceUnder, string before, string after, string location, string user, string limit)
         {
             StockService.StockServiceClient client = new StockService.StockServiceClient();
 
@@ -41,7 +43,7 @@ namespace FrontendWPF.Classes
  
             try
             {
-                string hostMessage = client.ListSalePurchase(Shared.uid, type, id, product, qOver, qUnder, before, after, location, user, limit).Message;
+                string hostMessage = client.ListSalePurchase(Shared.uid, type, id, product, qOver, qUnder, priceOver, priceUnder, before, after, location, user, limit).Message;
                 if (hostMessage.Contains("Unable to connect")) //  temporary solultion, I will need error message Unable to connect...
 
                 {
@@ -78,7 +80,7 @@ namespace FrontendWPF.Classes
                 else
                 {
                     // string query = $"WHERE type='{type}'";
-                    salesPurchasesArray = client.ListSalePurchase(Shared.uid, type, id, product, qOver, qUnder, before, after, location, user, limit).SalesPurchases;
+                    salesPurchasesArray = client.ListSalePurchase(Shared.uid, type, id, product, qOver, qUnder, priceOver, priceUnder, before, after, location, user, limit).SalesPurchases;
                     // Message does not give Unable to connect... error, and Array.Length is 0 if no database or no record...
                     salesPurchasesList = salesPurchasesArray.ToList();
                 }

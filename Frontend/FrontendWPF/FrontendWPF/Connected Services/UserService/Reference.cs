@@ -299,16 +299,16 @@ namespace FrontendWPF.UserService {
         System.Threading.Tasks.Task<string> LogoutUserAsync(string uid);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/RegisterUser", ReplyAction="http://tempuri.org/IUserService/RegisterUserResponse")]
-        string RegisterUser(string uid, string username, string password, string locationId, string permission);
+        string RegisterUser(string uid, string username, string password, string location, string permission);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/RegisterUser", ReplyAction="http://tempuri.org/IUserService/RegisterUserResponse")]
-        System.Threading.Tasks.Task<string> RegisterUserAsync(string uid, string username, string password, string locationId, string permission);
+        System.Threading.Tasks.Task<string> RegisterUserAsync(string uid, string username, string password, string location, string permission);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/UpdateUser", ReplyAction="http://tempuri.org/IUserService/UpdateUserResponse")]
-        string UpdateUser(string uid, string id, string username, string password, string locationId, string permission, string active);
+        string UpdateUser(string uid, string id, string username, string password, string location, string permission, string active);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/UpdateUser", ReplyAction="http://tempuri.org/IUserService/UpdateUserResponse")]
-        System.Threading.Tasks.Task<string> UpdateUserAsync(string uid, string id, string username, string password, string locationId, string permission, string active);
+        System.Threading.Tasks.Task<string> UpdateUserAsync(string uid, string id, string username, string password, string location, string permission, string active);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/DeleteUser", ReplyAction="http://tempuri.org/IUserService/DeleteUserResponse")]
         string DeleteUser(string uid, string id, string username);
@@ -368,20 +368,20 @@ namespace FrontendWPF.UserService {
             return base.Channel.LogoutUserAsync(uid);
         }
         
-        public string RegisterUser(string uid, string username, string password, string locationId, string permission) {
-            return base.Channel.RegisterUser(uid, username, password, locationId, permission);
+        public string RegisterUser(string uid, string username, string password, string location, string permission) {
+            return base.Channel.RegisterUser(uid, username, password, location, permission);
         }
         
-        public System.Threading.Tasks.Task<string> RegisterUserAsync(string uid, string username, string password, string locationId, string permission) {
-            return base.Channel.RegisterUserAsync(uid, username, password, locationId, permission);
+        public System.Threading.Tasks.Task<string> RegisterUserAsync(string uid, string username, string password, string location, string permission) {
+            return base.Channel.RegisterUserAsync(uid, username, password, location, permission);
         }
         
-        public string UpdateUser(string uid, string id, string username, string password, string locationId, string permission, string active) {
-            return base.Channel.UpdateUser(uid, id, username, password, locationId, permission, active);
+        public string UpdateUser(string uid, string id, string username, string password, string location, string permission, string active) {
+            return base.Channel.UpdateUser(uid, id, username, password, location, permission, active);
         }
         
-        public System.Threading.Tasks.Task<string> UpdateUserAsync(string uid, string id, string username, string password, string locationId, string permission, string active) {
-            return base.Channel.UpdateUserAsync(uid, id, username, password, locationId, permission, active);
+        public System.Threading.Tasks.Task<string> UpdateUserAsync(string uid, string id, string username, string password, string location, string permission, string active) {
+            return base.Channel.UpdateUserAsync(uid, id, username, password, location, permission, active);
         }
         
         public string DeleteUser(string uid, string id, string username) {

@@ -44,6 +44,9 @@ namespace FrontendWPF
         string lastLocation = "";
         int? lastPersmission = null;
         int? lastActive = null;
+        string input = "";
+        string opId = "=";
+        string opPermission = "=";
 
         public ManageUsersWindow()
         {
@@ -92,27 +95,29 @@ namespace FrontendWPF
 
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
 
-            if (window.IsLoaded == false) // run on the first time when window is not loaded
-            {
-                filterUsersList = new List<UserService.User>();
+            filterUsersList = new List<UserService.User>();
 
-                Dispatcher.InvokeAsync(() => {
-                    double stretch = (600 - 50) / dataGrid1.ActualWidth; // Border width - left margin - a bit more because first column remains unchanged
-                    dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
-                    dataGrid0.Width = dataGrid1.Width;
-                    dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
-                    // stretch columns to dataGrid1 width
-                    for (int i = 1; i < dataGrid1.Columns.Count; i++)
-                    {
-                        dataGrid1.Columns[i].Width = dataGrid1.Columns[i].ActualWidth * stretch;
-                        dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
-                        dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
-                    }
-                    dataGrid1.Items.Refresh();
-                    ScrollDown();
-                    selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
-                }, DispatcherPriority.Loaded);
-            }
+            Dispatcher.InvokeAsync(() => {
+                double stretch = Math.Max((borderLeft.ActualWidth - 10 - 67) / (550 - 10 - 140), 0.8); // Border width - left margin - a bit more because first column remains unchanged
+                dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
+                dataGrid0.Width = dataGrid1.Width;
+                dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
+
+                stackPanel1.Height = 442 + window.ActualHeight - 500; // original window.Height
+
+                // stretch columns to dataGrid1 width
+                for (int i = 1; i < dataGrid1.Columns.Count; i++)
+                {
+                    dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * stretch;
+                    dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
+                    dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
+                }
+                dataGrid1.FontSize = 14 * Math.Min(stretch, 1); // reset font size to max 14 on large window width
+                dataGrid1.Items.Refresh();
+                ScrollDown();
+                selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
+            }, DispatcherPriority.Loaded);
+            
             ScrollDown();
 
             // create/reset user_filter item and add it to filter dataGrid0
@@ -878,10 +883,10 @@ namespace FrontendWPF
             filteredUsersList = new List<UserService.User>();
 
             // show filter dataGrid0
-            if (stackPanel1.Height == 442)
+            if (stackPanel1.Height == 442 + window.ActualHeight - 500)
             {
                 stackPanel1.Margin = new Thickness(0, 45 + 30, 0, 0);
-                stackPanel1.Height = 442 - 30;
+                stackPanel1.Height = 442 - 30 + window.ActualHeight - 500;
                 ScrollDown();
                 TextBlock_message.Text = "Enter filter value(s).";
 
@@ -889,7 +894,7 @@ namespace FrontendWPF
             else
             {
                 stackPanel1.Margin = new Thickness(0, 45, 0, 0);
-                stackPanel1.Height = 442;
+                stackPanel1.Height = 442 + window.ActualHeight - 500;
                 TextBlock_message.Text = "Select an option.";
             }
         }
@@ -900,17 +905,32 @@ namespace FrontendWPF
             column = e.Column;
         }
 
+        private void dataGrid0_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            input = e.Text; // get character entered
+        }
+
         private void dataGrid0_KeyUp(object sender, KeyEventArgs e)
         // private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (row == null || column == null) { return; } // stop if column or row is not selected or not in edit mode
 
-            // check wheter the pressed key is digit or number, otherwise stop
-                if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Subtract && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
+            // check whether the pressed key is digit or number, otherwise stop
+            if (input.Length == 0) {
+                return; // should not happen
+            }
+            int ASCII = (int)input[0];
+            input = " "; // reset input to empty to avoid false value, becasuse KeyUp event may run on function keys as well
+            if ((ASCII > 31 && ASCII < 256) == false) { return; } // stop if not number or digit
+            // if (ASCII == 43 || ASCII == 60 || ASCII == 61 || ASCII == 62) { return; } // stop if +, <, =, >
+            bool key = e.Key == Key.Back;
+            
+            // stop on most function keys
+            if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Oem102 && e.Key != Key.Subtract && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
             {
                 return;
             }
-             
+            
             // row = e.Row;
             // column = e.Column;
             filterc_index = column.DisplayIndex;
@@ -918,15 +938,37 @@ namespace FrontendWPF
             if (cell.IsEditing == false) { return; } // stop if cell is not editing
             textBox = (TextBox)cell.Content;
             new_value = textBox.Text;
+            if ( new_value !="" && new_value.Length == 1 && (textBox.Text == "<" || textBox.Text == ">" || textBox.Text == ">") && e.Key != Key.Back && e.Key != Key.Delete) { return; } // stop if < or > in empty cell (but continue to recalculate if last key was Key.Back or Key.Delete
+            if (new_value != "" &&  new_value.Length < 3 && (textBox.Text.Substring(1) == "=")) { return; } // stop if '=' when there are no more characters       
+            
+            string firstChar = new_value != "" ? new_value.ToString().Substring(0, 1) : "";
+            string op = firstChar != ">" &&  firstChar != "<" ? "=" : firstChar;
+            if (new_value.Length > 1 && new_value.ToString().Substring(1, 1) == "=")
+            {
+                op = op == ">" ? ">=" : op == "<" ? "<=" : op; // setting >= or <= operator values
+            }
+            
             changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
+
+            // remove operator for integer columns Id and Permission
+           if (changed_property_name == "Id" || changed_property_name == "Permission")
+            {
+                if (op != "=" || (new_value != "" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
+                
+                switch (changed_property_name)
+                {
+                    case "Id": opId = op; break;
+                    case "Permission": opPermission = op; break;
+                    default: break;
+                }
+            }
 
             // if any user_filter value is null, set it temporarily to -999 to avoid error when setting old value                
             if (changed_property_name == "Id" && user_filter.Id == null) user_filter.Id = -999;
             if (changed_property_name == "Permission" && user_filter.Permission == null) user_filter.Permission = -999;
             if (changed_property_name == "Active" && user_filter.Active == null) user_filter.Active = -999;
-            //get old property value of user by property name
+            //get old property value of User by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-
             int? int_val = Int32.TryParse(user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString(), out var tempVal0) ? tempVal0 : (int?)null;
 
             old_value = int_val != null ? user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString() : "";
@@ -934,16 +976,19 @@ namespace FrontendWPF
             if (changed_property_name == "Permission" && user_filter.Permission == -999) user_filter.Permission = null;
             if (changed_property_name == "Active" && user_filter.Active == -999) user_filter.Active = null;
 
-            if (old_value == "-999")
+            string stopMessage = "";
+            if (old_value == "-999" || op != "=")
             {
                 Dispatcher.InvokeAsync(() => {
-                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end
+                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end; skip if an operator is entered into cell
+                    
+                    if (op != "=" && stopMessage == "") { textBox.Text = op + new_value; } // restore operator into cell, only if there is no error message (because it restores the old value);
+                    
                     Shared.SendKey(Key.End);
-                }, DispatcherPriority.Render);
+                }, DispatcherPriority.Input);
             }
 
             // check data correctness
-            string stopMessage = "";
             if (changed_property_name == "Id")
             {
                 int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
@@ -961,10 +1006,15 @@ namespace FrontendWPF
                 stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
             }
 
+            
             if (stopMessage != "")  // warn user, and stop
             {
                 MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                if (old_value != "-999") textBox.Text = old_value; // restore correct cell value
+                if (old_value != "-999")
+                {
+                    textBox.Text = op == "=" ? old_value : op + old_value; // restore correct cell value if old value is not null, plus the operator if any
+                    Shared.SendKey(Key.End);
+                }
                 return;
             }
                 
@@ -990,7 +1040,7 @@ namespace FrontendWPF
             foreach (var user in dbUsersList)
             {
 
-                if ((user_filter.Id == null || user.Id == user_filter.Id) && (user_filter.Username == "" || user.Username.ToLower().Contains(user_filter.Username.ToLower())) && (password == "" ||  user.Password == password) && (user_filter.Location == "" || user.Location.ToLower().Contains(user_filter.Location.ToLower())) && (user_filter.Permission == null || user.Permission == user_filter.Permission) && (user_filter.Active == null || user.Active == user_filter.Active))
+                if ((user_filter.Id == null || Compare(user.Id, user_filter.Id, opId)) && (user_filter.Username == "" || user.Username.ToLower().Contains(user_filter.Username.ToLower())) && (password == "" ||  user.Password == password) && (user_filter.Location == "" || user.Location.ToLower().Contains(user_filter.Location.ToLower())) && (user_filter.Permission == null || Compare(user.Permission, user_filter.Permission, opPermission)) && (user_filter.Active == null || user.Active == user_filter.Active))
                 {
                     filteredUsersList.Add(user);
                     continue;
@@ -1001,6 +1051,20 @@ namespace FrontendWPF
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
             dataGrid1.Items.Refresh();
         }
+        
+        private bool Compare(int? a, int? b, string op)
+        {
+            switch (op)
+            {
+                case "=": return a == b;
+                case ">": return a > b;
+                case "<": return a < b;
+                case ">=": return a >= b;
+                case "<=": return a <= b;
+                default: return false;
+            }
+        }
+        
         private void SetUserAccess()
         {
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
@@ -1187,6 +1251,25 @@ namespace FrontendWPF
                 gifImage.StartAnimation();
                 }
             }
+        }
+
+        private void window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            double stretch = Math.Max((borderLeft.ActualWidth - 10 -67) / (550 - 10 - 140), 0.8); // Border width - left margin - a bit more because first column remains unchanged
+            dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
+            dataGrid0.Width = dataGrid1.Width;
+            dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
+
+            stackPanel1.Height = 442 + window.ActualHeight - 500; // original window.Height
+
+            // stretch columns to dataGrid1 width
+            for (int i = 1; i < dataGrid1.Columns.Count; i++)
+            {
+                dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * stretch;
+                dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
+                dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
+            }
+            dataGrid1.FontSize = 14 * Math.Max(stretch*0.85, 0.85);
         }
 
     }
