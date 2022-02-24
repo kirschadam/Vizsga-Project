@@ -1,19 +1,12 @@
-import React, {useState, useEffect} from 'react'
-import CryptoJS from 'react-native-crypto-js'
+import React, {useState, useEffect} from 'react';
+import {User} from './Variables'
 
 function Test() {
     const [data, setData] = useState("");
     
     useEffect(() =>{
-        fetch("http://localhost:3000/loginuser?username=admin&password=" + CryptoJS.MD5("admin"), {
-            method:"GET"
-        })
-        .then((res) => res.json())
-        .then((response) =>{
-            console.log(response);
-            setData(response.Uid);
-            })
-        .catch(console.log);
+        console.log(User.Uid);
+        setData(User.Uid);
     }, []);
     
     return (
