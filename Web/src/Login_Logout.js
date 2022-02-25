@@ -25,7 +25,7 @@ export function Login() {
             console.log(response.Message);
             if(response.User.Active === 0){
                 alert("This user is currently set to inactive!");
-                navigate("/login");
+                return;
             }
             User.Uid = response.Uid;
             User.Details = response.User;
@@ -39,7 +39,7 @@ export function Login() {
         })
         .catch((response) => {
             console.log(response.Message);
-            navigate("/login");
+            return;
         });
         setLoginPending(false);
     }
@@ -84,25 +84,34 @@ export function Login() {
 export function Logout(){
     const navigate = useNavigate();
 
+    function Logout_uid(){
+        fetch(Base_user + "logoutuser?uid=" + User.Uid, {
+            method:"GET"
+        })
+        .then(res => res.json())
+        .then((response) =>{
+            console.log(response.Message);
+            sessionStorage.clear();
+            User.Uid = "";
+            User.Details = {
+                Id:0,
+                Username:"",
+                Password:"",
+                Location:"",
+                Permission:0,
+                Active:0
+            };
+            navigate("/login");
+        })
+        .catch((response) => {
+            console.log(response.Message);
+        });
+    }
+
     return(
         <button
             className="btn btn-danger m-2 float-right"
-            onClick={() => {
-                sessionStorage.clear();
-                User.Uid = "";
-                User.Details = {
-                    Id:0,
-                    Username:"",
-                    Password:"",
-                    Location:"",
-                    Permission:0,
-                    Active:0
-                };
-                navigate("/login");
-            }}
-        >
-            Logout
-        </button>
+            onClick={Logout_uid}>Logout</button>
     );
 }
 

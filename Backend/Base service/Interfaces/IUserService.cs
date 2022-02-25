@@ -49,11 +49,11 @@ namespace Base_service.Interfaces
         /// </summary>
         /// <returns>A message or error of the query.</returns>
         [OperationContract]
-        [WebInvoke(Method = "POST",
+        [WebInvoke(Method = "GET",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/logoutuser"
+            UriTemplate = "/logoutuser?uid={uid}"
             )]
         string LogoutUser(string uid);
 
