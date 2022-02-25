@@ -56,7 +56,7 @@ namespace Base_service
                 { "`locations`.`id`", "=", $"'{id}'" },
                 { "`locations`.`name`", "=", $"'{location}'" },
                 { "`regions`.`name`", "=", $"'{region}'"  },
-                { " LIMIT", " ", $"'{limit}'" }
+                { " LIMIT", " ", $"{limit}" }
             };
 
             var result = BaseSelect(
@@ -102,7 +102,7 @@ namespace Base_service
             {
                 { "`id`", "=", $"'{id}'" },
                 { "`name`", "=", $"'{region}'" },
-                { " LIMIT", " ", $"'{limit}'" }
+                { " LIMIT", " ", $"{limit}" }
             };
 
             var result = BaseSelect("regions", "*", conditions, "");

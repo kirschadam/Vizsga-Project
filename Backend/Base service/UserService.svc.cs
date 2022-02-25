@@ -27,7 +27,7 @@ namespace Base_service
                     { "`username`", "=", $"'{username}'" },
                     { "`locations`.`name`", "=", $"'{location}'" },
                     { "`regions`.`name`", "=", $"'{region}'" },
-                    { " LIMIT", " ", $"'{limit}'" }
+                    { " LIMIT", " ", $"{limit}" }
             };
 
             var result = BaseSelect(

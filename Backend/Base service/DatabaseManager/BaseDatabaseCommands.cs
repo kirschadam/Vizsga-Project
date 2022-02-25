@@ -25,7 +25,7 @@ namespace Base_service.DatabaseManager
             string conditions = "";
             for (int i = 0; i < condition_array.GetLength(0); i++)
             {
-                if (condition_array[i, 2] == "''") continue;
+                if (condition_array[i, 2] == "''" || condition_array[i, 2] == "") continue;
 
                 for (int j = 0; j < condition_array.GetLength(1); j++)
                 {
@@ -34,10 +34,15 @@ namespace Base_service.DatabaseManager
             }
 
             //If there are conditions, put and AND keyword between every condition, if there are multiple, every condition starts with "`" and ends with "'"
-            if (conditions != "") conditions = conditions.Replace("'`", "' AND `").Replace("%`", "% AND `");
-            else conditions = "1";
+            if (conditions != "")
+            {
+                if (!conditions.StartsWith(" LIMIT")) conditions = conditions.Insert(0, "WHERE");
 
-            string query = $"SELECT {columns} FROM `{table}` {inner_joins} WHERE {conditions};";
+                conditions = conditions.Replace("'`", "' AND `").Replace("%`", "% AND `");
+            }
+            else conditions = "WHERE 1";
+
+            string query = $"SELECT {columns} FROM `{table}` {inner_joins} {conditions};";
 
             DataTable result = new DataTable(); string message = "";
 

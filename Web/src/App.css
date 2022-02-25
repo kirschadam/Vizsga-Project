@@ -1,5 +1,13 @@
 .App {
   text-align: center;
+  height: 100vh;
+  transition: all .5s;
+}
+
+#themeButton{
+  border: 2px grey solid;
+  transition: all .5s;
+  float:right;
 }
 
 .App-header {
@@ -15,4 +23,29 @@
 
 .App-link {
   color: #61dafb;
+}
+
+#loginCard{
+  position: absolute;
+  top:300px;
+}
+
+.res-background{
+  background-color:var(--background);
+}
+
+.res-primary{
+  color:var(--text-primary);
+}
+
+.res-secondary{
+  color:var(--text-secondary);
+}
+
+.res-border{
+  border-color:var(--text-primary);
+}
+
+.res-color-hover:hover{
+  color:var(--text-secondary);
 }

@@ -115,7 +115,7 @@ namespace Base_service
                 { "`buyUnitPrice`", "<", $"'{buyUnder}'" },
                 { "`sellUnitPrice`", ">", $"'{sellOver}'" },
                 { "`sellUnitPrice`", "<", $"'{sellUnder}'"},
-                { " LIMIT", " ", $"'{limit}'" }
+                { " LIMIT", " ", $"{limit}" }
             };
 
             var result = BaseSelect("products", "*", conditions, "");
@@ -175,7 +175,7 @@ namespace Base_service
                 { "`date`", "<", $"'{before}'" },
                 { "`locations`.`name`", "=", $"'{location}'" },
                 { "`users`.`username`", "=", $"'{username}'" },
-                { " LIMIT", " ", $"'{limit}'" }
+                { " LIMIT", " ", $"{limit}" }
             };
             
             var result = BaseSelect(
@@ -232,7 +232,7 @@ namespace Base_service
                 {"`locations`.`name`", "=", $"'{location}'" },
                 {"`quantity`", ">", $"'{quantityOver}'" },
                 {"`quantity`", "<", $"'{quantityUnder}'" },
-                {" LIMIT", " ", $"'{limit}'" }
+                {" LIMIT", " ", $"{limit}" }
             };
             
             var result = BaseSelect(
