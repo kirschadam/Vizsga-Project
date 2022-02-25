@@ -1,5 +1,5 @@
 import './App.css';
-import Test from './Test';
+import Stocks from './StockList';
 import { BrowserRouter, Route, Routes, Navigate} from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Login } from './Login_Logout';
@@ -22,7 +22,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" exact element={<Login/>}></Route>
-          <Route path="/test" exact element={<Test/>}></Route>
+          <Route path="/stocks" exact element={<Stocks/>}></Route>
           <Route
             path="*"
             element={<Navigate to="/login" />}

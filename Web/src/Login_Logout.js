@@ -10,7 +10,7 @@ export function Login() {
 
     useEffect(() =>{
         if(sessionStorage.getItem("Uid") != null){
-            navigate("/test");
+            navigate("/stocks");
         }
     }, [navigate])
 
@@ -33,7 +33,7 @@ export function Login() {
                 sessionStorage.setItem("Uid", response.Uid);
                 sessionStorage.setItem("Details", JSON.stringify(response.User));
 
-                navigate("/test");
+                navigate("/stocks");
             }
             else {console.log("Response could not be converted correctly!");}
         })
