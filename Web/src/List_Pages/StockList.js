@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import { useNavigate, NavLink} from "react-router-dom";
-import {Base_storage, User} from './Variables';
-import {Logout} from './Login_Logout';
+import { useNavigate} from "react-router-dom";
+import {Base_storage, User} from '../Variables';
 
 function Stocks() {
     const [stocks, setStocks] = useState([]);
@@ -35,8 +34,10 @@ function Stocks() {
 
     function SearchSubmit(e){
         e.preventDefault();
-        fetch(Base_storage + "liststock?uid=" + User.Uid + "&product=" + e.target.elements.product.value + "&location=" + e.target.elements.location.value + 
-        "&quantityover=" + e.target.elements.over.value + "&quantityunder=" + e.target.elements.under.value + "&limit=" + e.target.elements.limit.value, {
+        e = e.target.elements;
+        fetch(Base_storage + "liststock?uid=" + User.Uid + "&product=" + e.product.value + "&location=" + e.location.value + 
+        "&quantityover=" + e.over.value + "&quantityunder=" + e.under.value + "&limit=" + e.limit.value
+        ,{
             method:"GET"
         })
         .then(res => res.json())
@@ -51,16 +52,13 @@ function Stocks() {
 
     return (
     <div>
-        <div className="col-1">
-            <Logout/>
-        </div>
         <div className='res-primary'>
             <ul className="list-group w-100">
                 <div className="row border-bottom py-2 w-100">
                     <h5 className="col-xs-12 col-sm-1">Id</h5>
-                    <h5 className="col-xs-4 col-sm-2">Quantity</h5>
-                    <h5 className="col-xs-8 col-sm-4">Product</h5>
-                    <h5 className="col-xs-10 col-sm-4">Location</h5>
+                    <h5 className="col-xs-4 col-sm-3">Quantity</h5>
+                    <h5 className="col-xs-8 col-sm-3">Product</h5>
+                    <h5 className="col-xs-10 col-sm-3">Location</h5>
                 </div>
             </ul>
             <form onSubmit={SearchSubmit} id="filterForm">
@@ -68,13 +66,14 @@ function Stocks() {
                     <div className="row border-bottom py-2 w-100">
                         <div className='col-xs-12 col-sm-1'>
                             <button type="submit" className='btn btn-dark'>Filter</button>
+                            <button type="Reset" className='btn btn-dark'>Reset</button>
                         </div>
                         <div className="col-xs-4 col-sm-3">
                             <div className=' float-start'>
                                 <label className='form-label me-1' htmlFor="over">Over:</label>
-                                <input type="text" name="over" className='form-text w-25'/>
+                                <input type="number" name="over" className='form-text w-25'/>
                                 <label className='form-label ms-2 me-1' htmlFor="under">Under:</label>
-                                <input type="text" name="under" className='form-text w-25'/>
+                                <input type="number" name="under" className='form-text w-25'/>
                             </div>
                         </div>
                         <div className="col-xs-8 col-sm-3">
@@ -87,20 +86,18 @@ function Stocks() {
                         </div> 
                         <div className='col-xs-12 col-sm-1'>
                             <label className='form-label mx-2' htmlFor="limit">Limit:</label>
-                            <input type="text" name="limit" className='form-text w-50'></input>
+                            <input type="number" name="limit" className='form-text w-50'></input>
                         </div>
                     </div>
                 </ul>
             </form>
                 {stocks.map((stock) => (
-                    <NavLink key={stock.Id} to={"/stock-" + stock.Id} className="text-decoration-none res-primary res-color-hover">
-                        <div className="row border-bottom  py-2 w-100">
-                            <div className="col-xs-12 col-sm-1">{stock.Id}</div>
-                            <div className="col-xs-4 col-sm-2">{stock.Quantity}</div>
-                            <div className="col-xs-8 col-sm-4">{stock.Product}</div>
-                            <div className="col-xs-10 col-sm-4">{stock.Location}</div>
-                        </div>
-                    </NavLink>
+                    <div key={stock.Id} className="row border-bottom  py-2 w-100">
+                        <div className="col-xs-12 col-sm-1">{stock.Id}</div>
+                        <div className="col-xs-4 col-sm-3">{stock.Quantity}</div>
+                        <div className="col-xs-8 col-sm-3">{stock.Product}</div>
+                        <div className="col-xs-10 col-sm-3">{stock.Location}</div>
+                    </div>
                 ))}
         </div>
     </div>

@@ -25,6 +25,24 @@
   color: #61dafb;
 }
 
+nav>div{
+  border:2px solid var(--text-primary);
+  padding:10px 0px;
+  margin:0;
+  min-width: fit-content;
+  float: left;
+}
+
+nav>div>a{
+  padding:12px;
+  margin:0;
+}
+
+nav>div:hover{
+  background-color: var(--color-one);
+  border-color: var(--text-secondary);
+}
+
 #loginCard{
   position: absolute;
   top:300px;
@@ -48,4 +66,8 @@
 
 .res-color-hover:hover{
   color:var(--text-secondary);
+}
+
+.res-current{
+  background-color: var(--accent);
 }

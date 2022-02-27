@@ -10,7 +10,13 @@ export function Login() {
 
     useEffect(() =>{
         if(sessionStorage.getItem("Uid") != null){
-            navigate("/stocks");
+            document.getElementById("logout").style.visibility="visible";
+            document.getElementById("navbar").style.visibility="visible";
+            navigate("/products");
+        }
+        else{
+            document.getElementById("logout").style.visibility="hidden";
+            document.getElementById("navbar").style.visibility="hidden";
         }
     }, [navigate])
 
@@ -33,7 +39,9 @@ export function Login() {
                 sessionStorage.setItem("Uid", response.Uid);
                 sessionStorage.setItem("Details", JSON.stringify(response.User));
 
-                navigate("/stocks");
+                document.getElementById("logout").style.visibility="visible";
+                document.getElementById("navbar").style.visibility="visible";
+                navigate("/products");
             }
             else {console.log("Response could not be converted correctly!");}
         })

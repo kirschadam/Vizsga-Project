@@ -11,7 +11,7 @@ namespace Base_service
     /// </summary>
     public class UserService : DatabaseManager.BaseDatabaseCommands, Interfaces.IUserService
     {
-        public Response_User ListUser(string uid, [Optional] string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit)
+        public Response_User ListUser(string uid, [Optional] string id, [Optional] string username, [Optional] string location, [Optional] string permissionover, [Optional] string permissionunder, [Optional] string active, [Optional] string region, [Optional] string limit)
         {
             Response_User response = new Response_User();
 
@@ -27,6 +27,9 @@ namespace Base_service
                     { "`username`", "=", $"'{username}'" },
                     { "`locations`.`name`", "=", $"'{location}'" },
                     { "`regions`.`name`", "=", $"'{region}'" },
+                    { "`permission`", ">", $"'{permissionover}'" },
+                    { "`permission`", "<", $"'{permissionunder}'" },
+                    { "`active`", "=", $"'{active}'" },
                     { " LIMIT", " ", $"{limit}" }
             };
 

@@ -159,9 +159,9 @@ namespace Base_service
 
             if (type == null || type == "") { response.Message = "State if the transaction is a sale or a purchase!"; return response; }
 
-            if (before != null || before != "") before = DateTime.Parse(before).ToString("yyyy-MM-dd HH:mm:ss.fff");
+            if (before != null && before != "") before = DateTime.Parse(before).ToString("yyyy-MM-dd HH:mm:ss.fff");
 
-            if (after != null || after != "") after = DateTime.Parse(after).ToString("yyyy-MM-dd HH:mm:ss.fff");
+            if (after != null && after != "") after = DateTime.Parse(after).ToString("yyyy-MM-dd HH:mm:ss.fff");
 
             string[,] conditions = 
             {

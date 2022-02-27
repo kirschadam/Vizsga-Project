@@ -22,11 +22,13 @@ code {
   --background: white;
   --text-primary: black;
   --text-secondary: royalblue;
-  --accent: purple;
+  --color-one: grey;
+  --accent: rgb(34, 34, 34);
 }
 [data-theme='dark'] {
   --background: rgb(20, 20, 20);
   --text-primary: white;
   --text-secondary: grey;
-  --accent: darkred;
+  --color-one: rgb(55, 62, 77);
+  --accent: rgb(64, 67, 83);
 }

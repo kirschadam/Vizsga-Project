@@ -24,9 +24,9 @@ namespace Base_service.Interfaces
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
-            UriTemplate = "/listuser?uid={uid}&id={id}&username={username}&location={location}&region={region}&limit={limit}"
+            UriTemplate = "/listuser?uid={uid}&id={id}&username={username}&location={location}&region={region}&permissionover={permissionover}&permissionunder={permissionunder}&active={active}&limit={limit}"
             )]
-        Response_User ListUser(string uid, [Optional] string id, [Optional] string username, [Optional] string location, [Optional] string region, [Optional] string limit);
+        Response_User ListUser(string uid, [Optional] string id, [Optional] string username, [Optional] string location, [Optional] string permissionover, [Optional] string permissionunder, [Optional] string active, [Optional] string region, [Optional] string limit);
 
         /// <summary>
         /// POST function to add user to active user list and send back user data and a UID.<br/>
