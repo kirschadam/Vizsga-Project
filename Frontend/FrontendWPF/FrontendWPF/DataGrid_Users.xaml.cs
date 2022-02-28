@@ -40,7 +40,7 @@ namespace FrontendWPF
 
             // dbUsersList = new List<UserService.User>();
             // string query = $"WHERE 1";  // összes user lekérdezése
-            dbUsersList = User.GetUsers("", "", "", "", ""); // query users from database
+            dbUsersList = User.GetUsers("", "", "", "", "", "", "", ""); // query users from database
 
             // close window and stop if no user is retrieved
             if (dbUsersList.Count == 0)
@@ -54,7 +54,7 @@ namespace FrontendWPF
             usersList = new List<User>();
             for (int i = 0; i < dbUsersList.Count; i++)
             {
-                usersList.Add(new User((int)dbUsersList[i].Id, dbUsersList[i].Username, dbUsersList[i].Password));
+                usersList.Add(new User((int)dbUsersList[i].Id, dbUsersList[i].Username, dbUsersList[i].Password, dbUsersList[i].Location, dbUsersList[i].Permission, dbUsersList[i].Active));
                 // AvailableNumbers.Add(usersList[i]);
             }
             dataGrid1.ItemsSource = dbUsersList;

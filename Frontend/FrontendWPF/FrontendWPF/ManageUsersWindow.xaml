@@ -7,9 +7,9 @@
         xmlns:localComponents="clr-namespace:FrontendWPF.Components"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        Title="Manage users Window" Height="500" MinHeight="500" Width="800" MinWidth="600"
+        Title="Manage users Window" Height="510" MinHeight="510" Width="800" MinWidth="600"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="CanResizeWithGrip"
+        ResizeMode="CanResize"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -21,6 +21,12 @@
         SizeChanged="window_SizeChanged"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
         >
+    <!--to make resize work-->
+    <WindowChrome.WindowChrome>
+        <WindowChrome 
+        CaptionHeight="0"
+        ResizeBorderThickness="8" />
+    </WindowChrome.WindowChrome>
 
     <Window.Resources>
         <ResourceDictionary>
@@ -247,7 +253,7 @@
             </Grid.RowDefinitions>
 
 
-            <Border CornerRadius="10" Grid.RowSpan="2" Margin="0,0,0.4,-0.4" BorderThickness="1" BorderBrush="Aqua">
+            <Border Name="borderRight" CornerRadius="10" Grid.RowSpan="2" Margin="0,0,0.4,-0.4" BorderThickness="1" BorderBrush="Aqua">
                 <Border.Background>
                     <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
                         <GradientStop Color="#FF8E52F7"/>
@@ -277,18 +283,20 @@
 
             <StackPanel Grid.Row="0" Margin="0,0,0,0" VerticalAlignment="Bottom" HorizontalAlignment="Center" >
 
-
-                <StackPanel Orientation="Vertical" Margin="0,50,0,0">
-                    <Button Name="Button_AddUser" Click="Button_AddUser_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Add user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_UpdateUser" Click="Button_UpdateUser_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Update user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_DeleteUser" Click="Button_DeleteUser_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Delete user" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_Filter" Click="Button_Filter_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_ReloadData" Click="Button_ReloadData_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Reset" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_Export" Click="Button_Export_Click" Width="110" Height="40" Margin="0,8,0,0" Content="Export" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Export data to file"/>
-                    <Button Name="Button_Import" Click="Button_Import_Click" Width="110" Height="40" Margin="0,8,0,10" Content="Import" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Import data from file"/>
-                </StackPanel>
-
-                <StackPanel/>
+                <Grid>
+                    <StackPanel Margin="0,0,0,10" HorizontalAlignment="Left" >
+                        <Button Name="Button_AddUser" Click="Button_AddUser_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Add" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button Name="Button_UpdateUser" Click="Button_UpdateUser_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Update" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button Name="Button_DeleteUser" Click="Button_DeleteUser_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Delete" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button Name="Button_Filter" Click="Button_Filter_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                    </StackPanel>
+                    <StackPanel Margin="105,0,0,10" HorizontalAlignment="Right" >
+                        <Button Name="Button_ReloadData" Click="Button_ReloadData_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Reset" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button Name="Button_Export" Click="Button_Export_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Export" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Export data to file"/>
+                        <Button Name="Button_Import" Click="Button_Import_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Import" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Import data from file"/>
+                        <Button Name="Button_LogWindow" Click="Button_LogWindow_Click" Width="90" Height="40" Margin="0,12,0,10" Content="View log" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="View log window"/>
+                    </StackPanel>
+                </Grid>
                 <!--<Border Width="250"
                         Height="2"
                         Background="White"
@@ -343,11 +351,6 @@
                 <StackPanel Orientation="Horizontal" Margin="0,00,0,0"/>
 
             </StackPanel>
-
-
-
-
-
 
         </Grid>
 

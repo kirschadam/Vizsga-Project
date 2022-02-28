@@ -66,12 +66,12 @@ namespace FrontendWPF
             dataGrid1.CanUserSortColumns = true;
             dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
-            TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
             
             // query all products from database
             dbProductsList = Product.GetProducts("", "", "", "", "", "", "");
             if (dbProductsList == null) { IsEnabled = false; Close(); return; } // stop on any error
+            TextBlock_message.Text = $"{dbProductsList.Count} products loaded.";
 
             // close window and stop if no product is retrieved
             if (dbProductsList.Count == 0)
@@ -218,6 +218,8 @@ namespace FrontendWPF
                                 deleteMessage = stockClient.RemoveProduct(Shared.uid, selectedProductsList[i].Id.ToString());
                                 if (deleteMessage == "Product successfully removed!")
                                 {
+                                    product_edited = selectedProductsList[i]; // required to write the log
+                                    Log("delete"); // write log to file
                                     dbProductsList.Remove(selectedProductsList[i]); // remove product also from dbProductsList
                                     selectedProductsList.RemoveAt(i);
                                 }
@@ -517,7 +519,7 @@ namespace FrontendWPF
                 else // update int?-type fields with new value (BuyUnitPrice, SellUnitPrice)
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    product_edited.GetType().GetProperty(changed_property_name).SetValue(product_edited, Convert.ToInt32(new_value));
+                    product_edited.GetType().GetProperty(changed_property_name).SetValue(product_edited, Convert.ToInt32(int_val));
 
                 }
 
@@ -582,6 +584,7 @@ namespace FrontendWPF
                         }
                         TextBlock_message.Text = $"The product '{product_edited.Name}' has been added.";
                         Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
+                        Log("insert"); // write log to file
                         edit_mode = "read";
                         dataGrid1.CanUserSortColumns = true;
                         dataGrid1.IsReadOnly = true;
@@ -595,7 +598,7 @@ namespace FrontendWPF
                     else if (edit_mode == "update")
                     {
                         TextBlock_message.Text = $"The product '{product_edited.Name}' has been updated with {(changed_property_name == "BuyUnitPrice" ? "Purchase price" : changed_property_name == "SellUnitPrice" ? "Sales price" : changed_property_name)  }.";
-
+                        Log("update"); // write log to file
                         // cell.Background = Brushes.OliveDrab;
                         Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
                         MoveToNextCell();
@@ -1044,7 +1047,10 @@ namespace FrontendWPF
                 Button_AddProduct.ToolTip = "You do not have rights to add data!";
                 Button_UpdateProduct.IsEnabled = false;
                 Button_UpdateProduct.Foreground = Brushes.Gray;
-                Button_UpdateProduct.ToolTip = "You do not have rights to update data!";
+                Button_UpdateProduct.ToolTip = "You do not have rights to import data!";
+                Button_Import.IsEnabled = false;
+                Button_Import.Foreground = Brushes.Gray;
+                Button_Import.ToolTip = "You do not have rights to import data!";
             }
         }
 
@@ -1207,7 +1213,7 @@ namespace FrontendWPF
             dataGrid0.Width = dataGrid1.Width;
             dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
 
-            stackPanel1.Height = 442 + window.ActualHeight - 500; // original window.Height
+            stackPanel1.Height = 442 + window.ActualHeight - 500 - stackPanel1.Margin.Top + 45; // original window.Height
 
             // stretch columns to dataGrid1 width
             for (int i = 1; i < dataGrid1.Columns.Count; i++)
@@ -1219,6 +1225,40 @@ namespace FrontendWPF
             dataGrid1.FontSize = 14 * Math.Max(stretch * 0.95, 0.9);
         }
 
+        private void Log(string operation)
+        {
+            string row = "";
+            // save operation into log file
+            StreamWriter sr = new StreamWriter("manageProducts.log", append: true, encoding: Encoding.UTF8);
+            // write file header line
+            // string header_row = "LogDate;LogUsername;LogOperation;Id;Name;BuyUnitPrice;SellUnitPrice";
+            // sr.WriteLine(header_row);
+
+            // write file rows
+            StockService.Product product;
+            product = product_edited;
+
+            if (operation == "update") // in update mode add the old value in a new line
+            {
+                int index = column_index;
+                row = $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{product.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)};{(column_index == 3 ? old_value : null)}\n";
+            }
+
+            row += $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{product.Id};{product.Name};{product.BuyUnitPrice};{product.SellUnitPrice}";
+            sr.WriteLine(row);
+            sr.Close();
+        }
+
+        LogWindowProducts LogWindowProducts;
+        private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
+        {
+            // show only if not open already (to avoid multiple instances)
+            if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowProducts))
+            {
+                LogWindowProducts = new LogWindowProducts();
+                if (LogWindowProducts.IsEnabled) LogWindowProducts.Show();
+            }
+        }
 
     }
 }

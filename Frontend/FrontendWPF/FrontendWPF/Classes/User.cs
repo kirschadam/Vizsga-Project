@@ -10,23 +10,30 @@ namespace FrontendWPF.Classes
 {
     public class User
     {
-        public int Id;
+        public int? Id;
         public string Username;
         public string Password;
+        public string Location;
+        public int? Permission;
+        public int? Active;
+
 
         public User()
         {
         }
 
-        public User(int id, string username, string password)
+        public User(int? id, string username, string password, string location, int? permission, int? active)
         {
             Id = id;
             Username = username;
             Password = password;
+            Location = location;
+            Permission = permission;
+            Active = active;
         }
 
         // returns a list of users
-        public static List<UserService.User> GetUsers(string id, string username, string location, string region, string limit)
+        public static List<UserService.User> GetUsers(string id, string username, string location, string permissionover, string permissionunder, string active,  string region, string limit)
         {
             UserService.UserServiceClient client = new UserService.UserServiceClient();
  
@@ -35,7 +42,7 @@ namespace FrontendWPF.Classes
  
             try
             {
-                string hostMessage = client.ListUser(Shared.uid, id, username, location, region, limit).Message;
+                string hostMessage = client.ListUser(Shared.uid, id, username, location, permissionover, permissionunder, active, region, limit).Message;
                 if (hostMessage.Contains("Unable to connect"))
                 {
                     MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
@@ -71,7 +78,7 @@ namespace FrontendWPF.Classes
                 else
                 {
                     // string query = $"WHERE Username='{userName}' AND Password='{CreateMD5(password)}'";
-                    usersArray = client.ListUser(Shared.uid, id, username, location, region, limit).Users;
+                    usersArray = client.ListUser(Shared.uid, id, username, location, permissionover, permissionunder, active, region, limit).Users;
                     usersList = usersArray.ToList();
                 }
             }

@@ -60,7 +60,7 @@ namespace FrontendWPF
                     errorMessage = $"The remote host is not accessible. Please check your Internet connection, or contact the service provider.";
                 }
                 */
-                if (responseLogin.Message.Contains("Unable to connect"))
+                if (responseLogin.Message.Contains("One or more errors occurred"))
                 {
                     errorMessage = $"The remote database is not available. Please check your Internet connection, or contact the service provider.";
                 }
@@ -169,6 +169,8 @@ namespace FrontendWPF
                     Shared.StartWindow.button_ManagePurchasesWindow.Foreground = Brushes.White;
                     Shared.StartWindow.button_ManageSalesWindow.IsEnabled = true;
                     Shared.StartWindow.button_ManageSalesWindow.Foreground = Brushes.White;
+                    Shared.StartWindow.button_LogWindow.IsEnabled = true;
+                    Shared.StartWindow.button_LogWindow.Foreground = Brushes.White;
                 }
                 else
                 {

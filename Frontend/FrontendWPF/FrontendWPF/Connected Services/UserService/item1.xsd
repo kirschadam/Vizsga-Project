@@ -8,6 +8,9 @@
         <xs:element minOccurs="0" name="id" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="username" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="location" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="permissionover" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="permissionunder" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="active" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="region" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="limit" nillable="true" type="xs:string" />
       </xs:sequence>

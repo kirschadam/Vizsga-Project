@@ -61,12 +61,12 @@ namespace FrontendWPF
             dataGrid1.CanUserSortColumns = true;
             dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
-            TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
             
             // query all locations from database
             dbLocationsList = Location.GetLocations("", "", "", "");
             if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
+            TextBlock_message.Text = $"{dbLocationsList.Count} locations loaded.";
 
             // close window and stop if no location is retrieved
             /*
@@ -215,6 +215,8 @@ namespace FrontendWPF
                                 deleteMessage = locationClient.RemoveLocation(Shared.uid, selectedLocationsList[i].Id.ToString(), selectedLocationsList[i].Name);
                                 if (deleteMessage == "Location successfully removed!")
                                 {
+                                    location_edited = selectedLocationsList[i]; // required to write the log
+                                    Log("delete"); // write log to file
                                     dbLocationsList.Remove(selectedLocationsList[i]); // remove location also from dbLocationsList
                                     selectedLocationsList.RemoveAt(i);
                                 }
@@ -564,6 +566,7 @@ namespace FrontendWPF
                         }
                         TextBlock_message.Text = $"The location '{location_edited.Name}' has been added.";
                         Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
+                        Log("insert"); // write log to file
                         edit_mode = "read";
                         dataGrid1.CanUserSortColumns = true;
                         dataGrid1.IsReadOnly = true;
@@ -576,7 +579,7 @@ namespace FrontendWPF
                     else if (edit_mode == "update")
                     {
                         TextBlock_message.Text = $"The location '{location_edited.Name}' has been updated with {changed_property_name}.";
-
+                        Log("update"); // write log to file
                         // cell.Background = Brushes.OliveDrab;
                         Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
                         MoveToNextCell();
@@ -1015,6 +1018,9 @@ namespace FrontendWPF
                 Button_UpdateLocation.IsEnabled = false;
                 Button_UpdateLocation.Foreground = Brushes.Gray;
                 Button_UpdateLocation.ToolTip = "You do not have rights to update data!";
+                Button_Import.IsEnabled = false;
+                Button_Import.Foreground = Brushes.Gray;
+                Button_Import.ToolTip = "You do not have rights to update data!";
             }
         }
 
@@ -1166,7 +1172,7 @@ namespace FrontendWPF
             dataGrid0.Width = dataGrid1.Width;
             dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
 
-            stackPanel1.Height = 442 + window.ActualHeight - 500; // original window.Height
+            stackPanel1.Height = 442 + window.ActualHeight - 500 - stackPanel1.Margin.Top + 45; // original window.Height
 
             // stretch columns to dataGrid1 width
             for (int i = 1; i < dataGrid1.Columns.Count; i++)
@@ -1176,6 +1182,41 @@ namespace FrontendWPF
                 // dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
             }
             dataGrid1.FontSize = 15 * Math.Max(stretch * 0.65, 0.9);
+        }
+
+        private void Log(string operation)
+        {
+            string row = "";
+            // save operation into log file
+            StreamWriter sr = new StreamWriter("manageLocations.log", append: true, encoding: Encoding.UTF8);
+            // write file header line
+            // string header_row = "LogDate;LogUsername;LogOperation;Id;Name;BuyUnitPrice;SellUnitPrice";
+            // sr.WriteLine(header_row);
+
+            // write file rows
+            LocationService.Store location;
+            location = location_edited;
+
+            if (operation == "update") // in update mode add the old value in a new line
+            {
+                int index = column_index;
+                row = $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{location.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)}\n";
+            }
+
+            row += $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{location.Id};{location.Name};{location.Region}";
+            sr.WriteLine(row);
+            sr.Close();
+        }
+
+        LogWindowLocations LogWindowLocations;
+        private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
+        {
+            // show only if not open already (to avoid multiple instances)
+            if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowLocations))
+            {
+                LogWindowLocations = new LogWindowLocations();
+                if (LogWindowLocations.IsEnabled) LogWindowLocations.Show();
+            }
         }
 
     }

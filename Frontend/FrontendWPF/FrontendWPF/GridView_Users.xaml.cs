@@ -41,7 +41,7 @@ namespace FrontendWPF
 
             // usersList = new List<UserService.User>();
             // string query = $"WHERE 1";  // összes user lekérdezése
-            dbUsersList = User.GetUsers("", "", "", "", "");
+            dbUsersList = User.GetUsers("", "", "", "", "", "", "", "");
             
             // close window and stop if no user is retrieved
             if (dbUsersList.Count == 0)

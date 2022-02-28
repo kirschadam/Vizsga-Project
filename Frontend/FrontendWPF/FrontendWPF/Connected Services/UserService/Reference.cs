@@ -281,10 +281,10 @@ namespace FrontendWPF.UserService {
     public interface IUserService {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/ListUser", ReplyAction="http://tempuri.org/IUserService/ListUserResponse")]
-        FrontendWPF.UserService.Response_User ListUser(string uid, string id, string username, string location, string region, string limit);
+        FrontendWPF.UserService.Response_User ListUser(string uid, string id, string username, string location, string permissionover, string permissionunder, string active, string region, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/ListUser", ReplyAction="http://tempuri.org/IUserService/ListUserResponse")]
-        System.Threading.Tasks.Task<FrontendWPF.UserService.Response_User> ListUserAsync(string uid, string id, string username, string location, string region, string limit);
+        System.Threading.Tasks.Task<FrontendWPF.UserService.Response_User> ListUserAsync(string uid, string id, string username, string location, string permissionover, string permissionunder, string active, string region, string limit);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IUserService/LoginUser", ReplyAction="http://tempuri.org/IUserService/LoginUserResponse")]
         FrontendWPF.UserService.Response_Login LoginUser(string username, string password);
@@ -344,12 +344,12 @@ namespace FrontendWPF.UserService {
                 base(binding, remoteAddress) {
         }
         
-        public FrontendWPF.UserService.Response_User ListUser(string uid, string id, string username, string location, string region, string limit) {
-            return base.Channel.ListUser(uid, id, username, location, region, limit);
+        public FrontendWPF.UserService.Response_User ListUser(string uid, string id, string username, string location, string permissionover, string permissionunder, string active, string region, string limit) {
+            return base.Channel.ListUser(uid, id, username, location, permissionover, permissionunder, active, region, limit);
         }
         
-        public System.Threading.Tasks.Task<FrontendWPF.UserService.Response_User> ListUserAsync(string uid, string id, string username, string location, string region, string limit) {
-            return base.Channel.ListUserAsync(uid, id, username, location, region, limit);
+        public System.Threading.Tasks.Task<FrontendWPF.UserService.Response_User> ListUserAsync(string uid, string id, string username, string location, string permissionover, string permissionunder, string active, string region, string limit) {
+            return base.Channel.ListUserAsync(uid, id, username, location, permissionover, permissionunder, active, region, limit);
         }
         
         public FrontendWPF.UserService.Response_Login LoginUser(string username, string password) {

@@ -10,28 +10,30 @@ namespace FrontendWPF.Classes
 {
     public class SalePurchase
     {
-        public int Id;
-        public int ProductId;
-        public int Quantity;
-        public int UnitPrice;
-        public DateTime Date;
-        public int LocationId;
-        public int UserId;
+        // class requires getter-setter to be visible in DataGrid!
+        public int? Id { set; get; }
+        public string Product { set; get; }
+        public int? Quantity { set; get; }
+        public int? TotalPrice { set; get; }
+        public DateTime? Date { set; get; }
+        public string Location { set; get; }
+        public string Username { set; get; }
 
         public SalePurchase()
         {
         }
 
-        public SalePurchase(int id, int productId, int quantity, int unitPrice, DateTime date, int locationId, int userId)
+        public SalePurchase(int? id, string product, int? quantity, int? totalPrice, DateTime? date, string location, string username)
         {
             Id = id;
-            ProductId = productId;
+            Product = product;
             Quantity = quantity;
-            UnitPrice = unitPrice;
+            TotalPrice = totalPrice;
             Date = date;
-            LocationId = locationId;
-            UserId = userId;
+            Location = location;
+            Username = username;
         }
+
 
         // returns a list of sales/purchases
         public static List<StockService.SalePurchase> GetSalesPurchases(string type, string id, string product, string qOver, string qUnder, string priceOver, string priceUnder, string before, string after, string location, string user, string limit)

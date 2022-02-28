@@ -197,6 +197,8 @@ namespace FrontendWPF
                 button_ManageSalesWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF8C8C8C");
                 button_ManageLocationsWindow.IsEnabled = false;
                 button_ManageLocationsWindow.Foreground = Brushes.Gray;
+                button_LogWindow.IsEnabled = false;
+                button_LogWindow.Foreground = Brushes.Gray;
 
                 UserService.UserServiceClient client = new UserService.UserServiceClient();
                 

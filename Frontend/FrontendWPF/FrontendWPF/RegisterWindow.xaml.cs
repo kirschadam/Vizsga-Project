@@ -69,7 +69,7 @@ namespace FrontendWPF
             
             try
             {
-                UserService.User[] userArray = client.ListUser(Shared.uid, "", userName, "", "", "").Users;
+                UserService.User[] userArray = client.ListUser(Shared.uid, "", userName, "", "", "", "", "", "").Users;
                 //user = client.UserList(query);
 
                 if (userArray == null)

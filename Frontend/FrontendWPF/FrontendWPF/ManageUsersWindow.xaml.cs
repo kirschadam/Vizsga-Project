@@ -67,12 +67,12 @@ namespace FrontendWPF
             dataGrid1.CanUserSortColumns = true;
             dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
-            TextBlock_message.Text = "Select an option.";
             TextBlock_message.Foreground = Brushes.White;
             
             // query all users from database
-            dbUsersList = User.GetUsers("", "", "", "", "");
+            dbUsersList = User.GetUsers("", "", "", "", "", "", "", "");
             if (dbUsersList == null) { IsEnabled = false; Close(); return; } // stop on any error
+            TextBlock_message.Text = $"{dbUsersList.Count} users loaded.";
 
             // close window and stop if no user is retrieved
             /*
@@ -88,7 +88,7 @@ namespace FrontendWPF
             usersList = new List<User>();
             for (int i = 0; i < dbUsersList.Count; i++)
             {
-                usersList.Add(new User((int)dbUsersList[i].Id, dbUsersList[i].Username, dbUsersList[i].Password));
+                usersList.Add(new User((int)dbUsersList[i].Id, dbUsersList[i].Username, dbUsersList[i].Password, dbUsersList[i].Location, dbUsersList[i].Permission, dbUsersList[i].Active));
             }
             // dataGrid1.ItemsSource = usersList;
             dataGrid1.ItemsSource = dbUsersList;
@@ -234,6 +234,8 @@ namespace FrontendWPF
                                 deleteMessage = client.DeleteUser(Shared.uid, selectedUsersList[i].Id.ToString(), selectedUsersList[i].Username);
                                 if (deleteMessage == "User successfully deleted!")
                                 {
+                                    user_edited = selectedUsersList[i]; // required to write the log
+                                    Log("delete"); // write log to file
                                     dbUsersList.Remove(selectedUsersList[i]); // remove user also from dbUsersList
                                     selectedUsersList.RemoveAt(i);
                                 }
@@ -618,6 +620,7 @@ namespace FrontendWPF
                         }
                         TextBlock_message.Text = $"The user '{user_edited.Username}' has been added.";
                         Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
+                        Log("insert"); // write log to file
                         edit_mode = "read";
                         dataGrid1.CanUserSortColumns = true;
                         dataGrid1.IsReadOnly = true;
@@ -629,7 +632,7 @@ namespace FrontendWPF
                     else if (edit_mode == "update")
                     {
                         TextBlock_message.Text = $"The user '{user_edited.Username}' has been updated with {changed_property_name}.";
-                        
+                        Log("update"); // write log to file
                         // cell.Background = Brushes.OliveDrab;
                         Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
                         MoveToNextCell();
@@ -1082,6 +1085,9 @@ namespace FrontendWPF
                 Button_UpdateUser.IsEnabled = false;
                 Button_UpdateUser.Foreground = Brushes.Gray;
                 Button_UpdateUser.ToolTip = "You do not have rights to update data!";
+                Button_Import.IsEnabled = false;
+                Button_Import.Foreground = Brushes.Gray;
+                Button_Import.ToolTip = "You do not have rights to update data!";
             }
         }
 
@@ -1260,7 +1266,7 @@ namespace FrontendWPF
             dataGrid0.Width = dataGrid1.Width;
             dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
 
-            stackPanel1.Height = 442 + window.ActualHeight - 500; // original window.Height
+            stackPanel1.Height = 442 + window.ActualHeight - 500 - stackPanel1.Margin.Top + 45; // original window.Height
 
             // stretch columns to dataGrid1 width
             for (int i = 1; i < dataGrid1.Columns.Count; i++)
@@ -1270,6 +1276,41 @@ namespace FrontendWPF
                 dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
             }
             dataGrid1.FontSize = 14 * Math.Max(stretch*0.85, 0.85);
+        }
+
+        private void Log(string operation)
+        {
+            string row = "";
+            // save operation into log file
+            StreamWriter sr = new StreamWriter("manageUsers.log", append: true, encoding: Encoding.UTF8);
+            // write file header line
+            // string header_row = "Date;Username;Operation;Id;Username;Location;Permission;Active";
+            // sr.WriteLine(header_row);
+
+            // write file rows
+            UserService.User user;
+            user = user_edited;
+
+            if (operation == "update") // in update mode add the old value in a new line
+            {
+                int index = column_index;
+                row = $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{user.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)};{(column_index == 3 ? old_value : null)};{(column_index == 4 ? old_value : null)};{(column_index == 5 ? old_value : null)}\n";
+            }
+
+            row += $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{user.Id};{user.Username};{user.Password};{user.Location};{user.Permission};{user.Active}";
+            sr.WriteLine(row);
+            sr.Close();
+        }
+
+        LogWindowUsers LogWindowUsers;
+        private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
+        {
+            // show only if not open already (to avoid multiple instances)
+            if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowUsers))
+            {
+                LogWindowUsers = new LogWindowUsers();
+                if (LogWindowUsers.IsEnabled) LogWindowUsers.Show();
+            }
         }
 
     }
