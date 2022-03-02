@@ -56,8 +56,8 @@ function Products() {
         		<div className="row border-bottom py-2 w-100">
           			<h5 className="col-xs-12 col-sm-1">Id</h5>
           			<h5 className="col-xs-4 col-sm-3">Product</h5>
-          			<h5 className="col-xs-8 col-sm-3">Sell Price</h5>
-          			<h5 className="col-xs-10 col-sm-3">Buy Price</h5>
+          			<h5 className="col-xs-8 col-sm-3">Purchase price</h5>
+          			<h5 className="col-xs-10 col-sm-3">Sales Price</h5>
         		</div>
       		</ul>
       		<form onSubmit={SearchSubmit} id="filterForm">
@@ -97,7 +97,7 @@ function Products() {
       		{products.map((product) => (
         		<div key={product.Id} className="row border-bottom  py-2 w-100">
           			<div className="col-xs-12 col-sm-1">{product.Id}</div>
-          			<div className="col-xs-4 col-sm-3">{product.Name}</div>
+          			<div className="col-xs-4 col-sm-4">{product.Name}</div>
           			<div className="col-xs-8 col-sm-3">{product.BuyUnitPrice}</div>
           			<div className="col-xs-10 col-sm-3">{product.SellUnitPrice}</div>
         		</div>

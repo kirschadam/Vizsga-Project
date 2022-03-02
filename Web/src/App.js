@@ -35,7 +35,7 @@ function App() {
   return (
     <div className="App res-primary res-background" data-theme={theme}>
       <div>
-        <button onClick={switchTheme} id="themeButton" className="res-primary res-background">{theme === 'light' ? 'Light' : 'Dark'}</button>
+        <button onClick={switchTheme} id="themeButton" className="res-primary res-background">{theme === 'light' ? 'Dark' : 'Light'}</button>
       </div>
       <BrowserRouter>
         <div>

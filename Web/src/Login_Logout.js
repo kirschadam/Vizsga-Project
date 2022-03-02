@@ -6,6 +6,9 @@ import {User, Base_user} from './Variables';
 
 export function Login() {
     const [isLoginPending, setLoginPending] = useState(false);
+    const [passwordShown, setPasswordShown] = useState(false);
+    const [showHidePassword, setShowHidePassword] = useState("Show");
+
     const navigate = useNavigate();
 
     useEffect(() =>{
@@ -29,6 +32,9 @@ export function Login() {
         .then(res => res.json())
         .then((response) =>{
             console.log(response.Message);
+            console.log(`"Login response.Message: ${response.Message}"`);
+            console.log(`"Login response: ${JSON.stringify(response)}"`);
+            alert(response.Message);
             if(response.User.Active === 0){
                 alert("This user is currently set to inactive!");
                 return;
@@ -62,6 +68,12 @@ export function Login() {
         );
     }
 
+  // Password toggle button handler
+  const togglePassword = () => {
+    setPasswordShown(!passwordShown);
+    setShowHidePassword(passwordShown? "Show": "Hide");
+  };
+
     return(
         <div className='container-fluid d-flex justify-content-center h-25 login-container' id="loginCard">
             <div className='card login-card'>
@@ -71,14 +83,15 @@ export function Login() {
 
                 <div className='card-body res-background'>
                     <form onSubmit={loginFormSubmit}>
-                        <div className='input-group form-group m-2'>
+                        <div className='input-group form-group'>
                             <input type="text" name='username' className='form-control' placeholder='Username'></input>
                         </div>
-                        <div className='input-group form-group m-2'>
-                            <input type="password" name='password' className='form-control' placeholder='Password'></input>
+                        <div className='input-group form-group'>
+                            <input type={passwordShown ? "text" : "password"} name='password' className='form-control' placeholder='Password'></input>
                         </div>
-                        <div className='form-group m-2'>
+                        <div className='form-group d-flex justify-content-between mt-2'>
                             <button type="submit" className='btn btn-success'>Login</button>
+                            <button type='button' className='btn btn-primary' onClick={togglePassword}>{showHidePassword} Password</button>
                         </div>
                     </form>
                 </div>
@@ -98,7 +111,7 @@ export function Logout(){
         })
         .then(res => res.json())
         .then((response) =>{
-            console.log(response.Message);
+            console.log(response);
             sessionStorage.clear();
             User.Uid = "";
             User.Details = {
