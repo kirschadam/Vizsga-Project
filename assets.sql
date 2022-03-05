@@ -1,6 +1,7 @@
 CREATE DATABASE `assets`
 DEFAULT CHARACTER SET utf8 
 COLLATE utf8_hungarian_ci;
+USE `assets`;
 
 
 CREATE TABLE `regions` (
