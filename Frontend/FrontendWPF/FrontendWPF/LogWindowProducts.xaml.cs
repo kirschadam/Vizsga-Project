@@ -36,6 +36,10 @@ namespace FrontendWPF
         string opBuyUnitPrice = "=";
         string opSellUnitPrice = "=";
         bool pickStartDate = false;
+        double windowLeft0;
+        double windowTop0;
+        double windowWidth0;
+        double windowHeight0;
 
         DateTime startDate = DateTime.Now.Date.AddDays(-30); // set an initial limit of 29 days
         DateTime endDate = DateTime.Now; //
@@ -193,11 +197,16 @@ namespace FrontendWPF
 
                 ReloadData();
             }
+            else
+            {
+                TextBlock_message.Text = "";
+                TextBlock_message.Foreground = Brushes.White;
+            }
         }
 
 
-        DataGridRow row;
-        DataGridColumn column;
+        DataGridRow row0;
+        DataGridColumn column0;
         DataGridCell cell;
         TextBox textBox;
         string old_value;
@@ -323,8 +332,8 @@ namespace FrontendWPF
 
         private void dataGrid0_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
-            row = e.Row;
-            column = e.Column;
+            row0 = e.Row;
+            column0 = e.Column;
         }
 
         private void dataGrid0_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -335,7 +344,7 @@ namespace FrontendWPF
         private void dataGrid0_KeyUp(object sender, KeyEventArgs e)
         // private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            if (row == null || column == null) { return; } // stop if column or row is not selected or not in edit mode
+            if (row0 == null || column0 == null) { return; } // stop if column or row is not selected or not in edit mode
 
             // check whether the pressed key is digit or number, otherwise stop
             if (input.Length == 0)
@@ -354,10 +363,8 @@ namespace FrontendWPF
                 return;
             }
 
-            // row = e.Row;
-            // column = e.Column;
-            filterc_index = column.DisplayIndex;
-            cell = dataGrid1.Columns[filterc_index].GetCellContent(row).Parent as DataGridCell;
+            filterc_index = column0.DisplayIndex;
+            cell = dataGrid1.Columns[filterc_index].GetCellContent(row0).Parent as DataGridCell;
             if (cell.IsEditing == false) { return; } // stop if cell is not editing
             textBox = (TextBox)cell.Content;
             new_value = textBox.Text;
@@ -560,6 +567,8 @@ namespace FrontendWPF
             TextBlock_datePicker.Foreground = pickStartDate ? Brushes.White : Brushes.LightSkyBlue;
             TextBlock_datePicker.Text = pickStartDate ? "Pick start date" : "Pick end date";
 
+            Button_Restore.Visibility = Visibility.Hidden;
+            Button_Maximize.Visibility = Visibility.Hidden;
             TextBlock_datePicker.Visibility = Visibility.Visible;
 
             // remove/add event handler 
@@ -624,8 +633,6 @@ namespace FrontendWPF
                 ReloadData();
 
                 string startOrEnd = pickStartDate ? "Start" : "End";
-                TextBlock_datePicker.Text = "";
-                datePicker.Visibility = Visibility.Hidden;
                 // int trimZeros = datePicker.SelectedDate.ToString().Substring(10, 8) == "00:00:00" ? 10 : 3;
                 TextBlock_message.Text = $"{startOrEnd} date changed to {(pickStartDate ? startDate : endDate).ToString().Substring(0, (pickStartDate ? startDate : endDate).ToString().Length - 3)}.";
 
@@ -634,6 +641,14 @@ namespace FrontendWPF
                 checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
                 gifImage.StartAnimation();
             }
+        }
+
+        private void datePicker_CalendarClosed(object sender, RoutedEventArgs e)
+        {
+            datePicker.Visibility = Visibility.Hidden;
+            TextBlock_datePicker.Text = "";
+            Button_Restore.Visibility = Visibility.Visible;
+            Button_Maximize.Visibility = Visibility.Visible;
         }
 
         private void window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -655,6 +670,58 @@ namespace FrontendWPF
             dataGrid1.Columns[5].Header = stretch < 1.15 ? "Purchase price" : "Purchase pr.";
         }
 
+        private void Button_Maximize_Click(object sender, RoutedEventArgs e)
+        {
+            windowWidth0 = window.Width;
+            windowHeight0 = window.Height;
+            windowLeft0 = window.Left;
+            windowTop0 = window.Top;
+            window.Width = Shared.screenWidth;
+            window.Height = Shared.screenHeight;
+            window.Left = 0;
+            window.Top = 0;
+            Button_Restore.IsEnabled = true;
+            Button_Maximize.IsEnabled = false;
+
+        }
+
+        private void Button_Restore_Click(object sender, RoutedEventArgs e)
+        {
+            window.Width = windowWidth0;
+            window.Height = windowHeight0;
+            window.Left = windowLeft0;
+            window.Top = windowTop0;
+            Button_Restore.IsEnabled = false;
+            Button_Maximize.IsEnabled = true;
+        }
+
+        ProductLog productlog;
+        private void dataGrid1_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            DataGridRow row = e.Row; int rowIndex = row.GetIndex();
+            productlog = dataGrid1.Items[row.GetIndex()] as ProductLog;
+            if (productlog.SellUnitPrice == null || productlog.BuyUnitPrice == null)
+            {
+                e.Row.Foreground = new SolidColorBrush(Colors.Gray);
+            }
+            else if (productlog.LogOperation == "insert")
+            {
+                e.Row.Foreground = new SolidColorBrush(Colors.Green);
+            }
+            else if (productlog.LogOperation == "delete")
+            {
+                e.Row.Foreground = new SolidColorBrush(Colors.Salmon);
+            }
+        }
+
+        private void window_Loaded(object sender, RoutedEventArgs e)
+        {
+            dataGrid1.Dispatcher.InvokeAsync(async () => {
+                await Task.Delay(2000);
+                // false is needed to display colored rows properly
+                dataGrid1.EnableRowVirtualization = false; // must be delayed, otherwise animation does not work properly
+            }, DispatcherPriority.SystemIdle);
+        }
     }
 }
 

@@ -16,26 +16,24 @@ using FrontendWPF.Classes;
 
 namespace FrontendWPF
 {
-    public partial class LogWindowSales : Window
+    public partial class LogWindowStocks : Window
     {
         private StockService.StockServiceClient stockClient = new StockService.StockServiceClient();
         private bool closeCompleted = false;
-        private List<SalePurchaseLog> logList { get; set; }
+        private List<StockLog> logList { get; set; }
 
         System.Collections.IList selectedItems;
-        List<SalePurchaseLog> filterSalesList { get; set; }
-        List<SalePurchaseLog> filteredSalesList { get; set; }
+        List<StockLog> filterStocksList { get; set; }
+        List<StockLog> filteredStocksList { get; set; }
 
         string edit_mode;
-        private List<SalePurchase> purchasesList { get; set; }
-        private int[] fieldsEntered = new int[9]; // LogDate, LogUser, LogOperation, (product) Name, Quantity, TotalPrice, Date, Location, User(name)
+        private List<Stock> stocksList { get; set; }
+        private int[] fieldsEntered = new int[6]; // LogDate, LogUser, LogOperation, Product (name), Quantity, Location
         ScrollViewer scrollViewer;
         string input = "";
         string opLogDate = "=";
         string opId = "=";
         string opQuantity = "=";
-        string opTotalPrice = "=";
-        string opDate = "=";
         bool pickStartDate = false;
         double windowLeft0;
         double windowTop0;
@@ -46,10 +44,10 @@ namespace FrontendWPF
         DateTime endDate = DateTime.Now; //
         // public double columnFontSize { get; set; }
 
-        public LogWindowSales()
+        public LogWindowStocks()
         {
             InitializeComponent();
-            logList = new List<SalePurchaseLog>();
+            logList = new List<StockLog>();
             ReloadData();
         }
 
@@ -76,13 +74,13 @@ namespace FrontendWPF
             */
 
             // get log file content
-            logList = SalePurchaseLog.GetSalesPurchasesLog(type: "sale", startDate, endDate);
+            logList = StockLog.GetStocksLog(startDate, endDate);
             if (logList == null) { IsEnabled = false; Close(); return; } // stop on any error
             dataGrid1.ItemsSource = logList;
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
             TextBlock_message.Text = $"{logList.Count} records loaded.";
 
-            // close window and stop if no sale is retrieved
+            // close window and stop if no purchase is retrieved
             /*
             if (logList.Count == 0)
             {
@@ -96,11 +94,11 @@ namespace FrontendWPF
             // if (window.IsLoaded == false) // run on the first time when window is not loaded
             if (true)
             {
-                filterSalesList = new List<SalePurchaseLog>();
+                filterStocksList = new List<StockLog>();
 
                 Dispatcher.InvokeAsync(() =>
                 {
-                    double stretch = Math.Max((borderLeft.ActualWidth - 10 - 80) / (800 - 10 - 77), 0.8); // (BorderLeft width - left margin - more due to Id and Quantity column) / original borderLeft
+                    double stretch = Math.Max((borderLeft.ActualWidth - 10 - 140) / (650 - 10 - 140), 0.8); // (BorderLeft width - left margin - more due to Id and Quantity column) / original borderLeft
                     dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                     dataGrid0.Width = dataGrid1.Width;
 
@@ -109,11 +107,10 @@ namespace FrontendWPF
                     // stretch columns to dataGrid1 width
                     for (int i = 0; i < dataGrid1.Columns.Count; i++)
                     {
-                        dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * ((stretch - 1) * (i == 0 || i == 5 ? 0.5 : 1) + 1); // resize Quantity row only by 50%
+                        dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * ((stretch - 1) * (i == 3 || i == 5 || i == 6 ? 0.5 : 1) + 1); // resize Quantity row only by 50%
                         dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
                     }
-                    dataGrid1.FontSize = 12 * Math.Min(stretch, 1.027); // reset font size to initial stretch value on large window width
-                    // dataGrid1.Columns[2].Header = stretch < 1.18 ? "Quantity" : "Quant.";
+                    dataGrid1.FontSize = 12 * Math.Min(stretch, 1.001); // reset font size to initial stretch value on large window width
                     dataGrid1.Items.Refresh();
                     ScrollDown();
                     selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
@@ -121,24 +118,22 @@ namespace FrontendWPF
             }
             ScrollDown();
 
-            // create/reset sale_filter item and add it to filter dataGrid0
-            sale_filter = new SalePurchaseLog()
+            // create/reset stock_filter item and add it to filter dataGrid0
+            stock_filter = new StockLog()
             {
                 LogDate = null,
                 LogUsername = "",
                 LogOperation = "",
                 Id = null,
-                Product = "", // Name of product
+                Product = "",
                 Quantity = null,
-                Date = null,
                 Location = "",
-                Username = ""
             };
 
-            filterSalesList.Clear();
-            filterSalesList.Add(sale_filter);
+            filterStocksList.Clear();
+            filterStocksList.Add(stock_filter);
             dataGrid0.ItemsSource = null; // to avoid IsEditingItem error
-            dataGrid0.ItemsSource = filterSalesList;
+            dataGrid0.ItemsSource = filterStocksList;
             dataGrid0.Items.Refresh();
 
             SetUserAccess();
@@ -163,7 +158,7 @@ namespace FrontendWPF
             column.SortDirection = sortDirection;
         }
 
-        private void Button_DeleteSale_Click(object sender, RoutedEventArgs e)
+        private void Button_DeleteStock_Click(object sender, RoutedEventArgs e)
         {
             TextBlock_message.Text = "Delete log file's content?";
             TextBlock_message.Foreground = Brushes.Salmon;
@@ -175,8 +170,8 @@ namespace FrontendWPF
                 {
                     // DELETE log file's content
 
-                    StreamWriter sw = new StreamWriter("manageSales.log", append: false, encoding: Encoding.UTF8);
-                    sw.WriteLine("LogDate;LogUsername;LogOperation;Id;Product;Quantity;TotalPrice;Date;Location;Username");
+                    StreamWriter sw = new StreamWriter("manageStocks.log", append: false, encoding: Encoding.UTF8);
+                    sw.WriteLine("LogDate;LogUsername;LogOperation;Id;Product;Quantity;Location");
                     sw.Close();
                 }
                 catch (Exception ex)
@@ -209,8 +204,6 @@ namespace FrontendWPF
         }
 
 
-        DataGridRow row;
-        DataGridColumn column;
         DataGridRow row0;
         DataGridColumn column0;
         DataGridCell cell;
@@ -219,7 +212,7 @@ namespace FrontendWPF
         string new_value = "";
         int filterc_index;
         string changed_property_name;
-        SalePurchaseLog sale_filter;
+        StockLog stock_filter;
 
 
         private void StopAnimation()
@@ -317,7 +310,7 @@ namespace FrontendWPF
         // show/hide dataGrid0 with filter row
         private void Button_Filter_Click(object sender, RoutedEventArgs e)
         {
-            filteredSalesList = new List<SalePurchaseLog>();
+            filteredStocksList = new List<StockLog>();
 
             // show filter dataGrid0
             if (stackPanel1.Height == 442 + window.ActualHeight - 500)
@@ -388,10 +381,9 @@ namespace FrontendWPF
             if (changed_property_name == "date") { changed_property_name = "LogDate"; }
             if (changed_property_name == "user name") { changed_property_name = "LogUsername"; }
             if (changed_property_name == "operation") { changed_property_name = "LogOperation"; }
-            if (changed_property_name == "Total price") { changed_property_name = "TotalPrice"; }
 
-            // remove operator for integer columns Id and UnitPrice
-            if (changed_property_name == "LogDate" || changed_property_name == "Id" || changed_property_name == "Quantity" || changed_property_name == "TotalPrice" || changed_property_name == "Date")
+            // remove operator for integer columns Id and Quantity
+            if (changed_property_name == "LogDate" || changed_property_name == "Id" || changed_property_name == "Quantity")
             {
                 if (op != "=" || (new_value != "" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
 
@@ -400,32 +392,23 @@ namespace FrontendWPF
                     case "LogDate": opLogDate = op; break;
                     case "Id": opId = op; break;
                     case "Quantity": opQuantity = op; break;
-                    case "TotalPrice": opTotalPrice = op; break;
-                    case "Date": opDate = op; break;
                     default: break;
                 }
             }
 
-            if ((changed_property_name == "LogDate" || changed_property_name == "Date") && ((new_value.Length < 8 && new_value.Length > 0) || (new_value.Length > 8 && new_value.Length < 14))) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise sale_filter.Date will be set to null
+            if (changed_property_name == "LogDate" && ((new_value.Length < 8 && new_value.Length > 0) || (new_value.Length > 8 && new_value.Length < 14))) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise stock_filter.Date will be set to null
 
-            // if any sale_filter value is null, set it temporarily to -999 to avoid error when setting old value 
-            if (changed_property_name == "LogDate" && sale_filter.LogDate == null) sale_filter.LogDate = DateTime.Parse("01.01.01 01:01:01");
-            if (changed_property_name == "Product name") { changed_property_name = "Product"; }
-            if (changed_property_name == "Total price") { changed_property_name = "TotalPrice"; }
-            if (changed_property_name == "User name") { changed_property_name = "Username"; }
-            if (changed_property_name == "Id" && sale_filter.Id == null) sale_filter.Id = -999;
-            if (changed_property_name == "Quantity" && sale_filter.Quantity == null) sale_filter.Quantity = -999;
-            if (changed_property_name == "TotalPrice" && sale_filter.TotalPrice == null) sale_filter.TotalPrice = -999;
-            if (changed_property_name == "Date" && sale_filter.Date == null) sale_filter.Date = DateTime.Parse("01.01.01 01:01:01");
+            // if any stock_filter value is null, set it temporarily to -999 to avoid error when setting old value 
+            if (changed_property_name == "LogDate" && stock_filter.LogDate == null) stock_filter.LogDate = DateTime.Parse("01.01.01 01:01:01");
+            if (changed_property_name == "Id" && stock_filter.Id == null) stock_filter.Id = -999;
+            if (changed_property_name == "Quantity" && stock_filter.Quantity == null) stock_filter.Quantity = -999;
 
-            //get old property value of sale by property name
+            //get old property value of purchase by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-            old_value = sale_filter.GetType().GetProperty(changed_property_name).GetValue(sale_filter).ToString();
-            if (changed_property_name == "LogDate" && sale_filter.LogDate == DateTime.Parse("01.01.01 01:01:01")) sale_filter.LogDate = null;
-            if (changed_property_name == "Id" && sale_filter.Id == -999) sale_filter.Id = null;
-            if (changed_property_name == "Quantity" && sale_filter.Quantity == -999) sale_filter.Quantity = null;
-            if (changed_property_name == "TotalPrice" && sale_filter.TotalPrice == -999) sale_filter.TotalPrice = null;
-            if (changed_property_name == "Date" && sale_filter.Date == DateTime.Parse("01.01.01 01:01:01")) sale_filter.Date = null;
+            old_value = stock_filter.GetType().GetProperty(changed_property_name).GetValue(stock_filter).ToString();
+            if (changed_property_name == "LogDate" && stock_filter.LogDate == DateTime.Parse("01.01.01 01:01:01")) stock_filter.LogDate = null;
+            if (changed_property_name == "Id" && stock_filter.Id == -999) stock_filter.Id = null;
+            if (changed_property_name == "Quantity" && stock_filter.Quantity == -999) stock_filter.Quantity = null;
 
             string stopMessage = "";
             if (old_value == "-999" || op != "=")
@@ -450,7 +433,7 @@ namespace FrontendWPF
                     stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
                 }
             }
-            else if (new_value != "" && changed_property_name == "Quantity") // if wrong Active value is entered
+            else if (new_value != "" && changed_property_name == "Quantity") // if wrong Quantity value is entered
             {
                 int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
                 if (int_val == null || (int_val < 0))
@@ -488,34 +471,33 @@ namespace FrontendWPF
                 return;
             }
 
-            if (filterc_index == 1 || filterc_index == 2 || filterc_index == 4 || filterc_index == 8 || filterc_index == 9) // // update string-type fields with new value ( LogUsername, LogOperation, Product (name),  Location, Username )
+            if (filterc_index == 1 || filterc_index == 2 || filterc_index == 4 || filterc_index == 5) // // update string-type fields with new value ( LogUsername, LogOperation, Product, Location)
             {
-                sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, new_value);
+                stock_filter.GetType().GetProperty(changed_property_name).SetValue(stock_filter, new_value);
             }
-            else if (filterc_index == 0 || filterc_index == 7) // // update LogDate, Date fields with new value
+            else if (filterc_index == 0) // update LogDate with new value
             {
                 DateTime? int_val = DateTime.TryParse(new_value, out var tempVal) ? tempVal : (DateTime?)null;
-                sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, int_val);
+                stock_filter.GetType().GetProperty(changed_property_name).SetValue(stock_filter, int_val);
             }
-            else // update int?-type fields with new value (Quantity, UnitPrice)
+            else // update int?-type fields with new value (Id, Quantity)
             {
                 int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                sale_filter.GetType().GetProperty(changed_property_name).SetValue(sale_filter, int_val);
-
+                stock_filter.GetType().GetProperty(changed_property_name).SetValue(stock_filter, int_val);
             }
 
             // filter
-            filteredSalesList.Clear();
-            foreach (var sale in logList)
+            filteredStocksList.Clear();
+            foreach (var stock in logList)
             {
-                if ((sale_filter.LogDate == null || (minutesExist ? Compare(sale.LogDate, sale_filter.LogDate, opLogDate) : Compare(sale.LogDate.Value.Date, sale_filter.LogDate, opLogDate))) && (sale_filter.LogUsername == "" || sale.LogUsername.ToLower().Contains(sale_filter.LogUsername.ToLower())) && (sale_filter.LogOperation == "" || sale.LogOperation.ToLower().Contains(sale_filter.LogOperation.ToLower())) && (sale_filter.Id == null || Compare(sale.Id, sale_filter.Id, opId)) && (sale_filter.Product == "" || sale.Product.ToLower().Contains(sale_filter.Product.ToLower())) && (sale_filter.Quantity == null || Compare(sale.Quantity, sale_filter.Quantity, opQuantity)) && (sale_filter.TotalPrice == null || Compare(sale.TotalPrice, sale_filter.TotalPrice, opTotalPrice)) && (sale_filter.Date == null || (sale.Date != null && (minutesExist ? Compare(sale.Date, sale_filter.Date, opDate) : Compare(sale.Date.Value.Date, sale_filter.Date, opDate)))) && (sale_filter.Location == "" || sale.Location.ToLower().Contains(sale_filter.Location.ToLower())) && (sale_filter.Username == "" || sale.Username.ToLower().Contains(sale_filter.Username.ToLower())))
+                if ((stock_filter.LogDate == null || (minutesExist ? Compare(stock.LogDate, stock_filter.LogDate, opLogDate) : Compare(stock.LogDate.Value.Date, stock_filter.LogDate, opLogDate))) && (stock_filter.LogUsername == "" || stock.LogUsername.ToLower().Contains(stock_filter.LogUsername.ToLower())) && (stock_filter.LogOperation == "" || stock.LogOperation.ToLower().Contains(stock_filter.LogOperation.ToLower())) && (stock_filter.Id == null || Compare(stock.Id, stock_filter.Id, opId)) && (stock_filter.Product == "" || stock.Product.ToLower().Contains(stock_filter.Product.ToLower())) && (stock_filter.Quantity == null || Compare(stock.Quantity, stock_filter.Quantity, opQuantity)) && (stock_filter.Location == "" || stock.Location.ToLower().Contains(stock_filter.Location.ToLower())))
                 {
-                    filteredSalesList.Add(sale);
+                    filteredStocksList.Add(stock);
                     continue;
                 }
             }
             // update dataGrid1 with filtered items                    
-            dataGrid1.ItemsSource = filteredSalesList;
+            dataGrid1.ItemsSource = filteredStocksList;
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
             dataGrid1.Items.Refresh();
 
@@ -551,9 +533,9 @@ namespace FrontendWPF
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
             if (Shared.loggedInUser.Permission < 6)
             {
-                Button_DeleteSale.IsEnabled = false;
-                Button_DeleteSale.Foreground = Brushes.Gray;
-                Button_DeleteSale.ToolTip = "You do not have rights to delete data!";
+                Button_DeleteStock.IsEnabled = false;
+                Button_DeleteStock.Foreground = Brushes.Gray;
+                Button_DeleteStock.ToolTip = "You do not have rights to delete data!";
             }
 
         }
@@ -651,7 +633,7 @@ namespace FrontendWPF
 
         private void window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            double stretch = Math.Max((borderLeft.ActualWidth - 10 - 80) / (800 - 10 - 77), 0.8); // (BorderLeft width - left margin - more due to Id and Quantity column) / original borderLeft
+            double stretch = Math.Max((borderLeft.ActualWidth - 10 - 140) / (650 - 10 - 140), 0.8); // (BorderLeft width - left margin - more due to Id and Quantity column) / original borderLeft
             dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
             dataGrid0.Width = dataGrid1.Width;
             // dataGrid0.Columns[0].Width = dataGrid1.Columns[0].ActualWidth;
@@ -661,11 +643,11 @@ namespace FrontendWPF
             // stretch columns to dataGrid1 width
             for (int i = 0; i < dataGrid1.Columns.Count; i++)
             {
-                dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * ((stretch - 1) * (i == 3 || i == 5 ? 0.5 : 1) + 1); // resize Id and Quantity row only by 50%
+                dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * ((stretch - 1) * (i == 3 || i == 5 || i == 6 ? 0.5 : 1) + 1); // resize Id and BuyUnitPrice and SellUnitPrice only by 50%
                 dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
             }
             dataGrid1.FontSize = 12 * Math.Max(stretch, 1);
-            dataGrid1.Columns[5].Header = stretch < 1.03 ? "Quantity" : "Quant.";
+            // dataGrid1.Columns[5].Header = stretch < 1.15 ? "Purchase price" : "Purchase pr.";
         }
 
         private void Button_Maximize_Click(object sender, RoutedEventArgs e)
@@ -693,20 +675,20 @@ namespace FrontendWPF
             Button_Maximize.IsEnabled = true;
         }
 
-        SalePurchaseLog saleLog;
+        StockLog stocklog;
         private void dataGrid1_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            row = e.Row;
-            saleLog = dataGrid1.Items[row.GetIndex()] as SalePurchaseLog;
-            if (saleLog.Quantity == null || saleLog.TotalPrice == null)
+            DataGridRow row = e.Row; int rowIndex = row.GetIndex();
+            stocklog = dataGrid1.Items[row.GetIndex()] as StockLog;
+            if (stocklog.Quantity == null || stocklog.Product == "")
             {
                 e.Row.Foreground = new SolidColorBrush(Colors.Gray);
             }
-            else if (saleLog.LogOperation == "insert")
+            else if (stocklog.LogOperation == "insert")
             {
                 e.Row.Foreground = new SolidColorBrush(Colors.Green);
             }
-            else if (saleLog.LogOperation == "delete")
+            else if (stocklog.LogOperation == "delete")
             {
                 e.Row.Foreground = new SolidColorBrush(Colors.Salmon);
             }

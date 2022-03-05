@@ -48,6 +48,10 @@ namespace FrontendWPF
         string opTotalPrice = "=";
         string opDate = "=";
         bool pickStartDate = false;
+        double windowLeft0;
+        double windowTop0;
+        double windowWidth0;
+        double windowHeight0;
 
         DateTime startDate = DateTime.Now.Date.AddDays(-30); // set an initial limit of 29 days
         DateTime endDate = DateTime.Now; //
@@ -57,7 +61,32 @@ namespace FrontendWPF
         public ManagePurchasesWindow()
         {
             InitializeComponent();
+            
+            if (Shared.layout != "")
+            {
+                WindowStartupLocation = WindowStartupLocation.Manual;
+                if (Shared.layout.Contains("Products")) // ProductsPurchases
+                {
+                    int overlay = Shared.layout.Contains("Overlay") ? 250 : 0;
+                    Window productsWindow = Application.Current.Windows.OfType<Window>().Where(w => w.Title == "Manage products Window").FirstOrDefault();
 
+                    window.Left = productsWindow.Width - overlay;
+                    window.Top = 0;
+                    window.Width = Shared.screenWidth - productsWindow.Width + overlay;
+                    window.Height = 1 * Shared.screenHeight;
+                }
+                else if (Shared.layout.Contains("PurchasesSales"))
+                {
+                    
+                    
+                                        
+                    window.Left = 0;
+                    window.Top = 0;
+                    window.Height = 1 * Shared.screenHeight;
+                    window.Width = 0.5 * Shared.screenWidth;
+                    // window.Topmost = false;
+                }
+            }
             ReloadData();
         }
 
@@ -112,14 +141,13 @@ namespace FrontendWPF
                         dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * ((stretch - 1) * (i == 0 || i == 2 ? 0.5 : 1) + 1); // resize Id and Quantity row only by 50%
                         dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
                     }
-                    dataGrid1.FontSize = 14 * Math.Min(stretch, 1.0663); // reset font size to initial stretch value on large window width
+                    dataGrid1.FontSize = 14 * Math.Min(stretch, Shared.layout == "" ? 1.0664 :stretch); // reset font size to initial stretch value on large window width
                     // dataGrid1.Columns[2].Header = stretch < 1.18 ? "Quantity" : "Quant.";
                     dataGrid1.Items.Refresh();
                     ScrollDown();
                     selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
                 }, DispatcherPriority.Loaded);
             }
-            ScrollDown();
 
             // create/reset purchase_filter item and add it to filter dataGrid0
             purchase_filter = new StockService.SalePurchase()
@@ -445,6 +473,7 @@ namespace FrontendWPF
                 if (changed_property_name == "User name") { changed_property_name = "Username"; }
                 // get old property value of purchase by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
+                
                 old_value = purchase_edited.GetType().GetProperty(changed_property_name).GetValue(purchase_edited).ToString();
 
                 // check data correctness
@@ -691,8 +720,8 @@ namespace FrontendWPF
                     {
                         TextBlock_message.Text = $"The purchase of id '{purchase_edited.Id}' has been updated with {(changed_property_name == "TotalPrice"? "Total price" : changed_property_name)}.";
                         Log("update"); // write log to file
-                        // cell.Background = Brushes.OliveDrab;
-                        Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
+                        cell.Background = Brushes.OliveDrab;
+                        // Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
                         MoveToNextCell();
                     }
                     old_value = new_value; // update old_value after successful update
@@ -949,7 +978,7 @@ namespace FrontendWPF
             else
             {
                 stackPanel1.Margin = new Thickness(0, 45, 0, 0);
-                stackPanel1.Height = 442  + window.ActualHeight - 500;
+                stackPanel1.Height = 442 + window.ActualHeight - 500;
                 TextBlock_message.Text = "Select an option.";
             }
         }
@@ -1200,6 +1229,8 @@ namespace FrontendWPF
             TextBlock_datePicker.Foreground = pickStartDate ? Brushes.White : Brushes.LightSkyBlue;
             TextBlock_datePicker.Text = pickStartDate ? "Pick start date" : "Pick end date";
 
+            Button_Restore.Visibility = Visibility.Hidden;
+            Button_Maximize.Visibility = Visibility.Hidden;
             TextBlock_datePicker.Visibility = Visibility.Visible;
 
             // remove/add event handler 
@@ -1264,8 +1295,6 @@ namespace FrontendWPF
                 ReloadData();
 
                 string startOrEnd = pickStartDate ? "Start" : "End";
-                TextBlock_datePicker.Text = "";
-                datePicker.Visibility = Visibility.Hidden;
                 // int trimZeros = datePicker.SelectedDate.ToString().Substring(10, 8) == "00:00:00" ? 10 : 3;
                 TextBlock_message.Text = $"{startOrEnd} date changed to {(pickStartDate ? startDate : endDate).ToString().Substring(0, (pickStartDate ? startDate : endDate).ToString().Length - 3)}.";
 
@@ -1274,6 +1303,14 @@ namespace FrontendWPF
                 checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
                 gifImage.StartAnimation();
             }
+        }
+
+        private void datePicker_CalendarClosed(object sender, RoutedEventArgs e)
+        {
+            datePicker.Visibility = Visibility.Hidden;
+            TextBlock_datePicker.Text = "";
+            Button_Restore.Visibility = Visibility.Visible;
+            Button_Maximize.Visibility = Visibility.Visible;
         }
 
         private void Button_Export_Click(object sender, RoutedEventArgs e)
@@ -1490,7 +1527,7 @@ namespace FrontendWPF
 
         private void Log(string operation)
         {
-            string row ="";
+            string row = "";
             // save operation into log file
             StreamWriter sr = new StreamWriter("managePurchases.log", append: true, encoding: Encoding.UTF8);
             // write file header line
@@ -1504,12 +1541,37 @@ namespace FrontendWPF
             if (operation == "update") // in update mode add the old value in a new line
             {
                 int index = column_index;
-                row = $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{purchase.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)};{(column_index == 3 ? old_value : null)};{(column_index == 4 ? old_value.Substring(0, purchase.Date.ToString().Length - 3) : null)};{(column_index == 5 ? old_value : null)};{(column_index == 6 ? old_value : null)}\n";
+                row = $"{DateTime.Now.ToString("yy.MM.dd HH:mm:ss")};{Shared.loggedInUser.Username};{operation};{purchase.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)};{(column_index == 3 ? old_value : null)};{(column_index == 4 ? old_value.Substring(0, purchase.Date.ToString().Length - 3) : null)};{(column_index == 5 ? old_value : null)};{(column_index == 6 ? old_value : null)}\n";
             }
-            
-            row += $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{purchase.Id};{purchase.Product};{purchase.Quantity};{purchase.TotalPrice};{purchase.Date.ToString().Substring(0, purchase.Date.ToString().Length - 3)};{purchase.Location};{purchase.Username}";
+            DateTime date = purchase.Date == null ? DateTime.Now : (DateTime)purchase.Date;
+            row += $"{DateTime.Now.ToString("yy.MM.dd HH:mm:ss")};{Shared.loggedInUser.Username};{operation};{purchase.Id};{purchase.Product};{purchase.Quantity};{purchase.TotalPrice};{(purchase.Date == null? null : date.ToString("yy.MM.dd HH:mm: ss"))};{purchase.Location};{purchase.Username}";
             sr.WriteLine(row);
             sr.Close();
+        }
+
+        private void Button_Maximize_Click(object sender, RoutedEventArgs e)
+        {
+            windowWidth0 = window.Width;
+            windowHeight0 = window.Height;
+            windowLeft0 = window.Left;
+            windowTop0 = window.Top;
+            window.Width = Shared.screenWidth;
+            window.Height = Shared.screenHeight;
+            window.Left = 0;
+            window.Top = 0;
+            Button_Restore.IsEnabled = true;
+            Button_Maximize.IsEnabled = false;
+            
+        }
+
+        private void Button_Restore_Click(object sender, RoutedEventArgs e)
+        {
+            window.Width = windowWidth0;
+            window.Height = windowHeight0;
+            window.Left = windowLeft0;
+            window.Top = windowTop0;
+            Button_Restore.IsEnabled = false;
+            Button_Maximize.IsEnabled = true;
         }
 
         LogWindowPurchases LogWindowPurchases;
@@ -1521,6 +1583,15 @@ namespace FrontendWPF
                 LogWindowPurchases = new LogWindowPurchases();
                 if (LogWindowPurchases.IsEnabled) LogWindowPurchases.Show();
             }
+        }
+
+        private void window_Loaded(object sender, RoutedEventArgs e)
+        {
+            dataGrid1.Dispatcher.InvokeAsync(async () => {
+                await Task.Delay(2000);
+                // false is needed to display colored rows properly
+                dataGrid1.EnableRowVirtualization = false; // must be delayed, otherwise animation does not work properly
+            }, DispatcherPriority.SystemIdle);
         }
 
     }

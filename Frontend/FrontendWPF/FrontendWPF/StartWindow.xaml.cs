@@ -32,6 +32,9 @@ namespace FrontendWPF
         {
             InitializeComponent();
 
+            Shared.screenWidth = System.Windows.SystemParameters.WorkArea.Width;
+            Shared.screenHeight = System.Windows.SystemParameters.WorkArea.Height;
+
             // Initialize the dummy (grouped) columns that are created during docking:
             colOneCopyForLayer0 = new ColumnDefinition();
             colOneCopyForLayer0.SharedSizeGroup = "column1";
@@ -195,10 +198,12 @@ namespace FrontendWPF
                 button_ManagePurchasesWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF989898");
                 button_ManageSalesWindow.IsEnabled = false;
                 button_ManageSalesWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF8C8C8C");
+                button_ManageStocksWindow.IsEnabled = false;
+                button_ManageStocksWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF868686");
                 button_ManageLocationsWindow.IsEnabled = false;
                 button_ManageLocationsWindow.Foreground = Brushes.Gray;
-                button_LogWindow.IsEnabled = false;
-                button_LogWindow.Foreground = Brushes.Gray;
+                button_Layouts.IsEnabled = false;
+                button_Layouts.Foreground = Brushes.Gray;
 
                 UserService.UserServiceClient client = new UserService.UserServiceClient();
                 
@@ -374,6 +379,7 @@ namespace FrontendWPF
         ManageUsersWindow ManageUsersWindow;
         private void button_ManageUsersWindow_Click(object sender, RoutedEventArgs e)
         {
+            Shared.layout = "";
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(ManageUsersWindow))
             {
@@ -385,6 +391,7 @@ namespace FrontendWPF
         ManageProductsWindow ManageProductsWindow;
         private void button_ManageProductsWindow_Click(object sender, RoutedEventArgs e)
         {
+            Shared.layout = "";
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(ManageProductsWindow))
             {
@@ -396,6 +403,7 @@ namespace FrontendWPF
         ManagePurchasesWindow ManagePurchasesWindow;
         private void button_ManagePurchasesWindow_Click(object sender, RoutedEventArgs e)
         {
+            Shared.layout = "";
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(ManagePurchasesWindow))
             {
@@ -407,6 +415,7 @@ namespace FrontendWPF
         ManageSalesWindow ManageSalesWindow;
         private void button_ManageSalesWindow_Click(object sender, RoutedEventArgs e)
         {
+            Shared.layout = "";
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(ManageSalesWindow))
             {
@@ -415,9 +424,21 @@ namespace FrontendWPF
             }
         }
 
+        ManageStocksWindow ManageStocksWindow;
+        private void button_ManageStocksWindow_Click(object sender, RoutedEventArgs e)
+        {
+            // show only if not open already (to avoid multiple instances)
+            if (!Application.Current.Windows.OfType<Window>().Contains(ManageStocksWindow))
+            {
+                ManageStocksWindow = new ManageStocksWindow();
+                if (ManageStocksWindow.IsEnabled) ManageStocksWindow.Show();
+            }
+        }
+
         ManageLocationsWindow ManageLocationsWindow;
         private void button_ManageLocationsWindow_Click(object sender, RoutedEventArgs e)
         {
+            Shared.layout = "";
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(ManageLocationsWindow))
             {
@@ -476,6 +497,60 @@ namespace FrontendWPF
             if (e.LeftButton == MouseButtonState.Pressed) DragMove();
         }
 
+        private void Button_layoutProductsPurchases_Click(object sender, RoutedEventArgs e)
+        {
+            string buttonName = ((Button)sender).Name;
+            Shared.layout = buttonName;
+            // show only if not open already (to avoid multiple instances)
+            if (!Application.Current.Windows.OfType<Window>().Contains(ManageProductsWindow))
+            {
+                ManageProductsWindow = new ManageProductsWindow();
+                if (ManageProductsWindow.IsEnabled) ManageProductsWindow.Show();
+            }
+            if(buttonName.Contains("Purchases") && !Application.Current.Windows.OfType<Window>().Contains(ManagePurchasesWindow))
+            {
+                ManagePurchasesWindow = new ManagePurchasesWindow();
+                if (ManagePurchasesWindow.IsEnabled) ManagePurchasesWindow.Show();
+            }
+            else if (buttonName.Contains("Sales") && !Application.Current.Windows.OfType<Window>().Contains(ManageSalesWindow))
+            {
+                ManageSalesWindow = new ManageSalesWindow();
+                if (ManageSalesWindow.IsEnabled) ManageSalesWindow.Show();
+            }
+        }
+
+        private void Button_layoutPurchasesSales_Click(object sender, RoutedEventArgs e)
+        {
+            string buttonName = ((Button)sender).Name;
+            Shared.layout = buttonName;
+            // show only if not open already (to avoid multiple instances)
+            if (!Application.Current.Windows.OfType<Window>().Contains(ManagePurchasesWindow))
+            {
+                ManagePurchasesWindow = new ManagePurchasesWindow();
+                if (ManagePurchasesWindow.IsEnabled) ManagePurchasesWindow.Show();
+            }
+            if (!Application.Current.Windows.OfType<Window>().Contains(ManageSalesWindow))
+            {
+                ManageSalesWindow = new ManageSalesWindow();
+                if (ManageSalesWindow.IsEnabled) ManageSalesWindow.Show();
+            }
+
+        }
+
+        private void button_Layouts_Click(object sender, RoutedEventArgs e)
+        {
+            if (gridLayout.Visibility == Visibility.Hidden)
+            {
+                gridLayout.Visibility = Visibility.Visible;
+                button_Layouts.Content = "Hide layouts";
+            }
+            else
+            {
+                gridLayout.Visibility = Visibility.Hidden;
+                button_Layouts.Content = "Show layouts";
+            }
+            
+        }
 
     }
 }

@@ -8,37 +8,36 @@ using System.Windows.Media;
 
 namespace FrontendWPF.Classes
 {
-    public class Product
+    public class Stock
     {
-        // class requires getter-setter to be visible in DataGrid!
-        public int? Id { set; get; }
-        public string Name { set; get; }
-        public int BuyUnitPrice { set; get; }
-        public int SellUnitPrice { set; get; }
+        public int Id { set; get; }
+        public string Product { set; get; }
+        public int Quantity { set; get; }
+        public string Location { set; get; }
 
-        public Product()
+        public Stock()
         {
         }
 
-        public Product(int id, string name, int buyUnitPrice, int sellUnitPrice)
+        public Stock(int id, string product, int quantity, string location)
         {
             Id = id;
-            Name = name;
-            BuyUnitPrice = buyUnitPrice;
-            SellUnitPrice = sellUnitPrice;
+            Product = product;
+            Quantity = quantity;
+            Location = location;
         }
 
-        // returns a list of products
-        public static List<StockService.Product> GetProducts(string id, string name, string buyOver, string buyUnder, string sellOver, string sellUnder, string limit)
+        // returns a list of stocks
+        public static List<StockService.Stock> GetStocks(string id, string product, string location, string quantityOver, string quantityUnder, string limit)
         {
             StockService.StockServiceClient client = new StockService.StockServiceClient();
 
-            StockService.Product[] productsArray;
-            List<StockService.Product> productsList = new List<StockService.Product>();
+            StockService.Stock[] stocksArray;
+            List<StockService.Stock> stocksList = new List<StockService.Stock>();
  
             try
             {
-                string hostMessage = client.ListProduct(Shared.uid, id, name, buyOver, buyUnder, sellOver, sellUnder, limit).Message;
+                string hostMessage = client.ListStock(Shared.uid, id, product, location,       quantityOver, quantityUnder, limit).Message;
                 if (hostMessage.Contains("Unable to connect"))
                 {
                     MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
@@ -73,11 +72,8 @@ namespace FrontendWPF.Classes
                 }
                 else
                 {
-                    // string query = $"WHERE name='{productName}' AND unitPrice='{CreateMD5(unitprice)}'";
-                    productsArray = client.ListProduct(Shared.uid, id, name, buyOver, buyUnder, sellOver, sellUnder, limit).Products;
-                    // UserService.Response_Product response_Product = new UserService.Response_Product();
-                    // string uid = response_Product.Uid;
-                    productsList = productsArray.ToList();
+                    stocksArray = client.ListStock(Shared.uid, id, product, location, quantityOver, quantityUnder, limit).Stocks;
+                    stocksList = stocksArray.ToList();
                 }
             }
             catch (Exception ex)
@@ -93,8 +89,7 @@ namespace FrontendWPF.Classes
                     return null;
                 }
             }
-            // return product.ToList();
-            return productsList;
+            return stocksList;
             
         }
         

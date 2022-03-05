@@ -41,6 +41,10 @@ namespace FrontendWPF
         ScrollViewer scrollViewer;
         string input = "";
         string opId = "=";
+        double windowLeft0;
+        double windowTop0;
+        double windowWidth0;
+        double windowHeight0;
 
         public ManageLocationsWindow()
         {
@@ -580,8 +584,8 @@ namespace FrontendWPF
                     {
                         TextBlock_message.Text = $"The location '{location_edited.Name}' has been updated with {changed_property_name}.";
                         Log("update"); // write log to file
-                        // cell.Background = Brushes.OliveDrab;
-                        Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
+                        cell.Background = Brushes.OliveDrab;
+                        // Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
                         MoveToNextCell();
                     }
                     old_value = new_value; // update old_value after successful update
@@ -1200,12 +1204,37 @@ namespace FrontendWPF
             if (operation == "update") // in update mode add the old value in a new line
             {
                 int index = column_index;
-                row = $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{location.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)}\n";
+                row = $"{DateTime.Now.ToString("yy.MM.dd HH:mm:ss")};{Shared.loggedInUser.Username};{operation};{location.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)}\n";
             }
 
-            row += $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{location.Id};{location.Name};{location.Region}";
+            row += $"{DateTime.Now.ToString("yy.MM.dd HH:mm:ss")};{Shared.loggedInUser.Username};{operation};{location.Id};{location.Name};{location.Region}";
             sr.WriteLine(row);
             sr.Close();
+        }
+
+        private void Button_Maximize_Click(object sender, RoutedEventArgs e)
+        {
+            windowWidth0 = window.Width;
+            windowHeight0 = window.Height;
+            windowLeft0 = window.Left;
+            windowTop0 = window.Top;
+            window.Width = Shared.screenWidth;
+            window.Height = Shared.screenHeight;
+            window.Left = 0;
+            window.Top = 0;
+            Button_Restore.IsEnabled = true;
+            Button_Maximize.IsEnabled = false;
+
+        }
+
+        private void Button_Restore_Click(object sender, RoutedEventArgs e)
+        {
+            window.Width = windowWidth0;
+            window.Height = windowHeight0;
+            window.Left = windowLeft0;
+            window.Top = windowTop0;
+            Button_Restore.IsEnabled = false;
+            Button_Maximize.IsEnabled = true;
         }
 
         LogWindowLocations LogWindowLocations;
@@ -1217,6 +1246,15 @@ namespace FrontendWPF
                 LogWindowLocations = new LogWindowLocations();
                 if (LogWindowLocations.IsEnabled) LogWindowLocations.Show();
             }
+        }
+
+        private void window_Loaded(object sender, RoutedEventArgs e)
+        {
+            dataGrid1.Dispatcher.InvokeAsync(async () => {
+                await Task.Delay(2000);
+                // fals is needed to display colored rows properly
+                dataGrid1.EnableRowVirtualization = false; // must be delayed, otherwise animation does not work properly
+            }, DispatcherPriority.SystemIdle);
         }
 
     }

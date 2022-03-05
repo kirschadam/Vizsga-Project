@@ -37,7 +37,7 @@
                 <Storyboard Name="WindowFadeIn">
                     <DoubleAnimation Name="WindowFadeInAnimation"
                                      Storyboard.TargetProperty="(Window.Opacity)"
-                                     From="0.0" To="1.0" Duration="0:0:2"
+                                     From="0.0" To="1.0" Duration="0:0:1"
                                      AutoReverse="False" RepeatBehavior="1x" />
                 </Storyboard>
             </BeginStoryboard>
@@ -48,7 +48,7 @@
                     <DoubleAnimation Name="WindowFadeOutAnimation"
                                      Storyboard.TargetName="window"
                                      Storyboard.TargetProperty="(Window.Opacity)"
-                                     From="1.0" To="0" Duration="0:0:3"
+                                     From="1.0" To="0" Duration="0:0:2"
                                      AutoReverse="False" RepeatBehavior="1x" />
                 </Storyboard>
             </BeginStoryboard>
@@ -324,14 +324,38 @@
                     <Button Name="button_ManageProductsWindow" Content="Manage products" Width="140" Height="40" Margin="0,10,0,0" IsEnabled="False" Foreground="#FF989898" ToolTip="Manage products from the database..." Click="button_ManageProductsWindow_Click" ToolTipService.ShowOnDisabled="True"/>
                     <Button Name="button_ManagePurchasesWindow" Content="Manage purchases" Width="140" Height="40" Margin="0,10,0,0" IsEnabled="False" Foreground="#FF989898" ToolTip="Manage purchases from the database..." Click="button_ManagePurchasesWindow_Click" ToolTipService.ShowOnDisabled="True"/>
                     <Button Name="button_ManageSalesWindow" Content="Manage sales" Width="140" Height="40" Margin="0,10,0,0" IsEnabled="False" Foreground="#FF8C8C8C" ToolTip="Manage sales from the database..." Click="button_ManageSalesWindow_Click" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="button_ManageStocksWindow" Content="Manage stocks" Width="140" Height="40" Margin="0,10,0,0" IsEnabled="False" Foreground="#FF868686" ToolTip="Manage stocks from the database..." ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="button_ManageStocksWindow" Content="Manage stocks" Width="140" Height="40" Margin="0,10,0,0" IsEnabled="False" Foreground="#FF868686" ToolTip="Manage stocks from the database..." Click="button_ManageStocksWindow_Click" ToolTipService.ShowOnDisabled="True"/>
                     <Button Name="button_ManageLocationsWindow" Content="Manage locations" Width="140" Height="40" Margin="0,10,0,0" IsEnabled="False" Foreground="Gray" ToolTip="Manage locations..." Click="button_ManageLocationsWindow_Click" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="button_LogWindow" Content="" Width="140" Height="40" Margin="0,10,0,0" IsEnabled="False" Foreground="Gray" ToolTip="View log window..."  ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="button_Layouts" Content="Show layouts" Width="140" Height="40" Margin="0,10,0,0" IsEnabled="False" Foreground="Gray" ToolTip="View layouts..." Click="button_Layouts_Click"  ToolTipService.ShowOnDisabled="True"/>
                     <Button Name="button_Exit" Content="Exit" Width="140" Height="40" Margin="0,10,0,0" Foreground="White" ToolTip="Exit application..." Click="button_Exit_Click" ToolTipService.ShowOnDisabled="True"/>
 
                 </StackPanel>
 
+                <Grid Name="gridLayout" Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" Grid.ColumnSpan="3" Background="Transparent" Margin="10,8,10,00" Visibility="Hidden">
+                    <StackPanel Margin="0,0,0,10" HorizontalAlignment="Left" >
+                        <Button Name="Button_layoutProductsPurchases" Click="Button_layoutProductsPurchases_Click" Width="300" Height="140" Margin="0,12,0,0" ToolTipService.ShowOnDisabled="True">
+                            <Image Source="pack://application:,,,/Resources/Images/ProductsPurchases.png" Margin="5,0, 5,0"/>
+                        </Button>
+                        <Button Name="Button_layoutProductsSales" Click="Button_layoutProductsPurchases_Click" Width="300" Height="140" Margin="0,12,0,0" ToolTipService.ShowOnDisabled="True">
+                            <Image Source="pack://application:,,,/Resources/Images/ProductsSales.png" Margin="5,0, 5,0"/>
+                        </Button>
+                        <Button Name="Button_layoutPurchasesSales" Click="Button_layoutPurchasesSales_Click" Width="300" Height="140" Margin="0,12,0,0" ToolTipService.ShowOnDisabled="True">
+                            <Image Source="pack://application:,,,/Resources/Images/PurchasesSales.png" Margin="5,0, 5,0"/>
+                        </Button>
 
+                    </StackPanel>
+                    <StackPanel Margin="105,0,10,10" HorizontalAlignment="Right" >
+                        <Button Name="Button_layoutProductsPurchasesOverlay" Click="Button_layoutProductsPurchases_Click" Width="250" Height="140" Margin="0,12,0,0" ToolTipService.ShowOnDisabled="True">
+                            <Image Source="pack://application:,,,/Resources/Images/ProductsPurchasesOverlay.png" Margin="5,0,5,0"/>
+                        </Button>
+                        <Button Name="Button_layoutProductsSalesesOverlay" Click="Button_layoutProductsPurchases_Click" Width="250" Height="140" Margin="0,12,0,0" ToolTipService.ShowOnDisabled="True">
+                            <Image Source="pack://application:,,,/Resources/Images/ProductsSalesOverlay.png" Margin="5,0,5,0"/>
+                        </Button>
+                        <Button Name="Button_layoutPurchasesSalesesOverlay" Click="Button_layoutPurchasesSales_Click" Width="250" Height="140" Margin="0,12,0,0" ToolTipService.ShowOnDisabled="True">
+                            <Image Source="pack://application:,,,/Resources/Images/PurchasesSalesOverlay.png" Margin="5,0,5,0"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
                 <ListBox Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" ToolTip="Click on an article to read it..." Grid.ColumnSpan="3" Background="Transparent" Foreground="AliceBlue" Visibility="Collapsed">
                     <ListBoxItem>This is ListBox item1.</ListBoxItem>
                     <ListBoxItem>This is ListBox item2. This is ListBox item2.</ListBoxItem>

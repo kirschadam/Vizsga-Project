@@ -48,7 +48,11 @@ namespace FrontendWPF
         string opTotalPrice = "=";
         string opDate = "=";
         bool pickStartDate = false;
-        
+        double windowLeft0;
+        double windowTop0;
+        double windowWidth0;
+        double windowHeight0;
+
         DateTime startDate = DateTime.Now.Date.AddDays(-30); // set an initial limit of 29 days
         DateTime endDate = DateTime.Now; //
 
@@ -58,6 +62,30 @@ namespace FrontendWPF
         {
             InitializeComponent();
 
+            if (Shared.layout != "")
+            {
+                WindowStartupLocation = WindowStartupLocation.Manual;
+                if (Shared.layout.Contains("Products")) // ProductsSales
+                {
+                    int overlay = Shared.layout.Contains("Overlay") ? 250 : 0;
+                    Window productsWindow = Application.Current.Windows.OfType<Window>().Where(w => w.Title == "Manage products Window").FirstOrDefault();
+
+                    window.Left = productsWindow.Width - overlay;
+                    window.Top = 0;
+                    window.Width = Shared.screenWidth - productsWindow.Width + overlay;
+                    window.Height = 1 * Shared.screenHeight;
+                }
+                else if (Shared.layout.Contains("PurchasesSales"))
+                {
+                    int overlay = Shared.layout.Contains("Overlay") ? 250 : 0;
+                    Window purchasesWindow = Application.Current.Windows.OfType<Window>().Where(w => w.Title == "Manage purchases Window").FirstOrDefault();
+
+                    window.Left = purchasesWindow.Width - overlay;
+                    window.Top = 0;
+                    window.Width = Shared.screenWidth - purchasesWindow.Width + overlay;
+                    window.Height = 1 * Shared.screenHeight;
+                }
+            }
             ReloadData();
         }
 
@@ -119,7 +147,6 @@ namespace FrontendWPF
                     selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
                 }, DispatcherPriority.Loaded);
             }
-            ScrollDown();
 
             // create/reset sale_filter item and add it to filter dataGrid0
             sale_filter = new StockService.SalePurchase()
@@ -445,6 +472,7 @@ namespace FrontendWPF
                 if (changed_property_name == "User name") { changed_property_name = "Username"; }
                 // get old property value of sale by property name
                 // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
+                
                 old_value = sale_edited.GetType().GetProperty(changed_property_name).GetValue(sale_edited).ToString();
 
                 // check data correctness
@@ -691,8 +719,8 @@ namespace FrontendWPF
                     {
                         TextBlock_message.Text = $"The sale of id '{sale_edited.Id}' has been updated with {(changed_property_name == "TotalPrice" ? "Total price" : changed_property_name)}.";
                         Log("update"); // write log to file
-                        // cell.Background = Brushes.OliveDrab;
-                        Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
+                        cell.Background = Brushes.OliveDrab;
+                        // Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
                         MoveToNextCell();
                     }
                     old_value = new_value; // update old_value after successful update
@@ -1200,6 +1228,8 @@ namespace FrontendWPF
             TextBlock_datePicker.Foreground = pickStartDate ? Brushes.White : Brushes.LightSkyBlue;
             TextBlock_datePicker.Text = pickStartDate ? "Pick start date" : "Pick end date";
 
+            Button_Restore.Visibility = Visibility.Hidden;
+            Button_Maximize.Visibility = Visibility.Hidden;
             TextBlock_datePicker.Visibility = Visibility.Visible;
 
             // remove/add event handler 
@@ -1264,8 +1294,6 @@ namespace FrontendWPF
                 ReloadData();
 
                 string startOrEnd = pickStartDate ? "Start" : "End";
-                TextBlock_datePicker.Text = "";
-                datePicker.Visibility = Visibility.Hidden;
                 // int trimZeros = datePicker.SelectedDate.ToString().Substring(10, 8) == "00:00:00" ? 10 : 3;
                 TextBlock_message.Text = $"{startOrEnd} date changed to {(pickStartDate ? startDate : endDate).ToString().Substring(0, (pickStartDate ? startDate : endDate).ToString().Length - 3)}.";
 
@@ -1274,6 +1302,14 @@ namespace FrontendWPF
                 checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
                 gifImage.StartAnimation();
             }
+        }
+
+        private void datePicker_CalendarClosed(object sender, RoutedEventArgs e)
+        {
+            datePicker.Visibility = Visibility.Hidden;
+            TextBlock_datePicker.Text = "";
+            Button_Restore.Visibility = Visibility.Visible;
+            Button_Maximize.Visibility = Visibility.Visible;
         }
 
         private void Button_Export_Click(object sender, RoutedEventArgs e)
@@ -1504,14 +1540,38 @@ namespace FrontendWPF
             if (operation == "update") // in update mode add the old value in a new line
             {
                 int index = column_index;
-                row = $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{sale.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)};{(column_index == 3 ? old_value : null)};{(column_index == 4 ? old_value.Substring(0, sale.Date.ToString().Length - 3) : null)};{(column_index == 5 ? old_value : null)};{(column_index == 6 ? old_value : null)}\n";
+                row = $"{DateTime.Now.ToString("yy.MM.dd HH:mm:ss")};{Shared.loggedInUser.Username};{operation};{sale.Id};{(column_index == 1 ? old_value : null)};{(column_index == 2 ? old_value : null)};{(column_index == 3 ? old_value : null)};{(column_index == 4 ? old_value.Substring(0, sale.Date.ToString().Length - 3) : null)};{(column_index == 5 ? old_value : null)};{(column_index == 6 ? old_value : null)}\n";
             }
-
-            row += $"{DateTime.Now};{Shared.loggedInUser.Username};{operation};{sale.Id};{sale.Product};{sale.Quantity};{sale.TotalPrice};{sale.Date.ToString().Substring(0, sale.Date.ToString().Length - 3)};{sale.Location};{sale.Username}";
+            DateTime date = sale.Date == null ? DateTime.Now : (DateTime)sale.Date;
+            row += $"{DateTime.Now.ToString("yy.MM.dd HH:mm:ss")};{Shared.loggedInUser.Username};{operation};{sale.Id};{sale.Product};{sale.Quantity};{sale.TotalPrice};{(sale.Date == null ? null : date.ToString("yy.MM.dd HH:mm: ss"))};{sale.Location};{sale.Username}";
             sr.WriteLine(row);
             sr.Close();
         }
+        private void Button_Maximize_Click(object sender, RoutedEventArgs e)
+        {
+            windowWidth0 = window.Width;
+            windowHeight0 = window.Height;
+            windowLeft0 = window.Left;
+            windowTop0 = window.Top;
+            window.Width = Shared.screenWidth;
+            window.Height = Shared.screenHeight;
+            window.Left = 0;
+            window.Top = 0;
+            Button_Restore.IsEnabled = true;
+            Button_Maximize.IsEnabled = false;
 
+        }
+
+        private void Button_Restore_Click(object sender, RoutedEventArgs e)
+        {
+            window.Width = windowWidth0;
+            window.Height = windowHeight0;
+            window.Left = windowLeft0;
+            window.Top = windowTop0;
+            Button_Restore.IsEnabled = false;
+            Button_Maximize.IsEnabled = true;
+        }
+        
         LogWindowSales LogWindowSales;
         private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
         {
@@ -1521,6 +1581,15 @@ namespace FrontendWPF
                 LogWindowSales = new LogWindowSales();
                 if (LogWindowSales.IsEnabled) LogWindowSales.Show();
             }
+        }
+
+        private void window_Loaded(object sender, RoutedEventArgs e)
+        {
+            dataGrid1.Dispatcher.InvokeAsync(async () => {
+                await Task.Delay(2000);
+                // fals is needed to display colored rows properly
+                dataGrid1.EnableRowVirtualization = false; // must be delayed, otherwise animation does not work properly
+            }, DispatcherPriority.SystemIdle);
         }
 
     }

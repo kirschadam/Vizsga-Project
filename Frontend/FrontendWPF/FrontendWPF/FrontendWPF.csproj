@@ -61,6 +61,8 @@
     </ApplicationDefinition>
     <Compile Include="Classes\GridViewSort.cs" />
     <Compile Include="Classes\LocationLog.cs" />
+    <Compile Include="Classes\StocksLog.cs" />
+    <Compile Include="Classes\Stock.cs" />
     <Compile Include="Classes\ProductLog.cs" />
     <Compile Include="Classes\Region.cs" />
     <Compile Include="Classes\Location.cs" />
@@ -95,6 +97,9 @@
     <Compile Include="LogWindowLocations.xaml.cs">
       <DependentUpon>LogWindowLocations.xaml</DependentUpon>
     </Compile>
+    <Compile Include="LogWindowStocks.xaml.cs">
+      <DependentUpon>LogWindowStocks.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LogWindowProducts.xaml.cs">
       <DependentUpon>LogWindowProducts.xaml</DependentUpon>
     </Compile>
@@ -109,6 +114,9 @@
     </Compile>
     <Compile Include="ManageLocationsWindow.xaml.cs">
       <DependentUpon>ManageLocationsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ManageStocksWindow.xaml.cs">
+      <DependentUpon>ManageStocksWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ManageSalesWindow.xaml.cs">
       <DependentUpon>ManageSalesWindow.xaml</DependentUpon>
@@ -198,6 +206,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="LogWindowStocks.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LogWindowProducts.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -215,6 +227,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="ManageLocationsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ManageStocksWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -400,6 +416,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Connected Services\UserService\UserService.wsdl" />
+    <None Include="manageStocks.log">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="manageUsers.log">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -532,6 +551,20 @@
       <Generator>WCF Proxy Generator</Generator>
       <LastGenOutput>Reference.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\ProductsPurchases.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\ProductsPurchasesOverlay.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\ProductsSales.png" />
+    <Resource Include="Resources\Images\ProductsSalesOverlay.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\PurchasesSales.png" />
+    <Resource Include="Resources\Images\PurchasesSalesOverlay.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

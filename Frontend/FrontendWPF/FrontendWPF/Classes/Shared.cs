@@ -21,6 +21,9 @@ namespace FrontendWPF.Classes
         public static UserService.User loggedInUser = null;
         public static string uid;
         public static bool loggedIn = false;
+        public static string layout = "";
+        public static double screenWidth;
+        public static double screenHeight;
 
         // delay execution: https://stackoverflow.com/questions/5904636/best-way-to-create-a-run-once-time-delayed-function-in-c-sharp
         public static async Task Delay(Action action, int timeoutInMilliseconds)

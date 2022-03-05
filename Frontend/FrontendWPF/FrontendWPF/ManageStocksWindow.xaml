@@ -1,4 +1,4 @@
-﻿<Window x:Class="FrontendWPF.ManageProductsWindow"
+﻿<Window x:Class="FrontendWPF.ManageStocksWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,7 +7,7 @@
         xmlns:localComponents="clr-namespace:FrontendWPF.Components"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        Title="Manage products Window" Height="510" MinHeight="510" Width="800" MinWidth="600"
+        Title="Manage stocks Window" Height="510" MinHeight="510" Width="800" MinWidth="600"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
         WindowStyle="None"
@@ -80,7 +80,7 @@
             </Border>
 
             <StackPanel VerticalAlignment="Top" Margin="10,10,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Name="TextBlock1" Text="Products management"
+                <TextBlock Name="TextBlock1" Text="Stocks management"
                            TextWrapping="Wrap"
                            FontWeight="Medium"
                            FontFamily="helvetica"
@@ -158,9 +158,9 @@
 
                     <DataGrid.Columns >
                         <DataGridTextColumn Header="Id" Binding="{Binding Id}" MinWidth="47" />
-                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                        <DataGridTextColumn Header="Purchase price" Binding="{Binding BuyUnitPrice}" />
-                        <DataGridTextColumn Header="Sales price" Binding="{Binding SellUnitPrice}" />
+                        <DataGridTextColumn Header="Product" Binding="{Binding Product}" />
+                        <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" />
+                        <DataGridTextColumn Header="Location" Binding="{Binding Location}" />
                     </DataGrid.Columns>
 
                 </DataGrid>
@@ -233,9 +233,9 @@
 
                     <DataGrid.Columns >
                         <DataGridTextColumn Header="Id" Binding="{Binding Id}" IsReadOnly="True" MinWidth="47" />
-                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="350" MinWidth="200" />
-                        <DataGridTextColumn Header="Purchase price" Binding="{Binding BuyUnitPrice}" MinWidth="112" />
-                        <DataGridTextColumn Header="Sales price" Binding="{Binding SellUnitPrice}" MinWidth="100" />
+                        <DataGridTextColumn Header="Product" Binding="{Binding Product}" Width="350" MinWidth="200" />
+                        <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" MinWidth="112" />
+                        <DataGridTextColumn Header="Location" Binding="{Binding Location}" MinWidth="100" />
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -261,7 +261,7 @@
 
             <StackPanel Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0" Width="247">
                 <Button Name="Button_Restore" Click="Button_Restore_Click" Width="45" Height="40" Margin="0,0,132,0" Content="&#xf063;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSkyBlue" FontSize="24" HorizontalAlignment="Right" IsEnabled="False"/>
-                <Button Name="Button_Maximize" Click="Button_Maximize_Click" Width="45" Height="40" Margin="0,-40,69,0" Content="&#xf062;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSkyBlue" FontSize="24" HorizontalAlignment="Right"/>
+                <Button Name="Button_Maximize" Click="Button_Maximize_Click" Width="45" Height="40" Margin="0,-40,68,0" Content="&#xf062;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSkyBlue" FontSize="24" HorizontalAlignment="Right"/>
                 <Button Name="Button_Close" Click="Button_Close_Click" Width="45" Height="40" Margin="0,-40,6,0" Content="&#xf410;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSalmon" FontSize="24" HorizontalAlignment="Right"/>
                 
                 <!--<Image Name="Image_Login" Source="/Resources/Images/login.gif" Width="160"/>-->
@@ -283,9 +283,9 @@
 
                 <Grid>
                     <StackPanel Margin="0,0,0,10" HorizontalAlignment="Left" >
-                        <Button Name="Button_AddProduct" Click="Button_AddProduct_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Add" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                        <Button Name="Button_UpdateProduct" Click="Button_UpdateProduct_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Update" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                        <Button Name="Button_DeleteProduct" Click="Button_DeleteProduct_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Delete" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button Name="Button_AddStock" Click="Button_AddStock_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Add" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button Name="Button_UpdateStock" Click="Button_UpdateStock_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Update" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button Name="Button_DeleteStock" Click="Button_DeleteStock_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Delete" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
                         <Button Name="Button_Filter" Click="Button_Filter_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
                     </StackPanel>
                     <StackPanel Margin="105,0,0,10" HorizontalAlignment="Right" >

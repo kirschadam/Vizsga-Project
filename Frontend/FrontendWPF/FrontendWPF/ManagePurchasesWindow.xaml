@@ -7,7 +7,7 @@
         xmlns:localComponents="clr-namespace:FrontendWPF.Components"
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
-        Title="Manage Purchases Window" Height="510" MinHeight="510" Width="900" MinWidth="600"
+        Title="Manage purchases Window" Height="510" MinHeight="510" Width="900" MinWidth="600"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
         WindowStyle="None"
@@ -19,6 +19,7 @@
         x:Name="window"
         KeyDown="Window_KeyDown"
         SizeChanged="window_SizeChanged"
+        Loaded="window_Loaded"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
         >
     <!--to make resize work-->
@@ -353,7 +354,7 @@
             <StackPanel x:Name="stackPanel1" VerticalAlignment="Top" Margin="0,45,0,0" Height="442" Orientation="Horizontal">
 
                 <DataGrid Name="dataGrid1" Background="AliceBlue" FontSize="14" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="2" Margin="10,0,0,0" HorizontalScrollBarVisibility="Visible" IsReadOnly="True"
-                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserDeleteRows="False"
+                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserDeleteRows="False" 
                   SelectedCellsChanged="dataGrid1_SelectedCellsChanged"
                   CellEditEnding="dataGrid1_CellEditEnding"
                   BeginningEdit="dataGrid1_BeginningEdit" 
@@ -418,13 +419,13 @@
                     <DataGrid.Columns >
                         <DataGridTextColumn Header="Id" Binding="{Binding Id}" MinWidth="47" />
                         <DataGridTextColumn Header="Product name" Binding="{Binding Product}" MinWidth="110" />
-                        <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" MinWidth="70"  x:Name="QuantityHeader">
+                        <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" MinWidth="70" />
 
-                            <!--<DataGridTextColumn.HeaderStyle>
+                        <!--<DataGridTextColumn.HeaderStyle>
                                 <Style TargetType="DataGridColumnHeader">
                                     -->
-                            <!--<Setter Property="FontSize" Value="{Binding columnFontSize, RelativeSource={RelativeSource AncestorType=Window}}"/>-->
-                            <!--
+                        <!--<Setter Property="FontSize" Value="{Binding columnFontSize, RelativeSource={RelativeSource AncestorType=Window}}"/>-->
+                        <!--
                                     <Setter Property="FontSize" Value="15"/>
                                     <Setter Property="FontWeight" Value="SemiBold"/>
                                     <Setter Property="Foreground" Value="Navy"/>
@@ -433,7 +434,7 @@
                                 </Style>
                             </DataGridTextColumn.HeaderStyle>-->
 
-                        </DataGridTextColumn>
+
                         <DataGridTextColumn Header="Total price" Binding="{Binding TotalPrice}" MinWidth="80" />
                         <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yy.MM.dd HH:mm\}}" MinWidth="105" />
                         <DataGridTextColumn Header="Location" Binding="{Binding Location}" MinWidth="80" />
@@ -473,14 +474,14 @@
                            Foreground="White"
                            Visibility="Hidden"
                            HorizontalAlignment="Center"/>
-                <DatePicker Height="25" HorizontalAlignment="Left" Margin="65,-26,0,0" Name="datePicker" VerticalAlignment="Top" Width="115" FirstDayOfWeek="Monday"  Loaded="datePicker_Loaded" SelectedDateChanged="datePicker_SelectedDateChanged" Style="{DynamicResource DatePickerStyle1}" CalendarStyle="{StaticResource styleCalendar}" Visibility="Hidden"/>
+                <DatePicker Height="25" HorizontalAlignment="Left" Margin="65,-26,0,0" Name="datePicker" VerticalAlignment="Top" Width="115" FirstDayOfWeek="Monday"  Loaded="datePicker_Loaded" SelectedDateChanged="datePicker_SelectedDateChanged" CalendarClosed="datePicker_CalendarClosed" Style="{DynamicResource DatePickerStyle1}" CalendarStyle="{StaticResource styleCalendar}" Visibility="Hidden"/>
 
-
-
+                <Button Name="Button_Restore" Click="Button_Restore_Click" Width="45" Height="40" Margin="0,-40,132,0" Content="&#xf063;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSkyBlue" FontSize="24" HorizontalAlignment="Right" IsEnabled="False"/>
+                <Button Name="Button_Maximize" Click="Button_Maximize_Click" Width="45" Height="40" Margin="0,-40,69,0" Content="&#xf062;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSkyBlue" FontSize="24" HorizontalAlignment="Right"/>
                 <Button Name="Button_Close" Click="Button_Close_Click" Width="45" Height="40" Margin="0,-40,6,0" Content="&#xf410;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSalmon" FontSize="24" HorizontalAlignment="Right"/>
 
                 <!--<Image Name="Image_Login" Source="/Resources/Images/login.gif" Width="160"/>-->
-                <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="60" Opacity="0" Margin="0,-30,0,0"/>
+                <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="60" Opacity="0" Margin="0,30,0,0"/>
 
                 <TextBlock Name="TextBlock_message" Text="Select an option."
                            Margin="5, 5, 5, 0"

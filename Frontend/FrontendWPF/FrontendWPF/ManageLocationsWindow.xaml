@@ -19,6 +19,7 @@
         x:Name="window"
         KeyDown="Window_KeyDown"
         SizeChanged="window_SizeChanged"
+        Loaded="window_Loaded"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
         >
     <!--to make resize work-->
@@ -257,10 +258,12 @@
 
 
             <StackPanel Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0" Width="247">
-                <Button Name="Button_Close" Click="Button_Close_Click" Width="45" Height="40" Margin="0,0,6,0" Content="&#xf410;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSalmon" FontSize="24" HorizontalAlignment="Right"/>
+                <Button Name="Button_Restore" Click="Button_Restore_Click" Width="45" Height="40" Margin="0,0,132,0" Content="&#xf063;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSkyBlue" FontSize="24" HorizontalAlignment="Right" IsEnabled="False"/>
+                <Button Name="Button_Maximize" Click="Button_Maximize_Click" Width="45" Height="40" Margin="0,-40,69,0" Content="&#xf062;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSkyBlue" FontSize="24" HorizontalAlignment="Right"/>
+                <Button Name="Button_Close" Click="Button_Close_Click" Width="45" Height="40" Margin="0,-40,6,0" Content="&#xf410;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSalmon" FontSize="24" HorizontalAlignment="Right"/>
 
                 <!--<Image Name="Image_Login" Source="/Resources/Images/login.gif" Width="160"/>-->
-                <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="60" Opacity="0" Margin="0,-30,0,0"/>
+                <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="60" Opacity="0" Margin="0,30,0,0"/>
 
                 <TextBlock Name="TextBlock_message" Text="Select an option."
                            Margin="5, 5, 5, 0"
