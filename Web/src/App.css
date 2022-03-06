@@ -5,7 +5,8 @@
 }
 
 #themeButton{
-  border: 2px grey solid;
+  border: 2px solid;
+  border-color: var(--text-primary);
   transition: all .5s;
   float:right;
 }
