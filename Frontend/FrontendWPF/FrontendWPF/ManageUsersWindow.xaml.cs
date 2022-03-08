@@ -243,6 +243,13 @@ namespace FrontendWPF
                                     dbUsersList.Remove(selectedUsersList[i]); // remove user also from dbUsersList
                                     selectedUsersList.RemoveAt(i);
                                 }
+                                else if (deleteMessage == "Unauthorized user!")
+                                {
+                                    Shared.Logout(); // stop on unauthorized user
+                                    IsEnabled = false;
+                                    Close();
+                                    return; 
+                                }
                                 else
                                 {
                                     MessageBox.Show(deleteMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -567,28 +574,41 @@ namespace FrontendWPF
                 // check if all properties are entered, then insert into database
                 if (fieldsEntered.All(n => n == 1) || edit_mode == "update") // if all fields have been updated OR update mode for one field
                 {
-                    string registerMessage = "";
-                    string updateMessage = "";
+                    string hostMessage = "";
                     try
                     {
                         if (edit_mode == "insert")
                         {
                             // REGISTER into database
-                            registerMessage = client.RegisterUser(Shared.uid, user_edited.Username, user_edited.Password, user_edited.Location, user_edited.Permission.ToString());
-                            if (registerMessage != "User successfully registered!")
+                            hostMessage = client.RegisterUser(Shared.uid, user_edited.Username, user_edited.Password, user_edited.Location, user_edited.Permission.ToString());
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                                // restore old value // TODO: restore cell values? (or simply reload entire list?)
-                                user_edited = user_edited0;
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
                                 return;
+                            }
+                            else if (hostMessage != "User successfully registered!")
+                            {
+                                MessageBox.Show(hostMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    // restore old value // TODO: restore cell values? (or simply reload entire list?)
+                                    user_edited = user_edited0;
+                                    return;
                             }
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = client.UpdateUser(Shared.uid, user_edited.Id.ToString(), user_edited.Username, user_edited.Password, user_edited.Location, user_edited.Permission.ToString(), user_edited.Active.ToString());
-                            if (updateMessage != "User successfully updated!")
+                            hostMessage = client.UpdateUser(Shared.uid, user_edited.Id.ToString(), user_edited.Username, user_edited.Password, user_edited.Location, user_edited.Permission.ToString(), user_edited.Active.ToString());
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "User successfully updated!")
+                            {
+                                MessageBox.Show(hostMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 user_edited = user_edited0;
                                 return;
@@ -1177,7 +1197,7 @@ namespace FrontendWPF
                 int row_index = 0;
                 string[] row;
                 int usersAdded = 0;
-                string registerMessage = "";
+                string hostMessage = "";
                 string errorMessage = "";
                 dbLocationsList = Location.GetLocations("", "", "", "");
                 if (dbLocationsList == null) { IsEnabled = false; Close(); return; } // stop on any error
@@ -1225,10 +1245,17 @@ namespace FrontendWPF
                     if (error != "") { continue; } // skip on error
 
                     // REGISTER into database
-                    registerMessage = client.RegisterUser(Shared.uid, username, (encrypt ? Shared.CreateMD5(password) : password), location, permission);
-                    if (registerMessage != "User successfully registered!")
+                    hostMessage = client.RegisterUser(Shared.uid, username, (encrypt ? Shared.CreateMD5(password) : password), location, permission);
+                    if (hostMessage == "Unauthorized user!")
                     {
-                        errorMessage += $"'{username}': {registerMessage}\n";
+                        Shared.Logout(); // stop on unauthorized user
+                        IsEnabled = false;
+                        Close();
+                        return;
+                    }
+                    else if (hostMessage != "User successfully registered!")
+                    {
+                        errorMessage += $"'{username}': {hostMessage}\n";
                         continue;
                     }
 
@@ -1286,7 +1313,7 @@ namespace FrontendWPF
         {
             string row = "";
             // save operation into log file
-            StreamWriter sr = new StreamWriter("manageUsers.log", append: true, encoding: Encoding.UTF8);
+            StreamWriter sr = new StreamWriter(@".\Logs\manageUsers.log", append: true, encoding: Encoding.UTF8);
             // write file header line
             // string header_row = "Date;Username;Operation;Id;Username;Location;Permission;Active";
             // sr.WriteLine(header_row);
@@ -1331,13 +1358,13 @@ namespace FrontendWPF
             Button_Maximize.IsEnabled = true;
         }
 
-        LogWindowUsers LogWindowUsers;
+        Logs.LogWindowUsers LogWindowUsers;
         private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
         {
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowUsers))
             {
-                LogWindowUsers = new LogWindowUsers();
+                LogWindowUsers = new Logs.LogWindowUsers();
                 if (LogWindowUsers.IsEnabled) LogWindowUsers.Show();
             }
         }

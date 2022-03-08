@@ -46,7 +46,7 @@ namespace FrontendWPF.Classes
         // returns a list of sales/purchases log
         public static List<SalePurchaseLog> GetSalesPurchasesLog(string type, DateTime startDate, DateTime endDate)
         {
-            string filename = type == "purchase" ? "managePurchases.log" : "manageSales.log";
+            string filename = type == "purchase" ? @".\Logs\managePurchases.log" : @".\Logs\manageSales.log";
 
             StreamReader sr = new StreamReader(filename);
             // check header correctness

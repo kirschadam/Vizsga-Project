@@ -38,7 +38,7 @@ namespace FrontendWPF.Classes
         // returns a list of products log
         public static List<ProductLog> GetProductsLog(DateTime startDate, DateTime endDate)
         {
-            string filename = "manageProducts.log";
+            string filename = @".\Logs\manageProducts.log";
 
             StreamReader sr = new StreamReader(filename);
             // check header correctness

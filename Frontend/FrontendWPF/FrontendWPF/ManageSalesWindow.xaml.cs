@@ -254,6 +254,13 @@ namespace FrontendWPF
                                     dbSalesList.Remove(selectedSalesList[i]); // remove sale also from dbSalesList
                                     selectedSalesList.RemoveAt(i);
                                 }
+                                else if (deleteMessage == "Unauthorized user!")
+                                {
+                                    Shared.Logout(); // stop on unauthorized user
+                                    IsEnabled = false;
+                                    Close();
+                                    return;
+                                }
                                 else
                                 {
                                     MessageBox.Show(deleteMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -637,22 +644,28 @@ namespace FrontendWPF
                 // check if all properties are entered, then insert into database
                 if (fieldsEntered.All(n => n == 1) || edit_mode == "update") // if all fields have been updated OR update mode for one field
                 {
-                    string registerMessage = "";
-                    string updateMessage = "";
+                    string hostMessage = "";
                     try
                     {
                         if (edit_mode == "insert")
                         {
                             // ADD into database
-                            registerMessage = stockClient.AddSalePurchase(Shared.uid, type: "sale", sale_edited.Product, sale_edited.Quantity.ToString(), sale_edited.Location, sale_edited.TotalPrice.ToString(), sale_edited.Date.ToString());
-                            if (registerMessage.Contains("FOREIGN KEY (`productId`)"))
+                            hostMessage = stockClient.AddSalePurchase(Shared.uid, type: "sale", sale_edited.Product, sale_edited.Quantity.ToString(), sale_edited.Location, sale_edited.TotalPrice.ToString(), sale_edited.Date.ToString());
+                            if (hostMessage == "Unauthorized user!")
+                            {
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage.Contains("FOREIGN KEY (`productId`)"))
                             {
                                 MessageBox.Show($"The product does not exist in the database. Please check product name.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 return;
                             }
-                            else if (registerMessage != "Sale/Purchase successfully added!")
+                            else if (hostMessage != "Sale/Purchase successfully added!")
                             {
-                                MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(hostMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell values? (or simply reload entire list?)
                                 sale_edited = sale_edited0;
                                 return;
@@ -660,10 +673,17 @@ namespace FrontendWPF
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = stockClient.UpdateSalePurchase(Shared.uid, sale_edited.Id.ToString(), type: "sale", sale_edited.Product, sale_edited.Quantity.ToString(), sale_edited.TotalPrice.ToString(), sale_edited.Date.ToString(), sale_edited.Location, sale_edited.Username);
-                            if (updateMessage != "Sale/Purchase successfully updated!")
+                            hostMessage = stockClient.UpdateSalePurchase(Shared.uid, sale_edited.Id.ToString(), type: "sale", sale_edited.Product, sale_edited.Quantity.ToString(), sale_edited.TotalPrice.ToString(), sale_edited.Date.ToString(), sale_edited.Location, sale_edited.Username);
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "Sale/Purchase successfully updated!")
+                            {
+                                MessageBox.Show(hostMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 sale_edited = sale_edited0;
                                 return;
@@ -1528,7 +1548,7 @@ namespace FrontendWPF
         {
             string row = "";
             // save operation into log file
-            StreamWriter sr = new StreamWriter("manageSales.log", append: true, encoding: Encoding.UTF8);
+            StreamWriter sr = new StreamWriter(@".\Logs\manageSales.log", append: true, encoding: Encoding.UTF8);
             // write file header line
             // string header_row = "Date;Username;Operation;Id;Product;Quantity;TotalPrice;Date;Location;Username;";
             // sr.WriteLine(header_row);
@@ -1572,13 +1592,13 @@ namespace FrontendWPF
             Button_Maximize.IsEnabled = true;
         }
         
-        LogWindowSales LogWindowSales;
+        Logs.LogWindowSales LogWindowSales;
         private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
         {
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowSales))
             {
-                LogWindowSales = new LogWindowSales();
+                LogWindowSales = new Logs.LogWindowSales();
                 if (LogWindowSales.IsEnabled) LogWindowSales.Show();
             }
         }

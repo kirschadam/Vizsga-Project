@@ -39,7 +39,7 @@ namespace FrontendWPF.Classes
         // returns a list of stocks log
         public static List<StockLog> GetStocksLog(DateTime startDate, DateTime endDate)
         {
-            string filename = "manageStocks.log";
+            string filename = @".\Logs\manageStocks.log";
 
             StreamReader sr = new StreamReader(filename);
             // check header correctness

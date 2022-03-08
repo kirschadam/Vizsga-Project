@@ -224,6 +224,13 @@ namespace FrontendWPF
                                     dbLocationsList.Remove(selectedLocationsList[i]); // remove location also from dbLocationsList
                                     selectedLocationsList.RemoveAt(i);
                                 }
+                                else if (deleteMessage == "Unauthorized user!")
+                                {
+                                    Shared.Logout(); // stop on unauthorized user
+                                    IsEnabled = false;
+                                    Close();
+                                    return;
+                                }
                                 else
                                 {
                                     MessageBox.Show(deleteMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -517,17 +524,23 @@ namespace FrontendWPF
                 // check if all properties are entered, then insert into database
                 if (fieldsEntered.All(n => n == 1) || edit_mode == "update") // if all fields have been updated OR update mode for one field
                 {
-                    string registerMessage = "";
-                    string updateMessage = "";
+                    string hostMessage = "";
                     try
                     {
                         if (edit_mode == "insert")
                         {
                             // ADD into database
-                            registerMessage = locationClient.AddLocation(Shared.uid, location_edited.Name, location_edited.Region);
-                            if (registerMessage != "Location successfully added!")
+                            hostMessage = locationClient.AddLocation(Shared.uid, location_edited.Name, location_edited.Region);
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "Location successfully added!")
+                            {
+                                MessageBox.Show(hostMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell values? (or simply reload entire list?)
                                 location_edited = location_edited0;
                                 return;
@@ -535,10 +548,17 @@ namespace FrontendWPF
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = locationClient.UpdateLocation(Shared.uid, location_edited.Id.ToString(), location_edited.Name, location_edited.Region);
-                            if (updateMessage != "Location successfully updated!")
+                            hostMessage = locationClient.UpdateLocation(Shared.uid, location_edited.Id.ToString(), location_edited.Name, location_edited.Region);
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "Location successfully updated!")
+                            {
+                                MessageBox.Show(hostMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 location_edited = location_edited0;
                                 return;
@@ -1097,7 +1117,7 @@ namespace FrontendWPF
                 int row_index = 0;
                 string[] row;
                 int locationsAdded = 0;
-                string registerMessage = "";
+                string hostMessage = "";
                 string errorMessage = "";
                 int? id = dbLocationsList.Max(u => u.Id) + 1;
                 while (sr.EndOfStream == false)
@@ -1134,10 +1154,17 @@ namespace FrontendWPF
                     if (error != "") { continue; } // continue on error
 
                     // ADD into database
-                    registerMessage = locationClient.AddLocation(Shared.uid, name, region);
-                    if (registerMessage != "Location successfully added!")
+                    hostMessage = locationClient.AddLocation(Shared.uid, name, region);
+                    if (hostMessage == "Unauthorized user!")
                     {
-                        errorMessage += $"'{name}': {registerMessage}\n";
+                        Shared.Logout(); // stop on unauthorized user
+                        IsEnabled = false;
+                        Close();
+                        return;
+                    }
+                    else if (hostMessage != "Location successfully added!")
+                    {
+                        errorMessage += $"'{name}': {hostMessage}\n";
                         continue;
                     }
 
@@ -1192,7 +1219,7 @@ namespace FrontendWPF
         {
             string row = "";
             // save operation into log file
-            StreamWriter sr = new StreamWriter("manageLocations.log", append: true, encoding: Encoding.UTF8);
+            StreamWriter sr = new StreamWriter(@".\Logs\manageLocations.log", append: true, encoding: Encoding.UTF8);
             // write file header line
             // string header_row = "LogDate;LogUsername;LogOperation;Id;Name;BuyUnitPrice;SellUnitPrice";
             // sr.WriteLine(header_row);
@@ -1237,13 +1264,13 @@ namespace FrontendWPF
             Button_Maximize.IsEnabled = true;
         }
 
-        LogWindowLocations LogWindowLocations;
+        Logs.LogWindowLocations LogWindowLocations;
         private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
         {
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowLocations))
             {
-                LogWindowLocations = new LogWindowLocations();
+                LogWindowLocations = new Logs.LogWindowLocations();
                 if (LogWindowLocations.IsEnabled) LogWindowLocations.Show();
             }
         }

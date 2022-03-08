@@ -36,7 +36,7 @@ namespace FrontendWPF.Classes
         // returns a list of locations log
         public static List<LocationLog> GetLocationsLog(DateTime startDate, DateTime endDate)
         {
-            string filename = "manageLocations.log";
+            string filename = @".\Logs\manageLocations.log";
 
             StreamReader sr = new StreamReader(filename);
             // check header correctness

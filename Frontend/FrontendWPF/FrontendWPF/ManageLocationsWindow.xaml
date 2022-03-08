@@ -263,7 +263,7 @@
                 <Button Name="Button_Close" Click="Button_Close_Click" Width="45" Height="40" Margin="0,-40,6,0" Content="&#xf410;" FontFamily="{StaticResource FontAwesome}" Foreground="LightSalmon" FontSize="24" HorizontalAlignment="Right"/>
 
                 <!--<Image Name="Image_Login" Source="/Resources/Images/login.gif" Width="160"/>-->
-                <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="60" Opacity="0" Margin="0,30,0,0"/>
+                <localComponents:GifImage x:Name="gifImage" IsAutoStart="True" GifSource="/FrontendWPF;component/Resources/Images/success.gif" Width="75" Opacity="0" Margin="0,30,0,0"/>
 
                 <TextBlock Name="TextBlock_message" Text="Select an option."
                            Margin="5, 5, 5, 0"

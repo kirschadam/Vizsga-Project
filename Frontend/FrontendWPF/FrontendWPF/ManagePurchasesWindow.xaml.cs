@@ -255,6 +255,13 @@ namespace FrontendWPF
                                     dbPurchasesList.Remove(selectedPurchasesList[i]); // remove purchase also from dbPurchasesList
                                     selectedPurchasesList.RemoveAt(i);
                                 }
+                                else if (deleteMessage == "Unauthorized user!")
+                                {
+                                    Shared.Logout(); // stop on unauthorized user
+                                    IsEnabled = false;
+                                    Close();
+                                    return;
+                                }
                                 else
                                 {
                                     MessageBox.Show(deleteMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -638,22 +645,28 @@ namespace FrontendWPF
                 // check if all properties are entered, then insert into database
                 if (fieldsEntered.All(n => n == 1) || edit_mode == "update") // if all fields have been updated OR update mode for one field
                 {
-                    string registerMessage = "";
-                    string updateMessage = "";
+                    string hostMessage = "";
                     try
                     {
                         if (edit_mode == "insert")
                         {
                             // ADD into database
-                            registerMessage = stockClient.AddSalePurchase(Shared.uid, type: "purchase", purchase_edited.Product, purchase_edited.Quantity.ToString(), purchase_edited.Location, purchase_edited.TotalPrice.ToString(), purchase_edited.Date.ToString());
-                            if (registerMessage.Contains("FOREIGN KEY (`productId`)"))
+                            hostMessage = stockClient.AddSalePurchase(Shared.uid, type: "purchase", purchase_edited.Product, purchase_edited.Quantity.ToString(), purchase_edited.Location, purchase_edited.TotalPrice.ToString(), purchase_edited.Date.ToString());
+                            if (hostMessage == "Unauthorized user!")
+                            {
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage.Contains("FOREIGN KEY (`productId`)"))
                             {
                                 MessageBox.Show($"The product does not exist in the database. Please check product name.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 return;
                             }
-                            else if (registerMessage != "Sale/Purchase successfully added!")
+                            else if (hostMessage != "Sale/Purchase successfully added!")
                             {
-                                MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(hostMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell values? (or simply reload entire list?)
                                 purchase_edited = purchase_edited0;
                                 return;
@@ -661,10 +674,17 @@ namespace FrontendWPF
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = stockClient.UpdateSalePurchase(Shared.uid, purchase_edited.Id.ToString(), type: "purchase", purchase_edited.Product, purchase_edited.Quantity.ToString(), purchase_edited.TotalPrice.ToString(), purchase_edited.Date.ToString(), purchase_edited.Location, purchase_edited.Username);
-                            if (updateMessage != "Sale/Purchase successfully updated!")
+                            hostMessage = stockClient.UpdateSalePurchase(Shared.uid, purchase_edited.Id.ToString(), type: "purchase", purchase_edited.Product, purchase_edited.Quantity.ToString(), purchase_edited.TotalPrice.ToString(), purchase_edited.Date.ToString(), purchase_edited.Location, purchase_edited.Username);
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "Sale/Purchase successfully updated!")
+                            {
+                                MessageBox.Show(hostMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 purchase_edited = purchase_edited0;
                                 return;
@@ -1388,7 +1408,7 @@ namespace FrontendWPF
                 int row_index = 0;
                 string[] row;
                 int purchasesAdded = 0;
-                string registerMessage = "";
+                string hostMessage = "";
                 string errorMessage = "";
                 int? id = dbPurchasesList.Max(u => u.Id) + 1;
                 dbLocationsList = Location.GetLocations("", "", "", "");
@@ -1470,10 +1490,17 @@ namespace FrontendWPF
                     if (error != "") { continue; } // skip on error
 
                     // ADD into database
-                    registerMessage = stockClient.AddSalePurchase(Shared.uid, type: "purchase", product, quantity, location, totalPrice, date);
-                    if (registerMessage.Contains("FOREIGN KEY (`productId`)"))
+                    hostMessage = stockClient.AddSalePurchase(Shared.uid, type: "purchase", product, quantity, location, totalPrice, date);
+                    if (hostMessage == "Unauthorized user!")
                     {
-                        errorMessage += $"Purchase in line'{column_index +1}': {registerMessage}\n";
+                        Shared.Logout(); // stop on unauthorized user
+                        IsEnabled = false;
+                        Close();
+                        return;
+                    }
+                    else if (hostMessage.Contains("FOREIGN KEY (`productId`)"))
+                    {
+                        errorMessage += $"Purchase in line'{column_index +1}': {hostMessage}\n";
                         continue;
                     }
                     
@@ -1529,7 +1556,7 @@ namespace FrontendWPF
         {
             string row = "";
             // save operation into log file
-            StreamWriter sr = new StreamWriter("managePurchases.log", append: true, encoding: Encoding.UTF8);
+            StreamWriter sr = new StreamWriter(@".\Logs\managePurchases.log", append: true, encoding: Encoding.UTF8);
             // write file header line
             // string header_row = "Date;Username;Operation;Id;Product;Quantity;TotalPrice;Date;Location;Username;";
             // sr.WriteLine(header_row);
@@ -1574,13 +1601,13 @@ namespace FrontendWPF
             Button_Maximize.IsEnabled = true;
         }
 
-        LogWindowPurchases LogWindowPurchases;
+        Logs.LogWindowPurchases LogWindowPurchases;
         private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
         {
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowPurchases))
             {
-                LogWindowPurchases = new LogWindowPurchases();
+                LogWindowPurchases = new Logs.LogWindowPurchases();
                 if (LogWindowPurchases.IsEnabled) LogWindowPurchases.Show();
             }
         }

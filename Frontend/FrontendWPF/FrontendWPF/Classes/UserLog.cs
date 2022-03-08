@@ -42,7 +42,7 @@ namespace FrontendWPF.Classes
         // returns a list of users log
         public static List<UserLog> GetUsersLog(DateTime startDate, DateTime endDate)
         {
-            string filename = "manageUsers.log";
+            string filename = @".\Logs\manageUsers.log";
 
             StreamReader sr = new StreamReader(filename);
             // check header correctness

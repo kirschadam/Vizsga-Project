@@ -84,40 +84,6 @@ namespace FrontendWPF
 
             }
 
-            
-            /*
-            client = new UserService.UserManagementClient();
-            UserService.User[] userArray = new UserService.User[0];
-            string query = $"WHERE Username='{userName}' AND Password='{Shared.CreateMD5(password)}'";
-            try
-            {
-                //userArray = client.UserList(query);
-                
-                if (user == null)
-                {
-                MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
-                return;
-                }
-            }
-                catch (Exception ex)
-            {
-                if (ex.ToString().Contains("Unable to connect to the remote server") || ex.ToString().Contains("EndpointNotFoundException"))
-                {
-                    MessageBox.Show("The remote server is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
-                    return;
-                }
-                else
-                {
-                MessageBox.Show("An error occurred, the details are the following:\n" + ex.ToString(), caption: "Error message");
-                    return;
-                }
-            }
-             */
-
-            // login check
-            //if (Textbox_UserName.Text == "admin" && PasswordBox_Password.Password == "admin")
-
-            // if (userArray.Length == 1)
             if (responseLogin.Message.Contains("Welcome"))
             {
                 Shared.loggedInUser = responseLogin.User;
@@ -225,6 +191,10 @@ namespace FrontendWPF
             Button_Close.Click -= Button_Close_Click; // remove event handler
             Button_Login.Click -= Button_Login_ClickAsync;
             Close();
+            if (Shared.loggedIn == false)
+            {
+                Shared.StartWindow.pictureTimer.Start();
+            }
         }
 
         private void Textbox_UserName_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)

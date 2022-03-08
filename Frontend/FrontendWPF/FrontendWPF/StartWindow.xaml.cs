@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,11 +10,12 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using FrontendWPF.Classes;
-
-
+using Microsoft.Win32;
 
 namespace FrontendWPF
 {
@@ -27,6 +29,10 @@ namespace FrontendWPF
         ColumnDefinition colTwoCopyForLayer0;
         ColumnDefinition colTwoCopyForLayer1;
         private bool closeCompleted = false;
+
+        private List<BitmapImage> imagesList = new List<BitmapImage>();
+        private int imageNumber = 0;
+        public DispatcherTimer pictureTimer = new DispatcherTimer();
 
         public StartWindow()
         {
@@ -42,14 +48,6 @@ namespace FrontendWPF
             colTwoCopyForLayer0.SharedSizeGroup = "column2";
             colTwoCopyForLayer1 = new ColumnDefinition();
             colTwoCopyForLayer1.SharedSizeGroup = "column2";
-            /*
-            button_login.Foreground = Brushes.LightSalmon;
-            button_login.FontWeight = FontWeights.SemiBold;
-            button_ManageUsersWindow.IsEnabled = false;
-            button_ManageUsersWindow.Foreground = Brushes.LightGray;
-            button_ManageProductsWindow.IsEnabled = false;
-            button_ManageProductsWindow.Foreground = Brushes.LightGray;
-            */
         }
 
         // Toggle panel 1 between docked and undocked states
@@ -183,6 +181,7 @@ namespace FrontendWPF
             {
                 loginWindow = new LoginWindow();
                 loginWindow.Show();
+                pictureTimer.Stop();
             }
             else // LOGOUT
             {
@@ -204,6 +203,16 @@ namespace FrontendWPF
                 button_ManageLocationsWindow.Foreground = Brushes.Gray;
                 button_Layouts.IsEnabled = false;
                 button_Layouts.Foreground = Brushes.Gray;
+
+                if (gridLayout.Visibility == Visibility.Visible)
+                {
+                    gridLayout.Visibility = Visibility.Hidden;
+                    button_Layouts.Content = "Show layouts";
+                    imageBackground.Visibility = Visibility.Visible;
+                }
+
+                pictureTimer.Start();
+
 
                 UserService.UserServiceClient client = new UserService.UserServiceClient();
                 
@@ -357,19 +366,19 @@ namespace FrontendWPF
 
         private void MenuItem_ViewUsers_Click(object sender, RoutedEventArgs e)
         {
-            ViewUsers viewUsers = new ViewUsers();
+            Templates.ViewUsers viewUsers = new Templates.ViewUsers();
             viewUsers.Show();
         }
 
         private void MenuItem_GridView_Users_Click(object sender, RoutedEventArgs e)
         {
-            GridView_Users gridView_Users = new GridView_Users();
+            Templates.GridView_Users gridView_Users = new Templates.GridView_Users();
             if (gridView_Users.IsEnabled) gridView_Users.Show();  // show if not closed (if set to enabled before)
         }
 
         private void MenuItem_DataGrid_Users_Click(object sender, RoutedEventArgs e)
         {
-            DataGrid_Users dataGrid_Users = new DataGrid_Users();
+            Templates.DataGrid_Users dataGrid_Users = new Templates.DataGrid_Users();
             if (dataGrid_Users.IsEnabled) dataGrid_Users.Show();  // show if not closed (if set to enabled before)
         }
 
@@ -534,7 +543,6 @@ namespace FrontendWPF
                 ManageSalesWindow = new ManageSalesWindow();
                 if (ManageSalesWindow.IsEnabled) ManageSalesWindow.Show();
             }
-
         }
 
         private void button_Layouts_Click(object sender, RoutedEventArgs e)
@@ -543,14 +551,183 @@ namespace FrontendWPF
             {
                 gridLayout.Visibility = Visibility.Visible;
                 button_Layouts.Content = "Hide layouts";
+                imageBackground.Visibility = Visibility.Hidden;
             }
             else
             {
                 gridLayout.Visibility = Visibility.Hidden;
                 button_Layouts.Content = "Show layouts";
+                imageBackground.Visibility = Visibility.Visible;
             }
             
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // create list of images for slideshow
+            // http://csharphelper.com/blog/2020/04/use-code-to-make-a-slideshow-in-c-and-wpf/
+            DirectoryInfo dir_info = new DirectoryInfo(Environment.CurrentDirectory + "\\Resources\\Images\\Slide");
+            foreach (FileInfo file_info in dir_info.GetFiles())
+            {
+                if ((file_info.Extension.ToLower() == ".jpg") ||
+                    (file_info.Extension.ToLower() == ".png"))
+                {
+                    imagesList.Add(new BitmapImage(new Uri(file_info.FullName)));
+                }
+            }
+
+            // Display the first image.
+            imageBackground.Source = imagesList[0];
+
+            // Install a timer to show each image.
+            pictureTimer.Interval = TimeSpan.FromSeconds(5);
+            pictureTimer.Tick += Tick;
+            pictureTimer.Start();
+        }
+
+        // Display the next image.
+        private void Tick(object sender, System.EventArgs e)
+        {
+            imageNumber = (imageNumber + 1) % imagesList.Count;
+            ShowNextImage(imageBackground);
+        }
+
+        private void ShowNextImage(Image img)
+        {
+            const double transition_time = 0.9;
+            Storyboard sb = new Storyboard();
+
+            // ***************************
+            // Animate Opacity 1.0 --> 0.0
+            // ***************************
+            DoubleAnimation fade_out = new DoubleAnimation(1.0, 0.0,
+                TimeSpan.FromSeconds(transition_time));
+            fade_out.BeginTime = TimeSpan.FromSeconds(0);
+
+            // Use the Storyboard to set the target property.
+            Storyboard.SetTarget(fade_out, img);
+            Storyboard.SetTargetProperty(fade_out,
+                new PropertyPath(Image.OpacityProperty));
+
+            // Add the animation to the StoryBoard.
+            sb.Children.Add(fade_out);
+
+
+            // *********************************
+            // Animate displaying the new image.
+            // *********************************
+            ObjectAnimationUsingKeyFrames new_image_animation =
+                new ObjectAnimationUsingKeyFrames();
+            // Start after the first animation has finisheed.
+            new_image_animation.BeginTime = TimeSpan.FromSeconds(transition_time);
+
+            // Add a key frame to the animation.
+            // It should be at time 0 after the animation begins.
+            DiscreteObjectKeyFrame new_image_frame =
+                new DiscreteObjectKeyFrame(imagesList[imageNumber], TimeSpan.Zero);
+            new_image_animation.KeyFrames.Add(new_image_frame);
+
+            // Use the Storyboard to set the target property.
+            Storyboard.SetTarget(new_image_animation, img);
+            Storyboard.SetTargetProperty(new_image_animation,
+                new PropertyPath(Image.SourceProperty));
+
+            // Add the animation to the StoryBoard.
+            sb.Children.Add(new_image_animation);
+
+
+            // ***************************
+            // Animate Opacity 0.0 --> 1.0
+            // ***************************
+            // Start when the first animation ends.
+            DoubleAnimation fade_in = new DoubleAnimation(0.0, 1.0,
+                TimeSpan.FromSeconds(transition_time));
+            fade_in.BeginTime = TimeSpan.FromSeconds(transition_time);
+
+            // Use the Storyboard to set the target property.
+            Storyboard.SetTarget(fade_in, img);
+            Storyboard.SetTargetProperty(fade_in,
+                new PropertyPath(Image.OpacityProperty));
+
+            // Add the animation to the StoryBoard.
+            sb.Children.Add(fade_in);
+
+            // Start the storyboard on the img control.
+            sb.Begin(img);
+        }
+
+        private void button_OpenNotes_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                Filter = "Text file (*.txt)|*.txt|Rich text file (*.rtf) |*.rtf",
+                DefaultExt = ".txt",
+                Title = "Open notes file:"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                int filter = openFileDialog.FilterIndex;
+                // https://docs.microsoft.com/en-us/dotnet/desktop/wpf/controls/how-to-save-load-and-print-richtextbox-content?view=netframeworkdesktop-4.8
+                TextRange range = new TextRange(richTextBox.Document.ContentStart, richTextBox.Document.ContentEnd);
+                FileStream fStream = new FileStream(openFileDialog.FileName, FileMode.OpenOrCreate);
+                range.Load(fStream, (filter == 1 ? DataFormats.Text : DataFormats.Rtf));
+                fStream.Close();
+                /*
+                StreamReader sr = new StreamReader(openFileDialog.FileName, Encoding.UTF8);
+                string fileContent = sr.ReadToEnd();
+
+                */
+            }
+        }
+        private void button_SaveNotes_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                Filter = "Text file (*.txt)|*.txt|Rich text file (*.rtf) |*.rtf",
+                DefaultExt = "*.txt",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                FileName = "Notes",
+                Title = "Save notes as:"
+            };
+            Nullable<bool> result = saveFileDialog.ShowDialog(); // show saveFileDialog
+
+            if (result == true)
+            {
+                /*using ( FileStream myStream = new FileStream( myDlg.FileName, FileMode.OpenOrCreate, FileAccess.Write ) ) {
+                    TextRange myRange = new TextRange( rtbTraffic.Document.ContentStart, rtbTraffic.Document.ContentEnd );
+                    myRange.Save( myStream, DataFormats.Rtf );
+                    myStream.Close();
+                }*/
+
+                int filter = saveFileDialog.FilterIndex;
+                richTextBox.SelectAll();
+                richTextBox.Selection.Save(new FileStream(saveFileDialog.FileName, FileMode.Create, FileAccess.Write), (filter == 1 ? DataFormats.Text : DataFormats.Rtf));
+                button_SaveNotes.Content = "File saved";
+                button_SaveNotes.IsEnabled = false;
+                richTextBox.TextChanged += new TextChangedEventHandler(richTextBox_TextChanged);
+            }
+        }
+
+        private void richTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (button_SaveNotes.Content.ToString() == "File saved")
+            {
+                button_SaveNotes.Content = "Save notes";
+                button_SaveNotes.IsEnabled = true;
+                richTextBox.TextChanged -= new TextChangedEventHandler(richTextBox_TextChanged);
+            }
+        }
+
+        private void ColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (IsLoaded)
+            {
+                // https://stackoverflow.com/questions/11874800/change-style-of-selected-text-in-richtextbox
+                TextSelection ts = richTextBox.Selection;
+                if(ts != null)
+                ts.ApplyPropertyValue(ForegroundProperty, new SolidColorBrush((Color)colorPickerFont.SelectedColor));
+            }
+        }
     }
 }

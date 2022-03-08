@@ -3,11 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:FrontendWPF"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing"
         Closed="Window_Closed"
+        Loaded="Window_Loaded"
         x:Name="window"
         Title="StartWindow" Height="510" MinHeight="510" Width="800" MinWidth="600"
         ResizeMode="CanResize"
@@ -278,11 +280,11 @@
                 <RotateTransform Angle="90" />
             </StackPanel.LayoutTransform>
 
-            <Button Name="button_panel1" MouseEnter="button_panel1_MouseEnter" Margin="0,0,10,0" Padding="10,1,10,1" Background="#FF8E52F7" Width="60" Height="30">
-                Panel1
+            <Button Name="button_panel1" MouseEnter="button_panel1_MouseEnter" Margin="0,0,10,0" Padding="10,1,10,1" Background="#FF8E52F7" Width="75" Height="30">
+                Notepad
             </Button>
 
-            <Button Name="button_panel2" MouseEnter="button_panel2_MouseEnter" Padding="10,1,10,1" Background="#FF8E52F7" Width="60" Height="30">
+            <Button Name="button_panel2" MouseEnter="button_panel2_MouseEnter" Padding="10,1,10,1" Background="#FF8E52F7" Width="75" Height="30">
                 Panel2
             </Button>
         </StackPanel>
@@ -356,6 +358,9 @@
                         </Button>
                     </StackPanel>
                 </Grid>
+
+                <Image Name="imageBackground"  Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="0" Grid.RowSpan="4" Source="/Resources/Images/background.jpg" Stretch="Uniform" Opacity="0.8" />
+
                 <ListBox Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" ToolTip="Click on an article to read it..." Grid.ColumnSpan="3" Background="Transparent" Foreground="AliceBlue" Visibility="Collapsed">
                     <ListBoxItem>This is ListBox item1.</ListBoxItem>
                     <ListBoxItem>This is ListBox item2. This is ListBox item2.</ListBoxItem>
@@ -383,26 +388,29 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
 
-                    <DockPanel Grid.Row="0">
+                    <DockPanel Grid.Row="0" Background="LightSteelBlue">
+                        
                         <Button Width="30" Height="30" Name="panel1Pin" DockPanel.Dock="Right" Click="panel1Pin_Click" Background="White" Padding="3">
                             <Image Name="panel1PinImg" Source="pack://application:,,,/Resources/Images/PinHor1col.png" />
                         </Button>
+                        <Button Name="button_SaveNotes" Click="button_SaveNotes_Click" Content="Save notes" Width="90" Height="30" DockPanel.Dock="Right" Margin="0,0,10,0" Padding="10,1,10,1" Background="#FF8E52F7">
+                        </Button>
+                        <Button Name="button_OpenNotes" Click="button_OpenNotes_Click" Content="Open notes" Width="90" Height="30" DockPanel.Dock="Right" Margin="0,0,10,0" Padding="10,1,10,1" Background="#FF8E52F7">
+                        </Button>
+                        <!-- How to use the Extended WPF toolkit: https://github.com/xceedsoftware/wpftoolkit  → https://youtu.be/ZyVeTO3AgR8 -->
+                        <xctk:ColorPicker Name="colorPickerFont" DockPanel.Dock="Right" SelectedColorChanged="ColorPicker_SelectedColorChanged" SelectedColor="LightSteelBlue" ToolTip="Pic font color for selected text"/>
 
-
-                        <TextBlock Padding="25,8" TextTrimming="CharacterEllipsis" Foreground="Black" DockPanel.Dock="Left">
-                            <TextBlock.Background>
-                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                    <GradientStop Color="LightSteelBlue" Offset="0"/>
-                                    <GradientStop Color="#FFF1F3FF" Offset="0.992"/>
-                                </LinearGradientBrush>
-                            </TextBlock.Background>
-                            Panel 1</TextBlock>
+                        <TextBlock Padding="17,8" TextTrimming="CharacterEllipsis" Foreground="Salmon" FontSize="15" FontWeight="Bold" DockPanel.Dock="Left" Text="Notepad ">
+                        </TextBlock>
+                        <!--// this space is needed after 'Notepad', otherwise panel closes when mouse moves to it from button!-->
 
                     </DockPanel>
 
 
 
-                    <ListBox Padding="10" Grid.Row="1">
+                    <RichTextBox Name="richTextBox" Padding="10" Grid.Row="1" FontSize="15" Block.LineHeight="2" MinWidth="400"></RichTextBox>
+                    
+                    <ListBox Padding="10" Grid.Row="1" Visibility="Hidden">
                         <ListBoxItem>Facebook</ListBoxItem>
                         <ListBoxItem>Twitter</ListBoxItem>
                         <ListBoxItem>Google+</ListBoxItem>
@@ -431,21 +439,14 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
 
-                    <DockPanel Grid.Row="0">
+                    <DockPanel Grid.Row="0" Background="LightSteelBlue">
 
                         <Button Width="30" Height="30" Name="panel2Pin" DockPanel.Dock="Right" Click="panel2Pin_Click" Background="White" Padding="3">
                             <Image Name="panel2PinImg" Source="pack://application:,,,/Resources/Images/PinHor1col.png"/>
                         </Button>
 
+                        <TextBlock Padding="35,8" TextTrimming="CharacterEllipsis" Foreground="Salmon" FontSize="15" FontWeight="Bold" DockPanel.Dock="Left" Text="Panel 2">
 
-                        <TextBlock Padding="35,8" TextTrimming="CharacterEllipsis" Foreground="Black" DockPanel.Dock="Left">
-                            <TextBlock.Background>
-                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                                    <GradientStop Color="LightSteelBlue" Offset="0"/>
-                                    <GradientStop Color="#FFF1F3FF" Offset="0.992"/>
-                                </LinearGradientBrush>
-                            </TextBlock.Background>
-                            Panel 2
                         </TextBlock>
                     </DockPanel>
 

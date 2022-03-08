@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -138,6 +139,40 @@ namespace FrontendWPF.Classes
                 }
             }
         }
+
+        public static void Logout()
+        {
+            MessageBox.Show("The connection to the server was interrupted. Please log in again to continue.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            // logout
+            Shared.StartWindow.button_login.Content = "LOGIN";
+            Shared.StartWindow.button_login.Foreground = Brushes.LightSalmon;
+            Shared.loggedInUser = null;
+            Shared.loggedIn = false;
+            Shared.StartWindow.button_ManageUsersWindow.IsEnabled = false;
+            Shared.StartWindow.button_ManageUsersWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF9D9D9D");
+            Shared.StartWindow.button_ManageProductsWindow.IsEnabled = false;
+            Shared.StartWindow.button_ManageProductsWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF989898");
+            Shared.StartWindow.button_ManagePurchasesWindow.IsEnabled = false;
+            Shared.StartWindow.button_ManagePurchasesWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF989898");
+            Shared.StartWindow.button_ManageSalesWindow.IsEnabled = false;
+            Shared.StartWindow.button_ManageSalesWindow.Foreground = (SolidColorBrush)new BrushConverter().ConvertFrom("#FF8C8C8C");
+            Shared.StartWindow.button_ManageLocationsWindow.IsEnabled = false;
+            Shared.StartWindow.button_ManageLocationsWindow.Foreground = Brushes.Gray;
+            if (Shared.StartWindow.gridLayout.Visibility == Visibility.Visible)
+            {
+                Shared.StartWindow.gridLayout.Visibility = Visibility.Hidden;
+                Shared.StartWindow.button_Layouts.Content = "Show layouts";
+                Shared.StartWindow.imageBackground.Visibility = Visibility.Visible;
+            }
+
+
+            // login
+            LoginWindow loginWindow = new LoginWindow();
+            loginWindow = new LoginWindow();
+            loginWindow.Show();
+        }
+
 
     }
 }

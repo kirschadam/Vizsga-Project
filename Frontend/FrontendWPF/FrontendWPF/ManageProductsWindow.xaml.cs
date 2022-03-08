@@ -238,6 +238,13 @@ namespace FrontendWPF
                                     dbProductsList.Remove(selectedProductsList[i]); // remove product also from dbProductsList
                                     selectedProductsList.RemoveAt(i);
                                 }
+                                else if (deleteMessage == "Unauthorized user!")
+                                {
+                                    Shared.Logout(); // stop on unauthorized user
+                                    IsEnabled = false;
+                                    Close();
+                                    return;
+                                }
                                 else
                                 {
                                     MessageBox.Show(deleteMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -541,17 +548,23 @@ namespace FrontendWPF
                 // check if all properties are entered, then insert into database
                 if (fieldsEntered.All(n => n == 1) || edit_mode == "update") // if all fields have been updated OR update mode for one field
                 {
-                    string registerMessage = "";
-                    string updateMessage = "";
+                    string hostMessage = "";
                     try
                     {
                         if (edit_mode == "insert")
                         {
                             // ADD into database
-                            registerMessage = stockClient.AddProduct(Shared.uid, product_edited.Name, product_edited.BuyUnitPrice.ToString(), product_edited.SellUnitPrice.ToString());
-                            if (registerMessage != "Product successfully added!")
+                            hostMessage = stockClient.AddProduct(Shared.uid, product_edited.Name, product_edited.BuyUnitPrice.ToString(), product_edited.SellUnitPrice.ToString());
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "Product successfully added!")
+                            {
+                                MessageBox.Show(hostMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell values? (or simply reload entire list?)
                                 product_edited = product_edited0;
                                 return;
@@ -559,10 +572,10 @@ namespace FrontendWPF
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = stockClient.UpdateProduct(Shared.uid, product_edited.Id.ToString(), product_edited.Name, product_edited.BuyUnitPrice.ToString(), product_edited.SellUnitPrice.ToString());
-                            if (updateMessage != "Product successfully updated!")
+                            hostMessage = stockClient.UpdateProduct(Shared.uid, product_edited.Id.ToString(), product_edited.Name, product_edited.BuyUnitPrice.ToString(), product_edited.SellUnitPrice.ToString());
+                            if (hostMessage != "Product successfully updated!")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(hostMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 product_edited = product_edited0;
                                 return;
@@ -1137,7 +1150,7 @@ namespace FrontendWPF
                 int row_index = 0;
                 string[] row;
                 int productsAdded = 0;
-                string registerMessage = "";
+                string hostMessage = "";
                 string errorMessage = "";
                 int? id = dbProductsList.Max(u => u.Id) + 1;
                 while (sr.EndOfStream == false)
@@ -1185,10 +1198,17 @@ namespace FrontendWPF
                     if (error != "") { continue; } // continue on error
 
                     // ADD into database
-                    registerMessage = stockClient.AddProduct(Shared.uid, name, buyUnitPrice, sellUnitPrice);
-                    if (registerMessage != "Product successfully added!")
+                    hostMessage = stockClient.AddProduct(Shared.uid, name, buyUnitPrice, sellUnitPrice);
+                    if (hostMessage == "Unauthorized user!")
                     {
-                        errorMessage += $"'{name}': {registerMessage}\n";
+                        Shared.Logout(); // stop on unauthorized user
+                        IsEnabled = false;
+                        Close();
+                        return;
+                    }
+                    else if (hostMessage != "Product successfully added!")
+                    {
+                        errorMessage += $"'{name}': {hostMessage}\n";
                         continue;
                     }
 
@@ -1244,7 +1264,7 @@ namespace FrontendWPF
         {
             string row = "";
             // save operation into log file
-            StreamWriter sr = new StreamWriter("manageProducts.log", append: true, encoding: Encoding.UTF8);
+            StreamWriter sr = new StreamWriter(@".\Logs\manageProducts.log", append: true, encoding: Encoding.UTF8);
             // write file header line
             // string header_row = "LogDate;LogUsername;LogOperation;Id;Name;BuyUnitPrice;SellUnitPrice";
             // sr.WriteLine(header_row);
@@ -1289,13 +1309,13 @@ namespace FrontendWPF
             Button_Maximize.IsEnabled = true;
         }
 
-        LogWindowProducts LogWindowProducts;
+        Logs.LogWindowProducts LogWindowProducts;
         private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
         {
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowProducts))
             {
-                LogWindowProducts = new LogWindowProducts();
+                LogWindowProducts = new Logs.LogWindowProducts();
                 if (LogWindowProducts.IsEnabled) LogWindowProducts.Show();
             }
         }

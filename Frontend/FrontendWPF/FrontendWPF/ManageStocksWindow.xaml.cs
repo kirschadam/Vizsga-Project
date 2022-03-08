@@ -237,6 +237,13 @@ namespace FrontendWPF
                                     dbStocksList.Remove(selectedStocksList[i]); // remove stock also from dbStocksList
                                     selectedStocksList.RemoveAt(i);
                                 }
+                                else if (deleteMessage == "Unauthorized user!")
+                                {
+                                    Shared.Logout(); // stop on unauthorized user
+                                    IsEnabled = false;
+                                    Close();
+                                    return;
+                                }
                                 else
                                 {
                                     MessageBox.Show(deleteMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -491,7 +498,7 @@ namespace FrontendWPF
                         stopMessage = $"Quantity cannot exceed 1,000,000,000!";
                     }
                 }
-                else if (changed_property_name == "Location" && new_value != old_value)
+                else if (changed_property_name == "Location")  //  && new_value != old_value
                 {
                     if (new_value.Length < 3)
                     {
@@ -569,17 +576,23 @@ namespace FrontendWPF
                 // check if all properties are entered, then insert into database
                 if (fieldsEntered.All(n => n == 1) || edit_mode == "update") // if all fields have been updated OR update mode for one field
                 {
-                    string registerMessage = "";
-                    string updateMessage = "";
+                    string hostMessage = "";
                     try
                     {
                         if (edit_mode == "insert")
                         {
                             // ADD into database
-                            registerMessage = stockClient.AddStock(Shared.uid, stock_edited.Product, stock_edited.Location);
-                            if (registerMessage != "Stock successfully added!")
+                            hostMessage = stockClient.AddStock(Shared.uid, stock_edited.Product, stock_edited.Location);
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(registerMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "Stock successfully added!")
+                            {
+                                MessageBox.Show(hostMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell values? (or simply reload entire list?)
                                 stock_edited = stock_edited0;
                                 return;
@@ -587,10 +600,17 @@ namespace FrontendWPF
                         }
                         else if (edit_mode == "update")
                         {
-                            updateMessage = stockClient.UpdateStock(Shared.uid, stock_edited.Id.ToString(), stock_edited.Product, stock_edited.Location, stock_edited.Quantity.ToString());
-                            if (updateMessage != "Stock successfully updated!")
+                            hostMessage = stockClient.UpdateStock(Shared.uid, stock_edited.Id.ToString(), stock_edited.Product, stock_edited.Quantity.ToString(), stock_edited.Location );
+                            if (hostMessage == "Unauthorized user!")
                             {
-                                MessageBox.Show(updateMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "Stock successfully updated!")
+                            {
+                                MessageBox.Show(hostMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
                                 stock_edited = stock_edited0;
                                 return;
@@ -1159,7 +1179,7 @@ namespace FrontendWPF
                 int row_index = 0;
                 string[] row;
                 int stocksAdded = 0;
-                string registerMessage = "";
+                string hostMessage = "";
                 string errorMessage = "";
                 int? id = dbStocksList.Max(u => u.Id) + 1;
                 List<StockService.Product> dbProductsList = new List<StockService.Product>();
@@ -1214,10 +1234,17 @@ namespace FrontendWPF
                     if (error != "") { continue; } // continue on error
 
                     // ADD into database
-                    registerMessage = stockClient.AddStock(Shared.uid, product, location);
-                    if (registerMessage != "Stock successfully added!")
+                    hostMessage = stockClient.AddStock(Shared.uid, product, location);
+                    if (hostMessage == "Unauthorized user!")
                     {
-                        errorMessage += $"'{product}': {registerMessage}\n";
+                        Shared.Logout(); // stop on unauthorized user
+                        IsEnabled = false;
+                        Close();
+                        return;
+                    }
+                    else if (hostMessage != "Stock successfully added!")
+                    {
+                        errorMessage += $"'{product}': {hostMessage}\n";
                         continue;
                     }
 
@@ -1273,7 +1300,7 @@ namespace FrontendWPF
         {
             string row = "";
             // save operation into log file
-            StreamWriter sr = new StreamWriter("manageStocks.log", append: true, encoding: Encoding.UTF8);
+            StreamWriter sr = new StreamWriter(@".\Logs\manageStocks.log", append: true, encoding: Encoding.UTF8);
             // write file header line
             // string header_row = "LogDate;LogUsername;LogOperation;Id;Product;Quantity;Location";
             // sr.WriteLine(header_row);
@@ -1318,13 +1345,13 @@ namespace FrontendWPF
             Button_Maximize.IsEnabled = true;
         }
 
-        LogWindowStocks LogWindowStocks;
+        Logs.LogWindowStocks LogWindowStocks;
         private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
         {
             // show only if not open already (to avoid multiple instances)
             if (!Application.Current.Windows.OfType<Window>().Contains(LogWindowStocks))
             {
-                LogWindowStocks = new LogWindowStocks();
+                LogWindowStocks = new Logs.LogWindowStocks();
                 if (LogWindowStocks.IsEnabled) LogWindowStocks.Show();
             }
         }
