@@ -411,7 +411,7 @@ namespace Base_service
 
 
 
-        public string UpdateStock(string uid, string id, [Optional] string product, [Optional] string location, [Optional] string quantity)
+        public string UpdateStock(string uid, string id, [Optional] string product, [Optional] string quantity, [Optional] string location)
         {
             if (!Current_users.ContainsKey(uid)) return "Unauthorized user!";
 
@@ -430,7 +430,7 @@ namespace Base_service
             string productId = "";
             if (product != null && product != "")
             {
-                var result_read = BaseSelect("products", "`id`", new string[,] { { "`name`", "=", $"'{location}'" } }, "");
+                var result_read = BaseSelect("products", "`id`", new string[,] { { "`name`", "=", $"'{product}'" } }, "");
 
                 if (result_read.Item1.Rows.Count != 0) productId = result_read.Item1.Rows[0]["id"].ToString();
                 else if (result_read.Item2 != "") return result_read.Item2;
@@ -440,8 +440,8 @@ namespace Base_service
             string[,] changes = 
             { 
                 { "`productId`", $"'{productId}'" },
-                { "`locationId`", $"'{locationId}'" },
-                { "`quantity`", $"'{quantity}'" } 
+                { "`quantity`", $"'{quantity}'" },
+                { "`locationId`", $"'{locationId}'" }
             };
 
             var result = BaseUpdate("stocks", changes, $"`id`='{id}'");
