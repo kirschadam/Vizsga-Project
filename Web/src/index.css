@@ -9,7 +9,7 @@ body {
 html {
     block-size: fit-content;
     width: 100%;
-    background-color:var(--background);
+    background-color: var(--background);
 }
 
 code {
@@ -17,7 +17,7 @@ code {
 }
 
 :root {
-    --background: #FF8E52F7;
+    --background: #874ACD;
     --text-primary: black;
     --text-secondary: royalblue;
     --color-one: grey;
@@ -26,7 +26,7 @@ code {
 
 [data-theme='dark'] {
     --background: rgb(20, 20, 20);
-    --text-primary: #FF8E52F7;
+    --text-primary: #874ACD;
     --text-secondary: grey;
     --color-one: rgb(55, 62, 77);
     --accent: rgb(64, 67, 83);
