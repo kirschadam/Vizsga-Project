@@ -44,7 +44,6 @@ namespace FrontendWPF
         string input = "";
         string opId = "=";
         string opQuantity = "=";
-        string opSellUnitPrice = "=";
         double windowLeft0;
         double windowTop0;
         double windowWidth0;

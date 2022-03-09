@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32002.261
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendWPF", "FrontendWPF\FrontendWPF.csproj", "{3B8176D2-E3F5-492A-9D44-510FD26BEF9B}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FrontendWPFSetup", "FrontendWPFSetup\FrontendWPFSetup.vdproj", "{CAB9488F-21C0-479C-9AB2-D47DABC90AF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,8 @@ Global
 		{3B8176D2-E3F5-492A-9D44-510FD26BEF9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B8176D2-E3F5-492A-9D44-510FD26BEF9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B8176D2-E3F5-492A-9D44-510FD26BEF9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAB9488F-21C0-479C-9AB2-D47DABC90AF9}.Debug|Any CPU.ActiveCfg = Debug
+		{CAB9488F-21C0-479C-9AB2-D47DABC90AF9}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
