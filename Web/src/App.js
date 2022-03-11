@@ -63,7 +63,7 @@ function App() {
             </div>
           </nav>
         </div>
-        <div className="float-end" id="logout">
+        <div id="logout">
           <Logout/>
         </div>
         <Routes>

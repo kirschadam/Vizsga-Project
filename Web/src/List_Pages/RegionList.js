@@ -90,13 +90,15 @@ function Regions() {
          	 		</div>
         		</ul>
       		</form>
-      		{regions.map((region) => (
-        		<div key={region.Id} className="row border-bottom  py-2 w-100">
-          			<div className="col-xs-12 col-sm-1">{region.Id}</div>
-          			<div className="col-xs-4 col-sm-3">{region.Name}</div>
-          			<div className="col-xs-8 col-sm-6">{locationList(region.Locations)}</div>
-        		</div>
-      		))}
+			<div className="list">
+      			{regions.map((region) => (
+        			<div key={region.Id} className="row border-bottom  py-2 w-100">
+          				<div className="col-xs-12 col-sm-1">{region.Id}</div>
+          				<div className="col-xs-4 col-sm-3">{region.Name}</div>
+          				<div className="col-xs-8 col-sm-6">{locationList(region.Locations)}</div>
+        			</div>
+      			))}
+			</div>
     	</div>
   	)
 }

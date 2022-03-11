@@ -95,15 +95,17 @@ function Users() {
          	 		</div>
         		</ul>
       		</form>
-      		{users.map((user) => (
-        		<div key={user.Id} className="row border-bottom  py-2 w-100">
-          			<div className="col-xs-12 col-sm-1">{user.Id}</div>
-          			<div className="col-xs-4 col-sm-3">{user.Username}</div>
-          			<div className="col-xs-8 col-sm-3">{user.Location}</div>
-          			<div className="col-xs-10 col-sm-3">{user.Permission}</div>
-          			<div className="col-xs-10 col-sm-1">{user.Active === 1 ? "Active" : "Inactive"}</div>
-        		</div>
-      		))}
+			<div className="list">
+      			{users.map((user) => (
+        			<div key={user.Id} className="row border-bottom  py-2 w-100">
+          				<div className="col-xs-12 col-sm-1">{user.Id}</div>
+          				<div className="col-xs-4 col-sm-3">{user.Username}</div>
+          				<div className="col-xs-8 col-sm-3">{user.Location}</div>
+          				<div className="col-xs-10 col-sm-3">{user.Permission}</div>
+          				<div className="col-xs-10 col-sm-1">{user.Active === 1 ? "Active" : "Inactive"}</div>
+        			</div>
+      			))}
+			</div>
     	</div>
   	)
 }

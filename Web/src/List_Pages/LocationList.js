@@ -80,13 +80,15 @@ function Locations() {
          	 		</div>
         		</ul>
       		</form>
-      		{locations.map((location) => (
-        		<div key={location.Id} className="row border-bottom  py-2 w-100">
-          			<div className="col-xs-12 col-sm-1">{location.Id}</div>
-          			<div className="col-xs-4 col-sm-3">{location.Name}</div>
-          			<div className="col-xs-8 col-sm-3">{location.Region}</div>
-        		</div>
-      		))}
+			<div className="list">
+      			{locations.map((location) => (
+        			<div key={location.Id} className="row border-bottom  py-2 w-100">
+          				<div className="col-xs-12 col-sm-1">{location.Id}</div>
+          				<div className="col-xs-4 col-sm-3">{location.Name}</div>
+          				<div className="col-xs-8 col-sm-3">{location.Region}</div>
+        			</div>
+      			))}
+			</div>
     	</div>
   	)
 }

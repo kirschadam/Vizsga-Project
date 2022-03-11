@@ -26,14 +26,16 @@ export function Login() {
     function loginFormSubmit(e) {
         e.preventDefault();
         setLoginPending(true);
-        fetch(Base_user + "loginuser?username=" + e.target.elements.username.value + "&password=" + CryptoJS.MD5(e.target.elements.password.value), {
-            method:"GET"
+        fetch(Base_user + "loginuser", {
+            method:"POST",
+            headers:{'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: e.target.elements.username.value,
+                password: String(CryptoJS.MD5(e.target.elements.password.value))
+            })
         })
         .then(res => res.json())
         .then((response) =>{
-            console.log(response.Message);
-            console.log(`"Login response.Message: ${response.Message}"`);
-            console.log(`"Login response: ${JSON.stringify(response)}"`);
             alert(response.Message);
             if(response.User.Active === 0){
                 alert("This user is currently set to inactive!");
@@ -106,8 +108,13 @@ export function Logout(){
     const navigate = useNavigate();
 
     function Logout_uid(){
-        fetch(Base_user + "logoutuser?uid=" + User.Uid, {
-            method:"GET"
+        fetch(Base_user + "logoutuser", {
+            method:"POST",
+            headers:{'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                uid: User.Uid
+            })
+            
         })
         .then(res => res.json())
         .then((response) =>{
@@ -131,7 +138,7 @@ export function Logout(){
 
     return(
         <button
-            className="btn btn-danger m-2 float-right"
+            className="button res-primary res-background m-2 float-right"
             onClick={Logout_uid}>Logout</button>
     );
 }

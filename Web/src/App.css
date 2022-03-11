@@ -47,10 +47,11 @@ nav>div:hover{
 #loginCard{
   position: absolute;
   top:300px;
+  height: 220px !important;
 }
 
 .res-background{
-  background-color:var(--background);
+  background: linear-gradient(var(--background), var(--background-gradient));;
 }
 
 .res-primary{
@@ -71,4 +72,28 @@ nav>div:hover{
 
 .res-current{
   background-color: var(--accent);
+}
+
+.button{
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  background-color: transparent;
+  border: 2px solid var(--text-primary);
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  border-radius: .25rem;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  position:fixed;
+  bottom: 0;
+  left: 0;
+}
+
+.list{
+  padding-bottom: 60px;
 }

@@ -94,14 +94,16 @@ function Products() {
          	 		</div>
         		</ul>
       		</form>
-      		{products.map((product) => (
-        		<div key={product.Id} className="row border-bottom  py-2 w-100">
-          			<div className="col-xs-12 col-sm-1">{product.Id}</div>
-          			<div className="col-xs-4 col-sm-4">{product.Name}</div>
-          			<div className="col-xs-8 col-sm-3">{product.BuyUnitPrice}</div>
-          			<div className="col-xs-10 col-sm-3">{product.SellUnitPrice}</div>
-        		</div>
-      		))}
+			<div className="list">
+      			{products.map((product) => (
+        			<div key={product.Id} className="row border-bottom  py-2 w-100">
+          				<div className="col-xs-12 col-sm-1">{product.Id}</div>
+          				<div className="col-xs-4 col-sm-4">{product.Name}</div>
+          				<div className="col-xs-8 col-sm-3">{product.BuyUnitPrice}</div>
+          				<div className="col-xs-10 col-sm-3">{product.SellUnitPrice}</div>
+        			</div>
+      			))}
+			</div>
     	</div>
   	)
 }

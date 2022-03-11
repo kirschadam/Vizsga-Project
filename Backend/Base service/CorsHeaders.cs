@@ -4,6 +4,7 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
+using System.ServiceModel.Web;
 
 namespace Base_service
 {
@@ -35,7 +36,13 @@ namespace Base_service
                 httpHeader.Headers.Add(item.Key, item.Value);
             }
 
-            string displayText = "Server responded to request.\n";
+            WebOperationContext ctx = WebOperationContext.Current;
+            if (ctx.IncomingRequest.Method == "OPTIONS")
+            {
+                ctx.OutgoingResponse.StatusCode = System.Net.HttpStatusCode.OK;
+            }
+
+                string displayText = "Server responded to request.\n";
             Console.WriteLine(displayText);
 
         }
@@ -57,7 +64,8 @@ namespace Base_service
             {
                 { "Access-Control-Allow-Origin", "*" },
                 { "Access-Control-Request-Method", "POST,GET,PUT,DELETE,OPTIONS" },
-                { "Access-Control-Allow-Headers", "X-Requested-With,Content-Type" }
+                { "Access-Control-Allow-Headers", "x-requested-with,content-type, accept" },
+                { "Access-Control-Max-Age", "1728000" }
             };
 
             dispatchRuntime.MessageInspectors.Add(new CustomHeaderMessageInspector(requiredHeaders));

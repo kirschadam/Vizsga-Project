@@ -115,6 +115,7 @@ return (
                   </div>
               </ul>
           </form>
+		  <div className="list">
               {purchases.map((purchase) => (
                 <div key={purchase.Id} className="row border-bottom  py-2 w-100">
                   <div className="col-xs-12 col-sm-1">{purchase.Id}</div>
@@ -126,6 +127,7 @@ return (
                   <div className="col-xs-10 col-sm-2">{purchase.Username}</div>
                 </div>
               ))}
+          </div>
       </div>
   </div>
   )

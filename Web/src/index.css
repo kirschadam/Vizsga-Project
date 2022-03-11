@@ -9,7 +9,7 @@ body {
 html {
     block-size: fit-content;
     width: 100%;
-    background-color: var(--background);
+    background: linear-gradient(var(--background), var(--background-gradient));
 }
 
 code {
@@ -18,16 +18,18 @@ code {
 
 :root {
     --background: #874ACD;
+    --background-gradient:#7C3763;
     --text-primary: black;
     --text-secondary: royalblue;
     --color-one: grey;
-    --accent: rgb(34, 34, 34);
+    --accent: rgb(195, 0, 255);
 }
 
 [data-theme='dark'] {
     --background: rgb(20, 20, 20);
+    --background-gradient:rgb(20, 20, 20);
     --text-primary: #874ACD;
     --text-secondary: grey;
     --color-one: rgb(55, 62, 77);
-    --accent: rgb(64, 67, 83);
+    --accent: rgb(102, 0, 109);
 }
