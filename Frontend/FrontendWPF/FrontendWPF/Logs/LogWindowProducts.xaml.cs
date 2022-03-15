@@ -382,7 +382,7 @@ namespace FrontendWPF.Logs
             if (changed_property_name == "date") { changed_property_name = "LogDate"; }
             if (changed_property_name == "user name") { changed_property_name = "LogUsername"; }
             if (changed_property_name == "operation") { changed_property_name = "LogOperation"; }
-            if (changed_property_name == "Purchase price") { changed_property_name = "BuyUnitPrice"; }
+            if (changed_property_name == "Purchase price" || changed_property_name == "Purchase pr") { changed_property_name = "BuyUnitPrice"; }
             if (changed_property_name == "Sales price") { changed_property_name = "SellUnitPrice"; }
 
             // remove operator for integer columns Id and UnitPrice
@@ -404,7 +404,7 @@ namespace FrontendWPF.Logs
 
             // if any product_filter value is null, set it temporarily to -999 to avoid error when setting old value 
             if (changed_property_name == "LogDate" && product_filter.LogDate == null) product_filter.LogDate = DateTime.Parse("01.01.01 01:01:01");
-            if (changed_property_name == "Purchase price") { changed_property_name = "BuyUnitPrice"; }
+            if (changed_property_name == "Purchase price" || changed_property_name == "Purchase pr") { changed_property_name = "BuyUnitPrice"; }
             if (changed_property_name == "Sales price") { changed_property_name = "SellUnitPrice"; }
             if (changed_property_name == "Id" && product_filter.Id == null) product_filter.Id = -999;
             if (changed_property_name == "BuyUnitPrice" && product_filter.BuyUnitPrice == null) product_filter.BuyUnitPrice = -999;

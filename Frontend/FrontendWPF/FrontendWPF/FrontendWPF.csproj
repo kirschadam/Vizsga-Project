@@ -134,12 +134,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
-    <Compile Include="Templates\DataGrid_Users.xaml.cs">
-      <DependentUpon>DataGrid_Users.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\GridView_Users.xaml.cs">
-      <DependentUpon>GridView_Users.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Logs\LogWindowLocations.xaml.cs">
       <DependentUpon>LogWindowLocations.xaml</DependentUpon>
     </Compile>
@@ -158,96 +152,33 @@
     <Compile Include="Logs\LogWindowPurchases.xaml.cs">
       <DependentUpon>LogWindowPurchases.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ManageLocationsWindow.xaml.cs">
+    <Compile Include="Windows\ManageLocationsWindow.xaml.cs">
       <DependentUpon>ManageLocationsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ManageStocksWindow.xaml.cs">
+    <Compile Include="Windows\ManageStocksWindow.xaml.cs">
       <DependentUpon>ManageStocksWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ManageSalesWindow.xaml.cs">
+    <Compile Include="Windows\ManageSalesWindow.xaml.cs">
       <DependentUpon>ManageSalesWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ManagePurchasesWindow.xaml.cs">
+    <Compile Include="Windows\ManagePurchasesWindow.xaml.cs">
       <DependentUpon>ManagePurchasesWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ManageProductsWindow.xaml.cs">
+    <Compile Include="Windows\ManageProductsWindow.xaml.cs">
       <DependentUpon>ManageProductsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ManageUsersWindow.xaml.cs">
+    <Compile Include="Windows\ManageUsersWindow.xaml.cs">
       <DependentUpon>ManageUsersWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Templates\Car.cs" />
-    <Compile Include="Templates\DataBinding_ListOfUsers.xaml.cs">
-      <DependentUpon>DataBinding_ListOfUsers.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\DataBinding_ObservableCollection_Users.xaml.cs">
-      <DependentUpon>DataBinding_ObservableCollection_Users.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Image_FadeInOut.xaml.cs">
-      <DependentUpon>Image_FadeInOut.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Users.cs" />
-    <Compile Include="Templates\Cars.cs" />
-    <Compile Include="Templates\CarType.cs" />
-    <Compile Include="Templates\DataBinding_ListOfClass.xaml.cs">
-      <DependentUpon>DataBinding_ListOfClass.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\DataBinding_ObservableCollection.xaml.cs">
-      <DependentUpon>DataBinding_ObservableCollection.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Layout_ScaleTransform.xaml.cs">
-      <DependentUpon>Layout_ScaleTransform.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Layout_ScrollViewer_ViewBox.xaml.cs">
-      <DependentUpon>Layout_ScrollViewer_ViewBox.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Layout_SkewTransform.xaml.cs">
-      <DependentUpon>Layout_SkewTransform.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Layout_StackPanel_DockPanel.xaml.cs">
-      <DependentUpon>Layout_StackPanel_DockPanel.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="RegisterWindow.xaml.cs">
+    <Compile Include="Windows\RegisterWindow.xaml.cs">
       <DependentUpon>RegisterWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LoginWindow.xaml.cs">
+    <Compile Include="Windows\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Templates\ItemsControl_TreeView.xaml.cs">
-      <DependentUpon>ItemsControl_TreeView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\ItemsControl_Tab.xaml.cs">
-      <DependentUpon>ItemsControl_Tab.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Property_Element.xaml.cs">
-      <DependentUpon>Property_Element.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Layout_RotateTransform.xaml.cs">
-      <DependentUpon>Layout_RotateTransform.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="StartWindow.xaml.cs">
+    <Compile Include="Windows\StartWindow.xaml.cs">
       <DependentUpon>StartWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Templates\Add_Element_Programmatically.xaml.cs">
-      <DependentUpon>Add_Element_Programmatically.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Layout_GridRowDefinitions.xaml.cs">
-      <DependentUpon>Layout_GridRowDefinitions.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\Window_FadeIn_FadeOut.xaml.cs">
-      <DependentUpon>Window_FadeIn_FadeOut.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Templates\ViewUsers.xaml.cs">
-      <DependentUpon>ViewUsers.xaml</DependentUpon>
-    </Compile>
-    <Page Include="Templates\DataGrid_Users.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Templates\GridView_Users.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Logs\LogWindowLocations.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -272,75 +203,39 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ManageLocationsWindow.xaml">
+    <Page Include="Windows\ManageLocationsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ManageStocksWindow.xaml">
+    <Page Include="Windows\ManageStocksWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ManageSalesWindow.xaml">
+    <Page Include="Windows\ManageSalesWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ManagePurchasesWindow.xaml">
+    <Page Include="Windows\ManagePurchasesWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ManageProductsWindow.xaml">
+    <Page Include="Windows\ManageProductsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ManageUsersWindow.xaml">
+    <Page Include="Windows\ManageUsersWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Templates\DataBinding_ListOfUsers.xaml">
+    <Page Include="Windows\RegisterWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Templates\DataBinding_ListOfClass.xaml">
+    <Page Include="Windows\LoginWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Templates\DataBinding_ObservableCollection_Users.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Templates\DataBinding_ObservableCollection.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Templates\Image_FadeInOut.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Templates\Layout_ScaleTransform.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Templates\Layout_ScrollViewer_ViewBox.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Templates\Layout_SkewTransform.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Templates\Layout_StackPanel_DockPanel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="RegisterWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="LoginWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Windows\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -348,47 +243,15 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Templates\ItemsControl_TreeView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Templates\ItemsControl_Tab.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Templates\Property_Element.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Templates\Layout_RotateTransform.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Resources\Styles\ButtonThemeModern.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="StartWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Templates\Add_Element_Programmatically.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Templates\Layout_GridRowDefinitions.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Templates\Window_FadeIn_FadeOut.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Templates\ViewUsers.xaml">
+    <Page Include="Windows\StartWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -408,6 +271,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Resource Include="sun-day-weather-symbol_icon-icons.com_73146.ico" />
+    <Resource Include="Resources\Images\sun-day-weather-symbol_icon-icons.com_73146.ico" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

@@ -93,6 +93,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_61362227D0AF45198305483E69FCDC12"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_6A53C25D864747D1A32D51D1D00B8769"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -224,6 +230,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -248,6 +262,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
     }
@@ -511,6 +533,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_61362227D0AF45198305483E69FCDC12"
+            {
+            "SourcePath" = "8:..\\..\\..\\..\\back end\\220308 backend\\sun-day-weather-symbol_icon-icons.com_73146.ico"
+            "TargetName" = "8:sun-day-weather-symbol_icon-icons.com_73146.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_1CB20007CCC94B8FBFDC9A0B1E99B6DB"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6A53C25D864747D1A32D51D1D00B8769"
@@ -856,7 +898,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Storage Manager"
         "ProductCode" = "8:{846CD35D-FDA4-4456-B528-62D3F356A55F}"
-        "PackageCode" = "8:{A2B5FD83-1821-4837-B8D3-9FE79A4E7AF8}"
+        "PackageCode" = "8:{261826EF-F30F-41C4-922F-FA5EECB8EC59}"
         "UpgradeCode" = "8:{43BFA8CC-5C49-4EA2-8997-91037C3E52C5}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -987,7 +1029,7 @@
             "Target" = "8:_02EFB58F436A4F9C8156BD263F880E1B"
             "Folder" = "8:_7B400D90913740CF832D20428B2A8721"
             "WorkingFolder" = "8:_1CB20007CCC94B8FBFDC9A0B1E99B6DB"
-            "Icon" = "8:"
+            "Icon" = "8:_61362227D0AF45198305483E69FCDC12"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_77F12E3E82944DE195F5AB83BC125B7C"

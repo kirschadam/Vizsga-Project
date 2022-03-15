@@ -13,7 +13,7 @@ namespace FrontendWPF.Classes
 {
     public class Shared
     {
-        public static StartWindow StartWindow;
+        public static Windows.StartWindow StartWindow;
         // public static List<string> locationsList = new List<string> { "Budapest", "Debrecen", "Szeged", "Miskolc", "Pécs", "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely","Érd", "Szolnok", "Tatabánya", "Sopron", "Kaposvár", "Veszprém", "Békéscsaba", "Zalaegerszeg", "Eger", "Nagykanizsa" };
 
         // public static List<string> regionsList = new List<string> { "Pest", "Hajdú-Bihar", "Csongrád-Csanád", "Borsod-Abaúj", "Pécs", "Győr", "Nyíregyháza", "Kecskemét", "Székesfehérvár", "Szombathely", "Érd", "Szolnok", "Tatabánya", "Sopron", "Kaposvár", "Veszprém", "Békéscsaba", "Zalaegerszeg", "Eger", "Nagykanizsa" };
@@ -168,8 +168,8 @@ namespace FrontendWPF.Classes
 
 
             // login
-            LoginWindow loginWindow = new LoginWindow();
-            loginWindow = new LoginWindow();
+            Windows.LoginWindow loginWindow = new Windows.LoginWindow();
+            // loginWindow = new Windows.LoginWindow();
             loginWindow.Show();
         }
 

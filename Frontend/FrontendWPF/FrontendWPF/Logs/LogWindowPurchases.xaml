@@ -272,7 +272,7 @@
 
             <StackPanel x:Name="stackPanel0" VerticalAlignment="Top" Margin="0,45,0,0" Height="28" Orientation="Horizontal">
 
-                <DataGrid Name="dataGrid0" Background="AliceBlue" FontSize="12" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="2" Margin="10,0,0,0" HorizontalScrollBarVisibility="Hidden"
+                <DataGrid Name="dataGrid0" Background="AliceBlue" FontSize="14" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="2" Margin="10,0,0,0" HorizontalScrollBarVisibility="Hidden"
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserDeleteRows="False"
                   BeginningEdit="dataGrid0_BeginningEdit"
                   KeyUp="dataGrid0_KeyUp" 
