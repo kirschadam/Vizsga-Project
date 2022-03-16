@@ -91,7 +91,7 @@ function Stocks() {
                     </div>
                 </ul>
             </form>
-			<div className="list">
+			<div className="list res-background">
                 {stocks.map((stock) => (
                     <div key={stock.Id} className="row border-bottom  py-2 w-100">
                         <div className="col-xs-12 col-sm-1">{stock.Id}</div>

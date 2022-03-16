@@ -115,7 +115,7 @@ return (
                   </div>
               </ul>
           </form>
-		  <div className="list">
+		  <div className="list res-background">
               {purchases.map((purchase) => (
                 <div key={purchase.Id} className="row border-bottom  py-2 w-100">
                   <div className="col-xs-12 col-sm-1">{purchase.Id}</div>
