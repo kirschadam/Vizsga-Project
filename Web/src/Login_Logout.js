@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate} from "react-router-dom";
 import CryptoJS from 'react-native-crypto-js';
 import {User, Base_user} from './Variables';
+import { Slide } from 'react-slideshow-image';
+import 'react-slideshow-image/dist/styles.css'
 
 export function Login() {
     const [isLoginPending, setLoginPending] = useState(false);
@@ -75,31 +77,76 @@ export function Login() {
     setPasswordShown(!passwordShown);
     setShowHidePassword(passwordShown? "Show": "Hide");
   };
+  
+    const slideImages = [
+        {
+            url: 'Slide/Budapest.jpg',
+            caption: 'Budapest'
+        },
+        {
+            url: 'Slide/Debrecen.jpg',
+            caption: 'Debrecen'
+        },
+        {
+            url: 'Slide/Gyor.jpg',
+            caption: 'Győr'
+        },
+        {
+            url: 'Slide/Kecskemet.jpg',
+            caption: 'Kecskemét'
+        },
+        {
+            url: 'Slide/Miskolc.jpg',
+            caption: 'Miskolc'
+        },
+        {
+            url: 'Slide/Pecs.jpg',
+            caption: 'Pécs'
+        },
+        {
+            url: 'Slide/Sopron.jpg',
+            caption: 'Sopron'
+        },
+        {
+            url: 'Slide/Szeged.jpg',
+            caption: 'Szeged'
+        },
+    ];
 
     return(
-        <div className='container-fluid d-flex justify-content-center h-25 login-container' id="loginCard">
-            <div className='card login-card'>
-                <div className='res-background p-2 border-bottom login-card-header'>
-                <h3>Login Form</h3>
+        <div className="res-background h-100">
+            <div className='container-fluid d-flex justify-content-center h-25 login-container' id="loginCard">
+                <div className='card login-card'>
+                    <div className='res-background p-2 border-bottom login-card-header'>
+                        <h3>Login Form</h3>
+                    </div>
+                    <div className='card-body res-background'>
+                        <form onSubmit={loginFormSubmit}>
+                            <div className='input-group form-group'>
+                                <input type="text" name='username' className='form-control' placeholder='Username'></input>
+                            </div>
+                            <div className='input-group form-group'>
+                                <input type={passwordShown ? "text" : "password"} name='password' className='form-control' placeholder='Password'></input>
+                            </div>
+                            <div className='form-group d-flex justify-content-between mt-2'>
+                                <button type="submit" className='btn btn-success'>Login</button>
+                                <button type='button' className='btn btn-primary' onClick={togglePassword}>{showHidePassword} Password</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-
-                <div className='card-body res-background'>
-                    <form onSubmit={loginFormSubmit}>
-                        <div className='input-group form-group'>
-                            <input type="text" name='username' className='form-control' placeholder='Username'></input>
-                        </div>
-                        <div className='input-group form-group'>
-                            <input type={passwordShown ? "text" : "password"} name='password' className='form-control' placeholder='Password'></input>
-                        </div>
-                        <div className='form-group d-flex justify-content-between mt-2'>
-                            <button type="submit" className='btn btn-success'>Login</button>
-                            <button type='button' className='btn btn-primary' onClick={togglePassword}>{showHidePassword} Password</button>
-                        </div>
-                    </form>
-                </div>
-
             </div>
-
+            <div className="slide-container" id="slider">
+                <Slide>
+                    {slideImages.map((slideImage, index)=> (
+                        <div className="each-slide" key={index}>
+                            <div className="slider-img" style={{'backgroundImage': `url(${slideImage.url})`}}>
+                                <span>{slideImage.caption}</span>
+                            </div>
+                        </div>
+                    ))} 
+                </Slide>
+            </div>
         </div>
     )
 }

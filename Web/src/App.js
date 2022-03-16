@@ -10,6 +10,7 @@ import { BrowserRouter, Route, Routes, Navigate, Link} from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Login, Logout } from './Login_Logout';
 import useLocalStorage from 'use-local-storage';
+import 'react-slideshow-image/dist/styles.css';
 
 function App() {
   const defaultDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -33,7 +34,7 @@ function App() {
   }
 
   return (
-    <div className="App res-primary res-background" data-theme={theme}>
+    <div className="App res-primary" data-theme={theme}>
       <div>
         <button onClick={switchTheme} id="themeButton" className="res-primary res-background">{theme === 'light' ? 'Dark' : 'Light'}</button>
       </div>

@@ -17,7 +17,7 @@ namespace Base_service.Interfaces
         /// </summary>
         /// <returns>Message or error of query.</returns>
         [OperationContract]
-        [WebInvoke(Method = "POST",
+        [WebInvoke(Method = "*",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
@@ -32,7 +32,7 @@ namespace Base_service.Interfaces
         /// </summary>
         /// <returns>Message or error of query.</returns>
         [OperationContract]
-        [WebInvoke(Method = "POST",
+        [WebInvoke(Method = "*",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
@@ -84,7 +84,7 @@ namespace Base_service.Interfaces
         /// </summary>
         /// <returns>A message or error of the query.</returns>
         [OperationContract]
-        [WebInvoke(Method = "DELETE",
+        [WebInvoke(Method = "*",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
@@ -101,7 +101,7 @@ namespace Base_service.Interfaces
         /// </summary>
         /// <returns>A message or error of the query.</returns>
         [OperationContract]
-        [WebInvoke(Method = "DELETE",
+        [WebInvoke(Method = "*",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
@@ -118,7 +118,7 @@ namespace Base_service.Interfaces
         /// </summary>
         /// <returns>A message or error of the query.</returns>
         [OperationContract]
-        [WebInvoke(Method = "PUT",
+        [WebInvoke(Method = "*",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
@@ -134,7 +134,7 @@ namespace Base_service.Interfaces
         /// </summary>
         /// <returns>A message or error of the query.</returns>
         [OperationContract]
-        [WebInvoke(Method = "PUT",
+        [WebInvoke(Method = "*",
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.WrappedRequest,

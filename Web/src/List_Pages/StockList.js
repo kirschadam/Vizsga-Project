@@ -52,7 +52,7 @@ function Stocks() {
 
     return (
     <div>
-        <div className='res-primary'>
+        <div className='res-primary res-background'>
             <ul className="list-group w-100">
                 <div className="row border-bottom py-2 w-100">
                     <h5 className="col-xs-12 col-sm-1">Id</h5>
