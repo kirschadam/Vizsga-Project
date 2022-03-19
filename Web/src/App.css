@@ -109,3 +109,11 @@ nav>div:hover{
   margin-left: 25%;
   width:50%;
 }
+
+.visible{
+  display:block;
+}
+
+.invisible{
+  display:none;
+}

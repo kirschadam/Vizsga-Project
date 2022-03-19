@@ -63,7 +63,7 @@ namespace Base_service
             var requiredHeaders = new Dictionary<string, string>
             {
                 { "Access-Control-Allow-Origin", "*" },
-                { "Access-Control-Request-Method", "POST,GET,PUT,DELETE,OPTIONS" },
+                { "Access-Control-Allow-Methods", "*" },
                 { "Access-Control-Allow-Headers", "x-requested-with,content-type, accept" },
                 { "Access-Control-Max-Age", "1728000" }
             };
