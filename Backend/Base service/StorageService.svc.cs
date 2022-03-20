@@ -29,7 +29,7 @@ namespace Base_service
             if (type == null || type == "") return "State if the transaction is a sale or a purchase!";
 
             //Checking the name of the product to find the corresponding product Id
-            var result_read = BaseSelect("products", "`id`", new string[,] { {"`name`", "=", $"'{product}'" } }, "");
+            var result_read = BaseSelect("products", "*", new string[,] { {"`name`", "=", $"'{product}'" } }, "");
 
             string productId;
             if (result_read.Item1.Rows.Count != 0) 
@@ -389,7 +389,10 @@ namespace Base_service
                 else return "User not found in database!";
             }
 
-            date = DateTime.Parse(date).ToString("yyyy-MM-dd HH:mm:ss.fff");
+            if(date != null && date != "")
+            {
+                date = DateTime.Parse(date).ToString("yyyy-MM-dd HH:mm:ss.fff");
+            }
 
             string[,] changes = 
             {

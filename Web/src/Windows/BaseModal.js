@@ -1,13 +1,13 @@
 import React from "react";
 
-export function ModalUpdate({ onClosed, Submitted, children}) {
+export function BaseModal({ onClosed, Submitted, children, title}) {
     return (
         <div className="modal d-block">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <form onSubmit={Submitted}>
                         <div className="modal-header">
-                            <h5 className="modal-title">Update Product</h5>
+                            <h5 className="modal-title">{title}</h5>
                             <button type="button" className="close" onClick={onClosed}>
                                 <span aria-hidden="true">&times;</span>
                             </button>

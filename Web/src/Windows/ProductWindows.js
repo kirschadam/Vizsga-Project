@@ -1,10 +1,8 @@
 import React from 'react';
 import {Base_storage, User} from '../Variables';
-import { ModalCreate } from '../Modals/ModalCreate';
-import { ModalDelete } from '../Modals/ModalDelete';
-import { ModalUpdate } from '../Modals/ModalUpdate';
+import { BaseModal } from './BaseModal';
 
-export function CreateButton({onClose}) {
+export function CreateWindow({onClose}) {
 
     function Create(e)
     {
@@ -37,7 +35,7 @@ export function CreateButton({onClose}) {
     }
 
     return (
-		<ModalCreate Submitted={Create} onClosed={onClose}>
+		<BaseModal Submitted={Create} onClosed={onClose}  title="Create Product">
 			<div className="from-group row pb-3">
                 <label className="col-sm-3 col-form-label">Name:</label>
                 <div className="col-sm-9">
@@ -57,11 +55,11 @@ export function CreateButton({onClose}) {
                 </div>
             </div>
 		add product?
-        </ModalCreate>
+        </BaseModal>
     )
 }
 
-export function UpdateButton({onClose, product}){
+export function UpdateWindow({onClose, product}){
 
     function Update(e){
         e.preventDefault();
@@ -72,7 +70,7 @@ export function UpdateButton({onClose, product}){
 			body: JSON.stringify({
 				uid: User.Uid,
 				id: product.Id,
-				name: e.target.elements.Name.value,
+				name: e.target.elements.name.value,
 				buyUnitPrice: e.target.elements.purchasePrice.value,
 				sellUnitPrice: e.target.elements.salesPrice.value
 		    })
@@ -93,7 +91,7 @@ export function UpdateButton({onClose, product}){
     }
 
     return(
-		<ModalUpdate Submitted={Update} onClosed={onClose} >
+		<BaseModal Submitted={Update} onClosed={onClose} title="Update Product">
 			<div className="from-group row pb-3">
                 <label className="col-sm-3 col-form-label">Name:</label>
                 <div className="col-sm-9">
@@ -112,12 +110,12 @@ export function UpdateButton({onClose, product}){
                     <input type="number" name="salesPrice" className="form-control" defaultValue={product == null ? "" : product.SellUnitPrice}/>
                 </div>
             </div>
-		add product ?
-		</ModalUpdate>
+		update product?
+		</BaseModal>
     )
 }
 
-export function DeleteButton({onClose, product}) {
+export function DeleteWindow({onClose, product}) {
 
     function Delete(e){
         e.preventDefault();
@@ -146,8 +144,8 @@ export function DeleteButton({onClose, product}) {
     }
 
     return(
-        <ModalDelete Submit={Delete} onClosed={onClose} >
+        <BaseModal Submitted={Delete} onClosed={onClose}  title="Delete Product">
             Are you sure to delete the product <span><b>{product == null ? "" : product.Name}</b></span> ?
-        </ModalDelete>
+        </BaseModal>
     )
 }

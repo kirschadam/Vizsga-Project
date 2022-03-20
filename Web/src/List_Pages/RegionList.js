@@ -1,6 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, Fragment} from 'react';
 import { useNavigate} from "react-router-dom";
 import {Base_location, User} from '../Variables';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faPencilAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {CreateWindow, UpdateWindow, DeleteWindow} from "../Windows/RegionWindows"
 
 function Regions() {
 	const [regions, setRegions] = useState([]);
@@ -62,13 +65,58 @@ function Regions() {
 		return string;
 	}
 
+	const [deletedisplay, setDeleteDisplay] = useState(false);
+	const [createdisplay, setCreateDisplay] = useState(false);
+	const [updatedisplay, setUpdateDisplay] = useState(false);
+	const [region, setRegion] = useState();
+
+	function Update(e){
+		var element;
+		if(e.target.tagName === "svg"){
+			element = e.target.parentNode;
+		}
+		else if(e.target.tagName === "path"){
+			element = e.target.parentNode.parentNode;
+		}
+		else element = e.target;
+
+		var currid = element.parentNode.parentNode.firstChild.innerText;
+		var region = regions.find((reg) => reg.Id === parseInt(currid));
+		if(region != null){
+			setRegion(region);
+			setUpdateDisplay(true);
+		}
+	}
+
+	function Delete(e){
+		var element;
+		if(e.target.tagName === "svg"){
+			element = e.target.parentNode;
+		}
+		else if(e.target.tagName === "path"){
+			element = e.target.parentNode.parentNode;
+		}
+		else element = e.target;
+
+		var currid = element.parentNode.parentNode.firstChild.innerText;
+		var region = regions.find((region) => region.Id === parseInt(currid));
+		if(region != null){
+			setRegion(region);
+			setDeleteDisplay(true);
+		}
+	}
+
   	return (
+	<Fragment>
     	<div className='res-primary res-background'>
       		<ul className="list-group w-100">
         		<div className="row border-bottom py-2 w-100">
           			<h5 className="col-xs-12 col-sm-1">Id</h5>
           			<h5 className="col-xs-4 col-sm-3">region</h5>
           			<h5 className="col-xs-8 col-sm-6">Locations</h5>
+					<div className="col-xs-10 col-sm-2 ">
+					  <button className="btn btn-sm btn-outline-warning mr-2" onClick={() => {setCreateDisplay(true)}}>{<FontAwesomeIcon icon={faPlus} />}</button>  
+				  	</div>
         		</div>
       		</ul>
       		<form onSubmit={SearchSubmit} id="filterForm">
@@ -96,10 +144,23 @@ function Regions() {
           				<div className="col-xs-12 col-sm-1">{region.Id}</div>
           				<div className="col-xs-4 col-sm-3">{region.Name}</div>
           				<div className="col-xs-8 col-sm-6">{locationList(region.Locations)}</div>
+						<div className="col-xs-10 col-sm-2">
+							<button className="btn btn-sm btn-outline-warning mr-2" onClick={Update}>	
+						  		{<FontAwesomeIcon icon={faPencilAlt} />}
+					  	  	</button>  	
+						  	<button className="btn btn-sm btn-outline-warning mr-2" onClick={Delete} >
+								{<FontAwesomeIcon icon={faTrash} />}
+							</button>  
+						</div>
         			</div>
       			))}
 			</div>
     	</div>
+		
+		<div className={createdisplay ? "visible" : "invisible"}><CreateWindow onClose={() => {setCreateDisplay(false)}}/></div>
+		<div className={updatedisplay ? "visible" : "invisible"}><UpdateWindow region={region} onClose={() => {setUpdateDisplay(false)}}/></div>
+		<div className={deletedisplay ? "visible" : "invisible"}><DeleteWindow region={region} onClose={() => {setDeleteDisplay(false)}}/></div>
+	</Fragment>
   	)
 }
 

@@ -3,15 +3,11 @@ import { useNavigate} from "react-router-dom";
 import {Base_storage, User} from '../Variables';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faPencilAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
-import {CreateButton, UpdateButton, DeleteButton} from "../Buttons/ProductButtons"
+import {CreateWindow, UpdateWindow, DeleteWindow} from "../Windows/ProductWindows"
 
 function Products() {
 	const [products, setProducts] = useState([]);
 	const navigate = useNavigate();
-	const [deletedisplay, setDeleteDisplay] = useState(false);
-	const [createdisplay, setCreateDisplay] = useState(false);
-	const [updatedisplay, setUpdateDisplay] = useState(false);
-	const [product, setProduct] = useState();
 
 	useEffect(() =>{
 		if(User.Uid === null || User.Uid === "")
@@ -57,6 +53,11 @@ function Products() {
     	});
   	}
 
+	const [deletedisplay, setDeleteDisplay] = useState(false);
+	const [createdisplay, setCreateDisplay] = useState(false);
+	const [updatedisplay, setUpdateDisplay] = useState(false);
+	const [product, setProduct] = useState();
+
 	function Update(e){
 		var element;
 		if(e.target.tagName === "svg"){
@@ -99,11 +100,14 @@ function Products() {
       		<ul className="list-group w-100">
         		<div className="row border-bottom py-2 w-100">
           			<h5 className="col-xs-12 col-sm-1">Id</h5>
-          			<h5 className="col-xs-4 col-sm-4">Product</h5>
+          			<h5 className="col-xs-4 col-sm-3">Product</h5>
           			<h5 className="col-xs-8 col-sm-3">Purchase price</h5>
           			<h5 className="col-xs-10 col-sm-3">Sales Price</h5>
-					<div className="col-xs-10 col-sm-1 ">
-					  <button className="btn btn-sm btn-outline-warning mr-2" onClick={() => {setCreateDisplay(true)}}>{<FontAwesomeIcon icon={faPlus} />}</button>  
+					<div className="col-xs-10 col-sm-2 ">
+					  	<button className="btn btn-sm btn-outline-warning mr-2" 
+					      onClick={() => {setCreateDisplay(true)}}>
+							{<FontAwesomeIcon icon={faPlus} />}
+						</button>  
 				  	</div>
         		</div>
       		</ul>
@@ -145,10 +149,10 @@ function Products() {
       			{products.map((product) => (
         			<div key={product.Id} className="row border-bottom py-2 w-100">
           				<div className="col-xs-12 col-sm-1">{product.Id}</div>
-          				<div className="col-xs-4 col-sm-4">{product.Name}</div>
+          				<div className="col-xs-4 col-sm-3">{product.Name}</div>
           				<div className="col-xs-8 col-sm-3">{product.BuyUnitPrice}</div>
           				<div className="col-xs-10 col-sm-3">{product.SellUnitPrice}</div>
-						<div className="col-xs-10 col-sm-1">
+						<div className="col-xs-10 col-sm-2">
 							<button className="btn btn-sm btn-outline-warning mr-2" onClick={Update}>	
 						  		{<FontAwesomeIcon icon={faPencilAlt} />}
 					  	  	</button>  	
@@ -161,9 +165,9 @@ function Products() {
 			</div>
     	</div>
 
-		<div className={createdisplay ? "visible" : "invisible"}><CreateButton onClose={() => {setCreateDisplay(false)}}/></div>
-		<div className={updatedisplay ? "visible" : "invisible"}><UpdateButton product={product} onClose={() => {setUpdateDisplay(false)}}/></div>
-		<div className={deletedisplay ? "visible" : "invisible"}><DeleteButton product={product} onClose={() => {setDeleteDisplay(false)}}/></div>
+		<div className={createdisplay ? "visible" : "invisible"}><CreateWindow onClose={() => {setCreateDisplay(false)}}/></div>
+		<div className={updatedisplay ? "visible" : "invisible"}><UpdateWindow product={product} onClose={() => {setUpdateDisplay(false)}}/></div>
+		<div className={deletedisplay ? "visible" : "invisible"}><DeleteWindow product={product} onClose={() => {setDeleteDisplay(false)}}/></div>
 	</Fragment>
   	)
 }

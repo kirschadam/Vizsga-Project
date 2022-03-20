@@ -1,6 +1,9 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, Fragment} from 'react';
 import { useNavigate} from "react-router-dom";
 import {Base_user, User} from '../Variables';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faPencilAlt, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {CreateWindow, UpdateWindow, DeleteWindow} from "../Windows/UserWindows"
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -50,7 +53,49 @@ function Users() {
     	});
   	}
 
+	const [deletedisplay, setDeleteDisplay] = useState(false);
+	const [createdisplay, setCreateDisplay] = useState(false);
+	const [updatedisplay, setUpdateDisplay] = useState(false);
+	const [user, setUser] = useState();
+  
+	function Update(e){
+		var element;
+		if(e.target.tagName === "svg"){
+			element = e.target.parentNode;
+		}
+		else if(e.target.tagName === "path"){
+			element = e.target.parentNode.parentNode;
+		}
+		else element = e.target;
+  
+		var currid = element.parentNode.parentNode.firstChild.innerText;
+		var user = users.find((usr) => usr.Id === parseInt(currid));
+		if(user != null){
+			setUser(user);
+			setUpdateDisplay(true);
+		}
+	}
+  
+	function Delete(e){
+		var element;
+		if(e.target.tagName === "svg"){
+			element = e.target.parentNode;
+		}
+		else if(e.target.tagName === "path"){
+			element = e.target.parentNode.parentNode;
+		}
+		else element = e.target;
+  
+		var currid = element.parentNode.parentNode.firstChild.innerText;
+		var user = users.find((usr) => usr.Id === parseInt(currid));
+		if(user != null){
+			setUser(user);
+			setDeleteDisplay(true);
+		}
+	}
+
   	return (
+	<Fragment>
     	<div className='res-primary res-background'>
       		<ul className="list-group w-100">
         		<div className="row border-bottom py-2 w-100">
@@ -59,6 +104,12 @@ function Users() {
           			<h5 className="col-xs-8 col-sm-3">Location</h5>
           			<h5 className="col-xs-10 col-sm-3">Permission</h5>
           			<h5 className="col-xs-10 col-sm-1">Status</h5>
+					<div className="col-xs-10 col-sm-1">
+					  	<button className={"btn btn-sm btn-outline-warning mr-2 " + (User.Details.Permission > 6 ? "visible" : "invisible")} 
+						  onClick={() => {setCreateDisplay(true)}}>
+						  	{<FontAwesomeIcon icon={faPlus} />}
+						</button>  
+				  	</div>
         		</div>
       		</ul>
       		<form onSubmit={SearchSubmit} id="filterForm">
@@ -103,10 +154,23 @@ function Users() {
           				<div className="col-xs-8 col-sm-3">{user.Location}</div>
           				<div className="col-xs-10 col-sm-3">{user.Permission}</div>
           				<div className="col-xs-10 col-sm-1">{user.Active === 1 ? "Active" : "Inactive"}</div>
+						<div className="col-xs-10 col-sm-1">
+							<button className={"btn btn-sm btn-outline-warning mr-2 " + (User.Details.Permission > 6 ? "visible" : "invisible")} onClick={Update}>	
+						  		{<FontAwesomeIcon icon={faPencilAlt} />}
+					  	  	</button>  	
+						  	<button className={"btn btn-sm btn-outline-warning mr-2 " + (User.Details.Permission > 8 ? "visible" : "invisible")} onClick={Delete} >
+								{<FontAwesomeIcon icon={faTrash} />}
+							</button>  
+						</div>
         			</div>
       			))}
 			</div>
     	</div>
+
+		<div className={createdisplay ? "visible" : "invisible"}><CreateWindow onClose={() => {setCreateDisplay(false)}}/></div>
+		<div className={updatedisplay ? "visible" : "invisible"}><UpdateWindow user={user} onClose={() => {setUpdateDisplay(false)}}/></div>
+		<div className={deletedisplay ? "visible" : "invisible"}><DeleteWindow user={user} onClose={() => {setDeleteDisplay(false)}}/></div>
+	</Fragment>
   	)
 }
 

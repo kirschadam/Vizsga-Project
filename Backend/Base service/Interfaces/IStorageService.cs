@@ -231,8 +231,8 @@ namespace Base_service.Interfaces
         /// <paramref name="uid"/>: UID of current user.<br/>
         /// <paramref name="id"/>: Id of stock to update.<br/>
         /// <paramref name="product"/>: Name of product. (Optional)<br/>
-        /// <paramref name="location"/>: Location of stock. (Optional)<br/>
-        /// <paramref name="quantity"/>: Quantity of Stock.
+        /// <paramref name="quantity"/>: Quantity of Stock. (Optional)<br/>
+        /// <paramref name="location"/>: Location of stock. (Optional)
         /// </summary>
         /// <returns>Message or error of query.</returns>
         [OperationContract]
@@ -242,6 +242,6 @@ namespace Base_service.Interfaces
             BodyStyle = WebMessageBodyStyle.WrappedRequest,
             UriTemplate = "/updatestock"
             )]
-        string UpdateStock(string uid, string id, [Optional] string product, [Optional] string location, [Optional] string quantity);
+        string UpdateStock(string uid, string id, [Optional] string product, [Optional] string quantity, [Optional] string location);
     }
 }
