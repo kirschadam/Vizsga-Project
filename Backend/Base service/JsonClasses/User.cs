@@ -1,8 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Base_service.JsonClasses
 {
+    public class CurrentUser
+    {
+        public int? Id { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public string Location { get; set; }
+        public int? Permission { get; set; }
+        public int? Active { get; set; }
+        public string Uid { get; set; }
+        public DateTime LoggedInAt { get; set; }
+
+        public CurrentUser() { }
+
+        public CurrentUser(int? id, string username, string password, string location, int? permission, int? active)
+        {
+            Id = id;
+            Username = username;
+            Password = password;
+            Location = location;
+            Permission = permission;
+            Active = active;
+        }
+    }
+
     [DataContract]
     public class Response_User
     {

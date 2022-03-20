@@ -23,13 +23,14 @@ export function CreateWindow({onClose}) {
                 alert("This is a specifice alert!");
                 return;
             }
+            else{
+                window.location.reload();
+            }
         })
         .catch((response) => {
             console.log(response);
             return;
         });
-        
-        window.location.reload();
     }
 
     return (
@@ -66,12 +67,14 @@ export function UpdateWindow({onClose, region}){
 				alert("This is a specifice alert!");
 				return;
 			}
+            else{
+                window.location.reload();
+            }
 		})
 		.catch((response) => {
 			console.log(response);
 			return;
 		});
-		window.location.reload();
     }
 
     return(
@@ -107,12 +110,14 @@ export function DeleteWindow({onClose, region}) {
                 alert("This is a specifice alert!");
                 return;
             }
+            else{
+                window.location.reload();
+            }
         })
         .catch((response) => {
             console.log(response);
             return;
         });
-        window.location.reload();
     }
 
     return(

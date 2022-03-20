@@ -88,7 +88,7 @@ namespace Base_service
             else return "Location not found in database!";
 
 
-            var result = BaseInsert("stocks", "`productId`, `locationId`, `quantity`", $"'{productId}','{locationId}','0'");
+            var result = BaseInsert("stocks", "`productId`, `locationId`, `quantity`", $"'{productId}','{locationId}',0");
 
             if (result.Item2 != "") return result.Item2;
             else return "Stock successfully added!";

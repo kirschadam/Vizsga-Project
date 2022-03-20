@@ -73,6 +73,28 @@ namespace Base_service
         {
             Response_Login response = new Response_Login();
 
+            foreach (var item in Current_users)
+            {
+                if(item.Value.Username == username && item.Value.Password == password)
+                {
+                    //Let in user if they logged in less than 8 hours ago,
+                    //do not refresh the LoggedInAt variable, user will get a new uid if they try logging in again and it's later than 4 hours
+                    if(item.Value.LoggedInAt > DateTime.Now.AddHours(-8))
+                    {
+                        response.Uid = item.Key;
+                        response.User = new User(item.Value.Id, item.Value.Username, item.Value.Password, item.Value.Location, item.Value.Permission, item.Value.Active);
+                        response.Message = $"Welcome {item.Value.Username}!";
+                        return response;
+                    }
+                    //Clear currently logging user if they logged in the Current_users dictionary more than 8 hours ago
+                    else
+                    {
+                        Current_users.Remove(item.Key);
+                        break;
+                    }
+                }
+            }
+
             var result = BaseSelect(
                     "users",
                     "`users`.`id`,`username`,`password`,`locations`.`name` AS 'location',`permission`,`active`",
@@ -100,15 +122,11 @@ namespace Base_service
                     response.Message += $"User could not be converted correctly!";
                     return response;
                 }
-
-                //Generating unique id for user, removing previous instance if it wasn't before
-                if(Current_users.Where(n => n.Value.Username == response.User.Username).Count() != 0)
-                {
-                    Current_users.Remove(Current_users.Where(n => n.Value.Username == response.User.Username).FirstOrDefault().Key);
-                }
                 
                 response.Uid = Guid.NewGuid().ToString();
-                Current_users.Add(response.Uid, response.User);
+
+                Current_users.Add(response.Uid, new CurrentUser(response.User.Id, response.User.Username, response.User.Password,
+                    response.User.Location, response.User.Permission, response.User.Active) { LoggedInAt = DateTime.UtcNow, Uid = response.Uid });
 
                 Console.WriteLine(response.Uid + "\t" + response.User.Username);
                 response.Message = $"Welcome {response.User.Username}!";

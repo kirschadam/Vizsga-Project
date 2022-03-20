@@ -25,13 +25,14 @@ export function CreateWindow({onClose}) {
                 alert("This is a specifice alert!");
                 return;
             }
+            else{
+                window.location.reload();
+            }
         })
         .catch((response) => {
             console.log(response);
             return;
         });
-        
-        window.location.reload();
     }
 
     return (
@@ -82,12 +83,14 @@ export function UpdateWindow({onClose, product}){
 				alert("This is a specifice alert!");
 				return;
 			}
+            else{
+                window.location.reload();
+            }
 		})
 		.catch((response) => {
 			console.log(response);
 			return;
 		});
-		window.location.reload();
     }
 
     return(
@@ -135,12 +138,14 @@ export function DeleteWindow({onClose, product}) {
                 alert("This is a specifice alert!");
                 return;
             }
+            else{
+                window.location.reload();
+            }
         })
         .catch((response) => {
             console.log(response);
             return;
         });
-        window.location.reload();
     }
 
     return(

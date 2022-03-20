@@ -7,7 +7,7 @@ namespace Base_service.DatabaseManager
 {
     public class BaseDatabaseCommands
     {
-        public static Dictionary<string, JsonClasses.User> Current_users { get; } = new Dictionary<string, JsonClasses.User>();
+        public static Dictionary<string, JsonClasses.CurrentUser> Current_users { get; } = new Dictionary<string, JsonClasses.CurrentUser>();
 
         public static MySqlConnection BaseConnection { get; } = new MySqlConnection("SERVER=localhost; DATABASE=assets; UID=root; PASSWORD=; SSL MODE = none;");
 
