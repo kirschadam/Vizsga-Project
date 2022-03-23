@@ -27,7 +27,9 @@ function Sales() {
     .then(res => res.json())
     .then((response) =>{
         console.log(response.Message);
-        setSales(response.SalesPurchases);
+        setSales(response.SalesPurchases.sort(function(a, b){
+            return b.Id - a.Id;
+        }));
     })
     .catch((response) => {
         console.log(response.Message);
@@ -47,7 +49,9 @@ function SearchSubmit(e){
     .then(res => res.json())
     .then((response) =>{
         console.log(response.Message);
-        setSales(response.SalesPurchases);
+        setSales(response.SalesPurchases.sort(function(a, b){
+            return b.Id - a.Id;
+        }));
     })
     .catch((response) => {
         console.log(response.Message);

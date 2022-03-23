@@ -27,7 +27,9 @@ function Stocks() {
         .then(res => res.json())
         .then((response) =>{
             console.log(response.Message);
-            setStocks(response.Stocks);
+            setStocks(response.Stocks.sort(function(a, b){
+                return b.Id - a.Id;
+            }));
         })
         .catch((response) => {
             console.log(response.Message);
@@ -46,7 +48,9 @@ function Stocks() {
         .then(res => res.json())
         .then((response) =>{
             console.log(response.Message);
-            setStocks(response.Stocks);
+            setStocks(response.Stocks.sort(function(a, b){
+                return b.Id - a.Id;
+            }));
         })
         .catch((response) => {
             console.log(response.Message);

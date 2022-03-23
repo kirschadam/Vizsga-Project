@@ -28,7 +28,9 @@ function Locations() {
     	.then(res => res.json())
     	.then((response) =>{
       		console.log(response.Message);
-      		setLocations(response.Locations);
+      		setLocations(response.Locations.sort(function(a, b){
+                return b.Id - a.Id;
+            }));
     	})
     	.catch((response) => {
       		console.log(response.Message);
@@ -45,7 +47,9 @@ function Locations() {
     	.then(res => res.json())
     	.then((response) =>{
       		console.log(response.Message);
-      		setLocations(response.Locations);
+      		setLocations(response.Locations.sort(function(a, b){
+                return b.Id - a.Id;
+            }));
     	})
     	.catch((response) => {
       		console.log(response.Message);

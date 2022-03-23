@@ -28,7 +28,9 @@ function Users() {
     	.then(res => res.json())
     	.then((response) =>{
       		console.log(response.Message);
-      		setUsers(response.Users);
+      		setUsers(response.Users.sort(function(a, b){
+                return b.Id - a.Id;
+            }));
     	})
     	.catch((response) => {
       		console.log(response.Message);
@@ -46,7 +48,9 @@ function Users() {
     	.then(res => res.json())
     	.then((response) =>{
       		console.log(response.Message);
-      		setUsers(response.Users);
+      		setUsers(response.Users.sort(function(a, b){
+                return b.Id - a.Id;
+            }));
     	})
     	.catch((response) => {
       		console.log(response.Message);

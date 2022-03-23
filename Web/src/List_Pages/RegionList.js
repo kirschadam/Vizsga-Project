@@ -28,7 +28,9 @@ function Regions() {
     	.then(res => res.json())
     	.then((response) =>{
       		console.log(response.Message);
-      		setRegions(response.Regions);
+      		setRegions(response.Regions.sort(function(a, b){
+                return b.Id - a.Id;
+            }));
     	})
     	.catch((response) => {
       		console.log(response.Message);
@@ -44,8 +46,11 @@ function Regions() {
     	})
     	.then(res => res.json())
     	.then((response) =>{
+			console.log(response);
       		console.log(response.Message);
-      		setRegions(response.Regions);
+      		setRegions(response.Regions.sort(function(a, b){
+                return b.Id - a.Id;
+            }));
     	})
     	.catch((response) => {
       		console.log(response.Message);
@@ -60,6 +65,7 @@ function Regions() {
 			  string += ", " + element.Name
 		  }
 		  else string += element.Name
+		  i++;
 		})
 
 		return string;
