@@ -21,7 +21,7 @@ function Purchases() {
             else {console.log("User data loaded from cache!");}
         }
 
-        fetch(Base_storage + "listsalepurchase?uid=" + User.Uid + "&type=purchase", {
+        fetch(Base_storage + "listsalepurchase?uid=" + User.Uid + "&type=purchase&limit=50", {
             method:"GET"
         })
         .then(res => res.json())

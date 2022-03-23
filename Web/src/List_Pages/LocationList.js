@@ -21,7 +21,7 @@ function Locations() {
       		else {console.log("User data loaded from cache!");}
     	}
 
-    	fetch(Base_location + "listlocation?uid=" + User.Uid
+    	fetch(Base_location + "listlocation?uid=" + User.Uid + "&limit=50"
 		,{
       		method:"GET"
     	})

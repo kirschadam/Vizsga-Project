@@ -21,7 +21,7 @@ function Regions() {
       		else {console.log("User data loaded from cache!");}
     	}
 
-    	fetch(Base_location + "listregion?uid=" + User.Uid
+    	fetch(Base_location + "listregion?uid=" + User.Uid + "&limit=50"
 		,{
       		method:"GET"
     	})

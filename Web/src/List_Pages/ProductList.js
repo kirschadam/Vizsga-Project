@@ -21,7 +21,7 @@ function Products() {
       		else {console.log("User data loaded from cache!");}
     	}
 
-    	fetch(Base_storage + "listproduct?uid=" + User.Uid
+    	fetch(Base_storage + "listproduct?uid=" + User.Uid + "&limit=50"
 		,{
       		method:"GET"
     	})

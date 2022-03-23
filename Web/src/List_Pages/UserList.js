@@ -21,7 +21,7 @@ function Users() {
       		else {console.log("User data loaded from cache!");}
     	}
 
-    	fetch(Base_user + "listuser?uid=" + User.Uid
+    	fetch(Base_user + "listuser?uid=" + User.Uid + "&limit=50"
 		,{
       		method:"GET"
     	})

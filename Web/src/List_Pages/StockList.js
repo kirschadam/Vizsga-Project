@@ -21,7 +21,7 @@ function Stocks() {
             else {console.log("User data loaded from cache!");}
         }
 
-        fetch(Base_storage + "liststock?uid=" + User.Uid, {
+        fetch(Base_storage + "liststock?uid=" + User.Uid + "&limit=50", {
             method:"GET"
         })
         .then(res => res.json())
