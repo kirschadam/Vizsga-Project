@@ -1,7 +1,5 @@
 using Base_service.DatabaseManager;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data;
-using System.Threading;
 
 namespace UnitTests
 {
@@ -9,13 +7,13 @@ namespace UnitTests
     public class UnitTest : BaseDatabaseCommands
     {
         [TestMethod]
-        public void Connection_Test()
+        public void Test0_Connection_Test()
         {
             Assert.IsNotNull(BaseConnection);
         }
 
         [TestMethod]
-        public void Select_Test()
+        public void Test1_Select()
         {
             var result = BaseSelect(
                 "users",
@@ -29,7 +27,7 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void Insert_Test()
+        public void Test2_Insert()
         {
             var result = BaseInsert("users", "`username`, `password`, `locationId`, `permission`, `active`", "'username','password','1','1','1'");
 
@@ -37,7 +35,7 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void Update_Test()
+        public void Test3_Update()
         {
             var result = BaseUpdate("users", new string[,] { {"`permission`", "'2'" } }, $"`username`='username'");
 
@@ -45,10 +43,8 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void Delete_Test()
+        public void Test4_Delete()
         {
-            Assert.IsNotNull(BaseConnection);
-
             var result = BaseDelete("users", $"`username`='username'");
 
             Assert.AreEqual(1, result.Item1);
