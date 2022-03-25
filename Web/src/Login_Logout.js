@@ -6,11 +6,11 @@ import {User, Base_user} from './Variables';
 import { Slide } from 'react-slideshow-image';
 import 'react-slideshow-image/dist/styles.css'
 
-export function Login() {
+export function Login({headtext}) {
     const [isLoginPending, setLoginPending] = useState(false);
     const [passwordShown, setPasswordShown] = useState(false);
     const [showHidePassword, setShowHidePassword] = useState("Show");
-
+    
     const navigate = useNavigate();
 
     useEffect(() =>{
@@ -51,6 +51,7 @@ export function Login() {
 
                 document.getElementById("logout").style.visibility="visible";
                 document.getElementById("navbar").style.visibility="visible";
+                headtext("Logged in user: " + User.Details.Username + " (" + User.Details.Permission + ")")
                 navigate("/products");
             }
             else {console.log("Response could not be converted correctly!");}
@@ -151,7 +152,7 @@ export function Login() {
     )
 }
 
-export function Logout(){
+export function Logout({headtext}){
     const navigate = useNavigate();
 
     function Logout_uid(){
@@ -176,6 +177,7 @@ export function Logout(){
                 Permission:0,
                 Active:0
             };
+            headtext("");
             navigate("/login");
         })
         .catch((response) => {

@@ -11,10 +11,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Login, Logout } from './Login_Logout';
 import useLocalStorage from 'use-local-storage';
 import 'react-slideshow-image/dist/styles.css';
+import { useState } from 'react';
 
 function App() {
   const defaultDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const [theme, setTheme] = useLocalStorage('theme', defaultDark ? 'dark' : 'light');
+  const [headtext, setHeadText] = useState("");
 
   const switchTheme = () =>{
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -64,11 +66,14 @@ function App() {
             </div>
           </nav>
         </div>
+        <div>
+          {headtext}
+        </div>
         <div id="logout">
-          <Logout/>
+          <Logout headtext={setHeadText}/>
         </div>
         <Routes>
-          <Route path="/login" exact element={<Login/>}></Route>
+          <Route path="/login" exact element={<Login headtext={setHeadText}/>}></Route>
           <Route path="/products" exact element={<Products/>}></Route>
           <Route path="/stocks" exact element={<Stocks/>}></Route>
           <Route path="/sales" exact element={<Sales/>}></Route>
