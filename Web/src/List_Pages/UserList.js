@@ -20,7 +20,6 @@ function Users() {
       		}
       		else {console.log("User data loaded from cache!");}
     	}
-		sessionStorage.setItem("route", "users")
 
     	fetch(Base_user + "listuser?uid=" + User.Uid + "&limit=50"
 		,{

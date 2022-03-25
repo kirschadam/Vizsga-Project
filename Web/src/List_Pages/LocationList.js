@@ -20,7 +20,6 @@ function Locations() {
       		}
       		else {console.log("User data loaded from cache!");}
     	}
-		sessionStorage.setItem("route", "locations")
 
     	fetch(Base_location + "listlocation?uid=" + User.Uid + "&limit=50"
 		,{

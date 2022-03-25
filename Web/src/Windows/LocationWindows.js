@@ -1,10 +1,8 @@
 import React from 'react';
-import { useNavigate} from "react-router-dom";
 import {Base_location, User} from '../Variables';
 import { BaseModal } from './BaseModal';
 
 export function CreateWindow({onClose}) {
-	const navigate = useNavigate();
 
     function Create(e)
     {
@@ -27,7 +25,7 @@ export function CreateWindow({onClose}) {
                 return;
             }
             else{
-                navigate("/");
+                window.location.reload();
             }
         })
         .catch((response) => {
@@ -56,7 +54,6 @@ export function CreateWindow({onClose}) {
 }
 
 export function UpdateWindow({onClose, location}){
-	const navigate = useNavigate();
 
     function Update(e){
         e.preventDefault();
@@ -79,7 +76,7 @@ export function UpdateWindow({onClose, location}){
 				return;
 			}
             else{
-                navigate("/");
+                window.location.reload();
             }
 		})
 		.catch((response) => {
@@ -108,7 +105,6 @@ export function UpdateWindow({onClose, location}){
 }
 
 export function DeleteWindow({onClose, location}) {
-	const navigate = useNavigate();
 
     function Delete(e){
         e.preventDefault();
@@ -129,7 +125,7 @@ export function DeleteWindow({onClose, location}) {
                 return;
             }
             else{
-                navigate("/");
+                window.location.reload();
             }
         })
         .catch((response) => {

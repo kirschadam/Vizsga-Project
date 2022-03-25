@@ -20,7 +20,6 @@ function Regions() {
       		}
       		else {console.log("User data loaded from cache!");}
     	}
-		sessionStorage.setItem("route", "regions")
 
     	fetch(Base_location + "listregion?uid=" + User.Uid + "&limit=50"
 		,{

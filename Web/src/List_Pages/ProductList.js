@@ -20,7 +20,6 @@ function Products() {
       		}
       		else {console.log("User data loaded from cache!");}
     	}
-		sessionStorage.setItem("route", "products")
 
     	fetch(Base_storage + "listproduct?uid=" + User.Uid + "&limit=50"
 		,{

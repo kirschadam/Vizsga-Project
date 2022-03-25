@@ -78,7 +78,7 @@ function App() {
           <Route path="/Users" exact element={<Users/>}></Route>
           <Route
             path="*"
-            element={<Navigate to="/login" />}
+            element={<Navigate to={"/login"}/>}
           />
         </Routes>
       </BrowserRouter>
