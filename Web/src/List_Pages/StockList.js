@@ -20,6 +20,7 @@ function Stocks() {
             }
             else {console.log("User data loaded from cache!");}
         }
+		sessionStorage.setItem("route", "stocks")
 
         fetch(Base_storage + "liststock?uid=" + User.Uid + "&limit=50", {
             method:"GET"

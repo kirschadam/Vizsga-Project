@@ -20,6 +20,7 @@ function Purchases() {
             }
             else {console.log("User data loaded from cache!");}
         }
+		sessionStorage.setItem("route", "purchases")
 
         fetch(Base_storage + "listsalepurchase?uid=" + User.Uid + "&type=purchase&limit=50", {
             method:"GET"

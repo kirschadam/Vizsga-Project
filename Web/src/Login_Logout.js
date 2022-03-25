@@ -17,6 +17,10 @@ export function Login() {
         if(sessionStorage.getItem("Uid") != null){
             document.getElementById("logout").style.visibility="visible";
             document.getElementById("navbar").style.visibility="visible";
+            var route = sessionStorage.getItem("route")
+            if(route != null){
+                navigate("/" + route);
+            }
             navigate("/products");
         }
         else{
@@ -51,7 +55,11 @@ export function Login() {
 
                 document.getElementById("logout").style.visibility="visible";
                 document.getElementById("navbar").style.visibility="visible";
-                navigate("/products");
+                var route = sessionStorage.getItem("route")
+                if(route != null){
+                    navigate("/" + route)
+                }
+                else navigate("/products");
             }
             else {console.log("Response could not be converted correctly!");}
         })

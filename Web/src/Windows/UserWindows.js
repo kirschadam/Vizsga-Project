@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate} from "react-router-dom";
 import {Base_user, User} from '../Variables';
 import { BaseModal } from './BaseModal';
 import CryptoJS from 'react-native-crypto-js';
 
 export function CreateWindow({onClose}) {
+	const navigate = useNavigate();
 
     function Create(e)
     {
@@ -28,7 +30,7 @@ export function CreateWindow({onClose}) {
                 return;
             }
             else{
-                window.location.reload();
+                navigate("/");
             }
         })
         .catch((response) => {
@@ -69,6 +71,7 @@ export function CreateWindow({onClose}) {
 }
 
 export function UpdateWindow({onClose, user}){
+	const navigate = useNavigate();
 
     function Update(e){
         e.preventDefault();
@@ -94,7 +97,7 @@ export function UpdateWindow({onClose, user}){
 				return;
 			}
             else{
-                window.location.reload();
+                navigate("/");
             }
 		})
 		.catch((response) => {
@@ -141,6 +144,7 @@ export function UpdateWindow({onClose, user}){
 }
 
 export function DeleteWindow({onClose, user}) {
+	const navigate = useNavigate();
 
     function Delete(e){
         e.preventDefault();
@@ -161,7 +165,7 @@ export function DeleteWindow({onClose, user}) {
                 return;
             }
             else{
-                window.location.reload();
+                navigate("/");
             }
         })
         .catch((response) => {
