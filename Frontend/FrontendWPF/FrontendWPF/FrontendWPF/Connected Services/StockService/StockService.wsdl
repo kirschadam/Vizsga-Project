@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://tempuri.org/" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" name="StockService" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import schemaLocation="http://localhost:3001/?xsd=xsd0" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="http://localhost:3001/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost:3001/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Base_service.JsonClasses" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IStockService_AddProduct_InputMessage">
+    <wsdl:part name="parameters" element="tns:AddProduct" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_AddProduct_OutputMessage">
+    <wsdl:part name="parameters" element="tns:AddProductResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_AddSalePurchase_InputMessage">
+    <wsdl:part name="parameters" element="tns:AddSalePurchase" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_AddSalePurchase_OutputMessage">
+    <wsdl:part name="parameters" element="tns:AddSalePurchaseResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_AddStock_InputMessage">
+    <wsdl:part name="parameters" element="tns:AddStock" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_AddStock_OutputMessage">
+    <wsdl:part name="parameters" element="tns:AddStockResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_ListProduct_InputMessage">
+    <wsdl:part name="parameters" element="tns:ListProduct" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_ListProduct_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ListProductResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_ListSalePurchase_InputMessage">
+    <wsdl:part name="parameters" element="tns:ListSalePurchase" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_ListSalePurchase_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ListSalePurchaseResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_ListStock_InputMessage">
+    <wsdl:part name="parameters" element="tns:ListStock" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_ListStock_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ListStockResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_RemoveProduct_InputMessage">
+    <wsdl:part name="parameters" element="tns:RemoveProduct" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_RemoveProduct_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RemoveProductResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_RemoveSalePurchase_InputMessage">
+    <wsdl:part name="parameters" element="tns:RemoveSalePurchase" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_RemoveSalePurchase_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RemoveSalePurchaseResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_RemoveStock_InputMessage">
+    <wsdl:part name="parameters" element="tns:RemoveStock" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_RemoveStock_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RemoveStockResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_UpdateProduct_InputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateProduct" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_UpdateProduct_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateProductResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_UpdateSalePurchase_InputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateSalePurchase" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_UpdateSalePurchase_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateSalePurchaseResponse" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_UpdateStock_InputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateStock" />
+  </wsdl:message>
+  <wsdl:message name="IStockService_UpdateStock_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateStockResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IStockService">
+    <wsdl:operation name="AddProduct">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/AddProduct" message="tns:IStockService_AddProduct_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/AddProductResponse" message="tns:IStockService_AddProduct_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="AddSalePurchase">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/AddSalePurchase" message="tns:IStockService_AddSalePurchase_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/AddSalePurchaseResponse" message="tns:IStockService_AddSalePurchase_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="AddStock">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/AddStock" message="tns:IStockService_AddStock_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/AddStockResponse" message="tns:IStockService_AddStock_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListProduct">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/ListProduct" message="tns:IStockService_ListProduct_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/ListProductResponse" message="tns:IStockService_ListProduct_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListSalePurchase">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/ListSalePurchase" message="tns:IStockService_ListSalePurchase_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/ListSalePurchaseResponse" message="tns:IStockService_ListSalePurchase_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListStock">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/ListStock" message="tns:IStockService_ListStock_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/ListStockResponse" message="tns:IStockService_ListStock_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RemoveProduct">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/RemoveProduct" message="tns:IStockService_RemoveProduct_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/RemoveProductResponse" message="tns:IStockService_RemoveProduct_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RemoveSalePurchase">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/RemoveSalePurchase" message="tns:IStockService_RemoveSalePurchase_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/RemoveSalePurchaseResponse" message="tns:IStockService_RemoveSalePurchase_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RemoveStock">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/RemoveStock" message="tns:IStockService_RemoveStock_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/RemoveStockResponse" message="tns:IStockService_RemoveStock_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateProduct">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/UpdateProduct" message="tns:IStockService_UpdateProduct_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/UpdateProductResponse" message="tns:IStockService_UpdateProduct_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateSalePurchase">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/UpdateSalePurchase" message="tns:IStockService_UpdateSalePurchase_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/UpdateSalePurchaseResponse" message="tns:IStockService_UpdateSalePurchase_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateStock">
+      <wsdl:input wsaw:Action="http://tempuri.org/IStockService/UpdateStock" message="tns:IStockService_UpdateStock_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IStockService/UpdateStockResponse" message="tns:IStockService_UpdateStock_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_IStockService" type="tns:IStockService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="AddProduct">
+      <soap:operation soapAction="http://tempuri.org/IStockService/AddProduct" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddSalePurchase">
+      <soap:operation soapAction="http://tempuri.org/IStockService/AddSalePurchase" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddStock">
+      <soap:operation soapAction="http://tempuri.org/IStockService/AddStock" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListProduct">
+      <soap:operation soapAction="http://tempuri.org/IStockService/ListProduct" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListSalePurchase">
+      <soap:operation soapAction="http://tempuri.org/IStockService/ListSalePurchase" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListStock">
+      <soap:operation soapAction="http://tempuri.org/IStockService/ListStock" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RemoveProduct">
+      <soap:operation soapAction="http://tempuri.org/IStockService/RemoveProduct" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RemoveSalePurchase">
+      <soap:operation soapAction="http://tempuri.org/IStockService/RemoveSalePurchase" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RemoveStock">
+      <soap:operation soapAction="http://tempuri.org/IStockService/RemoveStock" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateProduct">
+      <soap:operation soapAction="http://tempuri.org/IStockService/UpdateProduct" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateSalePurchase">
+      <soap:operation soapAction="http://tempuri.org/IStockService/UpdateSalePurchase" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateStock">
+      <soap:operation soapAction="http://tempuri.org/IStockService/UpdateStock" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="StockService">
+    <wsdl:port name="BasicHttpBinding_IStockService" binding="tns:BasicHttpBinding_IStockService">
+      <soap:address location="http://localhost:3001/soap" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
