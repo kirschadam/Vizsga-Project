@@ -84,7 +84,7 @@ namespace Base_service
             }
 
             if (result.Item2 != "") response.Message += result.Item2;
-            else response.Message += $"Number of regions found: {response.Locations.Count}";
+            else response.Message += $"Number of locations found: {response.Locations.Count}";
 
             return response;
         }
