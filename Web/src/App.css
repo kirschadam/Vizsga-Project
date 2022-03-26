@@ -9,6 +9,7 @@
   border-color: var(--text-primary);
   transition: all .5s;
   float:right;
+  border-radius: 0.25rem;
 }
 
 .App-header {
@@ -46,7 +47,7 @@ nav>div:hover{
 }
 
 #loginCard{
-  height: 220px !important;
+  height: 225px !important;
 }
 
 .res-background{
@@ -109,10 +110,6 @@ nav>div:hover{
   margin-top: 60px;
   margin-left: 25%;
   width:50%;
-}
-
-.visible{
-  display:block;
 }
 
 .invisible{

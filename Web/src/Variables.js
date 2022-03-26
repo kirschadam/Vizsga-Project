@@ -13,3 +13,38 @@ export const User = {
         Active:0
     }
 };
+ 
+export const SlideImages = [
+    {
+        url: 'Slide/Budapest.jpg',
+        caption: 'Budapest'
+    },
+    {
+        url: 'Slide/Debrecen.jpg',
+        caption: 'Debrecen'
+    },
+    {
+        url: 'Slide/Gyor.jpg',
+        caption: 'Győr'
+    },
+    {
+        url: 'Slide/Kecskemet.jpg',
+        caption: 'Kecskemét'
+    },
+    {
+        url: 'Slide/Miskolc.jpg',
+        caption: 'Miskolc'
+    },
+    {
+        url: 'Slide/Pecs.jpg',
+        caption: 'Pécs'
+    },
+    {
+        url: 'Slide/Sopron.jpg',
+        caption: 'Sopron'
+    },
+    {
+        url: 'Slide/Szeged.jpg',
+        caption: 'Szeged'
+    },
+];
