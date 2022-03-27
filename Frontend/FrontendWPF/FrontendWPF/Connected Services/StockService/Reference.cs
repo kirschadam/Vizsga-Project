@@ -594,10 +594,10 @@ namespace FrontendWPF.StockService {
         System.Threading.Tasks.Task<string> UpdateSalePurchaseAsync(string uid, string id, string type, string product, string quantity, string totalPrice, string date, string location, string username);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/UpdateStock", ReplyAction="http://tempuri.org/IStockService/UpdateStockResponse")]
-        string UpdateStock(string uid, string id, string product, string location, string quantity);
+        string UpdateStock(string uid, string id, string product, string quantity, string location);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IStockService/UpdateStock", ReplyAction="http://tempuri.org/IStockService/UpdateStockResponse")]
-        System.Threading.Tasks.Task<string> UpdateStockAsync(string uid, string id, string product, string location, string quantity);
+        System.Threading.Tasks.Task<string> UpdateStockAsync(string uid, string id, string product, string quantity, string location);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -715,12 +715,12 @@ namespace FrontendWPF.StockService {
             return base.Channel.UpdateSalePurchaseAsync(uid, id, type, product, quantity, totalPrice, date, location, username);
         }
         
-        public string UpdateStock(string uid, string id, string product, string location, string quantity) {
-            return base.Channel.UpdateStock(uid, id, product, location, quantity);
+        public string UpdateStock(string uid, string id, string product, string quantity, string location) {
+            return base.Channel.UpdateStock(uid, id, product, quantity, location);
         }
         
-        public System.Threading.Tasks.Task<string> UpdateStockAsync(string uid, string id, string product, string location, string quantity) {
-            return base.Channel.UpdateStockAsync(uid, id, product, location, quantity);
+        public System.Threading.Tasks.Task<string> UpdateStockAsync(string uid, string id, string product, string quantity, string location) {
+            return base.Channel.UpdateStockAsync(uid, id, product, quantity, location);
         }
     }
 }

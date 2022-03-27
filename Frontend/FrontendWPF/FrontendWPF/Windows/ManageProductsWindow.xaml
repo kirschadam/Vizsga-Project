@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FrontendWPF"
         xmlns:localComponents="clr-namespace:FrontendWPF.Components"
-        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         Title="Manage products Window" Height="510" MinHeight="510" Width="800" MinWidth="600"
         WindowStartupLocation="CenterScreen"

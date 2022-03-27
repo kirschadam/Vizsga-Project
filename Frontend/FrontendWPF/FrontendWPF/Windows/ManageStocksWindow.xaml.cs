@@ -419,102 +419,10 @@ namespace FrontendWPF.Windows
         {
             if (e.EditAction == DataGridEditAction.Commit)
             {
-                // exit insert mode if 'Update stock' is clicked
-                if (Button_UpdateStock.IsKeyboardFocused)
-                {
-                    edit_mode = "read";
-                    dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
-                    dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
-                    dbStocksList.RemoveAt(dbStocksList.Count - 1);
-                    dataGrid1.ItemsSource = null;
-                    dataGrid1.ItemsSource = dbStocksList;
-                    UpdateStock();
-                    return;
-                }
-                else if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
-                {
-                    return;
-                }
-                else if (Button_Close.IsKeyboardFocused)
-                {
-                    CloseWindow();
-                    return;
-                }
+                CellEditEnding_setup(e); // setup rules
 
-                row = e.Row;
-                row_index = row.GetIndex();
-                column = e.Column;
-                column_index = column.DisplayIndex;
-                //stock_edited = row.Item as StockService.Stock; //  stock_edited and stock_edited0 are already defined in UpdateStock and AddStock (read out current (old) values from the row, because the entry is a new value)
-
-                cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
-                textBox = (TextBox)cell.Content;
-                new_value = textBox.Text;
-
-                changed_property_name = dataGrid1.Columns[column_index].Header.ToString();
-                if (changed_property_name == "Purchase price") { changed_property_name = "BuyUnitPrice"; }
-                if (changed_property_name == "Sales price") { changed_property_name = "SellUnitPrice"; }
-                // get old property value of stock by property name
-                // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
-                old_value = stock_edited.GetType().GetProperty(changed_property_name).GetValue(stock_edited).ToString();
-
-                // check data correctness
-                string stopMessage = "";
-                if (new_value == "") // if new value is empty
-                {
-                    stopMessage = "New value cannot be empty!";
-                }
-                else if (changed_property_name == "Product" && new_value != old_value)
-                {
-                    if (new_value.Length < 5)
-                    {
-                        stopMessage = $"The name must be at least 5 charachters long!";
-                    }
-                    else
-                    {
-                        List<StockService.Product> dbProductsList = new List<StockService.Product>();
-                        dbProductsList = Product.GetProducts("", new_value, "", "", "", "", "");
-
-                        if (dbProductsList.Count == 0) // stop if product does not exist in database, AND if new name is different
-                        {
-                            stopMessage = $"The product '{new_value}' does not exist in database!";
-                        }
-                    }
-                }
-                else if (changed_property_name == "Quantity") // if wrong BuyUnitPrice or SellUnitPrice value is entered
-                {
-                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                    if (int_val == null || int_val < 0)
-                    {
-                        stopMessage = $"Please enter a correct value for the quantity!";
-                    }
-                    else if (edit_mode == "inset" && int_val > 0)
-                    {
-                        stopMessage = $"Initial quantity must be 0!";
-                    }
-                    else if (int_val > 1000000000)
-                    {
-                        stopMessage = $"Quantity cannot exceed 1,000,000,000!";
-                    }
-                }
-                else if (changed_property_name == "Location")  //  && new_value != old_value
-                {
-                    if (new_value.Length < 3)
-                    {
-                        stopMessage = $"The location name must be at least 3 charachters long!";
-                    }
-                    else
-                    {
-                        List<StockService.Stock> dbStocksAtLocationList = new List<StockService.Stock>();
-                        dbStocksAtLocationList = Stock.GetStocks("", stock_edited.Product, new_value, "", "", "");
-
-                        if (dbStocksAtLocationList.Count != 0) // stop if product is already in stock table for the given location, AND if new name is different
-                        {
-                            stopMessage = $"The product '{stock_edited.Product}' in the stock table already exists for the location '{new_value}'!";
-                        }
-                    }
-                }
-
+                string stopMessage = CellEditEnding_checkInput(); // check data correctness
+                if (stopMessage == "stop") { return; } // stop on database error
                 if (stopMessage != "")  // warn user, and stop
                 {
                     MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -543,7 +451,7 @@ namespace FrontendWPF.Windows
                 // stop in insert mode if new and old value are the same AND the field was already updated (in insert mode the suggested old values of columns Name, BuyUnitPrice, SellUnitPrice can be same as old values if accepted) OR in each case in update mode; 
                 else if (old_value == new_value && (fieldsEntered[column_index - 1] == 1 || edit_mode == "update")) // && column_index < 4
                 {
-                    MoveToNextCell();
+                    CellEditEnding_nextCell_update();
                     return;
                 }
 
@@ -662,7 +570,7 @@ namespace FrontendWPF.Windows
                         Log("update"); // write log to file
                         cell.Background = Brushes.OliveDrab;
                         // Shared.ChangeColor(cell, Colors.OliveDrab, Colors.Transparent);
-                        MoveToNextCell();
+                        CellEditEnding_nextCell_update();
                     }
                     old_value = new_value; // update old_value after successful update
                     TextBlock_message.Foreground = Brushes.LightGreen;
@@ -672,35 +580,9 @@ namespace FrontendWPF.Windows
                     checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
                     gifImage.StartAnimation();
                 }
-                else // move to next cell
+                else // move to next cell when inserting
                 {
-                    dataGrid1.Focus();
-                    dataGrid1.Dispatcher.InvokeAsync(() =>
-                    {
-
-                        cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
-
-                        // select next unchanged column; if last 'SellUnitPrice' column is reached, return to first 'Name' column
-                        int column_shift = 0;
-                        while (fieldsEntered[column_index + column_shift - 1] != 0)
-                        {
-                            column_shift = column_index + column_shift == 3 ? -column_index + 1 : column_shift + 1;
-                        }
-                        cell = dataGrid1.Columns[column_index + column_shift].GetCellContent(row).Parent as DataGridCell;
-
-                        // turn off eventual editing mode caused e.g. by tab key on data entry
-                        if (cell.IsEditing) { cell.IsEditing = false; }
-
-                        // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
-                        // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
-                        Button_AddStock.Focus();
-
-                        SelectTextBox();
-
-
-
-                    },
-                DispatcherPriority.Loaded); // style the id cell of the new stock
+                    CellEditEnding_nextCell_insert();
                 }
 
             }
@@ -708,6 +590,178 @@ namespace FrontendWPF.Windows
             {
                 return;
             }
+        }
+
+        private void CellEditEnding_setup(DataGridCellEditEndingEventArgs e)
+        {
+            // exit insert mode if 'Update stock' is clicked
+            if (Button_UpdateStock.IsKeyboardFocused)
+            {
+                edit_mode = "read";
+                dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
+                dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
+                dbStocksList.RemoveAt(dbStocksList.Count - 1);
+                dataGrid1.ItemsSource = null;
+                dataGrid1.ItemsSource = dbStocksList;
+                UpdateStock();
+                return;
+            }
+            else if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
+            {
+                return;
+            }
+            else if (Button_Close.IsKeyboardFocused)
+            {
+                CloseWindow();
+                return;
+            }
+
+            row = e.Row;
+            row_index = row.GetIndex();
+            column = e.Column;
+            column_index = column.DisplayIndex;
+            //stock_edited = row.Item as StockService.Stock; //  stock_edited and stock_edited0 are already defined in UpdateStock and AddStock (read out current (old) values from the row, because the entry is a new value)
+
+            cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
+            textBox = (TextBox)cell.Content;
+            new_value = textBox.Text;
+
+            changed_property_name = dataGrid1.Columns[column_index].Header.ToString();
+            if (changed_property_name == "Purchase price") { changed_property_name = "BuyUnitPrice"; }
+            if (changed_property_name == "Sales price") { changed_property_name = "SellUnitPrice"; }
+            // get old property value of stock by property name
+            // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
+            old_value = stock_edited.GetType().GetProperty(changed_property_name).GetValue(stock_edited).ToString();
+        }
+
+        private string CellEditEnding_checkInput()
+        {
+            string stopMessage = "";
+            if (new_value == "") // if new value is empty
+            {
+                stopMessage = "New value cannot be empty!";
+            }
+            else if (changed_property_name == "Product" && new_value != old_value)
+            {
+                if (new_value.Length < 5)
+                {
+                    stopMessage = $"The name must be at least 5 charachters long!";
+                }
+                else
+                {
+                    List<StockService.Product> dbProductsList = new List<StockService.Product>();
+                    dbProductsList = Product.GetProducts("", new_value, "", "", "", "", "");
+                    if (dbProductsList == null) { IsEnabled = false; Close(); return "stop"; } // stop on any error
+                    if (dbProductsList.Count == 0) // stop if product does not exist in database, AND if new name is different
+                    {
+                        stopMessage = $"The product '{new_value}' does not exist in database!";
+                    }
+                }
+            }
+            else if (changed_property_name == "Quantity") // if wrong BuyUnitPrice or SellUnitPrice value is entered
+            {
+                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                if (int_val == null || int_val < 0)
+                {
+                    stopMessage = $"Please enter a correct value for the quantity!";
+                }
+                else if (edit_mode == "inset" && int_val > 0)
+                {
+                    stopMessage = $"Initial quantity must be 0!";
+                }
+                else if (int_val > 1000000000)
+                {
+                    stopMessage = $"Quantity cannot exceed 1,000,000,000!";
+                }
+            }
+            else if (changed_property_name == "Location")  //  && new_value != old_value
+            {
+                if (new_value.Length < 3)
+                {
+                    stopMessage = $"The location name must be at least 3 charachters long!";
+                }
+                else
+                {
+                    List<StockService.Stock> dbStocksAtLocationList = new List<StockService.Stock>();
+                    dbStocksAtLocationList = Stock.GetStocks("", stock_edited.Product, new_value, "", "", "");
+
+                    if (dbStocksAtLocationList.Count != 0) // stop if product is already in stock table for the given location, AND if new name is different
+                    {
+                        stopMessage = $"The product '{stock_edited.Product}' in the stock table already exists for the location '{new_value}'!";
+                    }
+                }
+            }
+            return stopMessage;
+        }
+
+        private void CellEditEnding_nextCell_update()
+        {
+            dataGrid1.Dispatcher.InvokeAsync(() =>
+            {
+                // select next  column; if last 'SellUnitPrice' column is reached, return to first 'Name' column
+                if (column_index == dataGrid1.Columns.Count - 1)
+                {
+                    column_index = 1;
+                    // move 1 row down if it is not the last row
+                    if (row_index < dataGrid1.Items.Count - 1)
+                    {
+                        row = dataGrid1.ItemContainerGenerator.ContainerFromItem(dataGrid1.Items[row_index + 1]) as DataGridRow;
+                        row_index++;
+                    }
+                }
+                else
+                {
+                    column_index++;
+                }
+
+                cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
+
+                // turn off eventual editing mode causes e.g. by tab key on data entry
+                // if (cell.IsEditing) { cell.IsEditing = false; }
+
+
+                // go into edit mode if in insert mode
+                cell.Focus(); // set focus on cell
+                if (edit_mode == "insert") // TODO: tesztelni!
+                {
+                    SelectTextBox();
+                }
+
+                if (edit_mode == "update") dataGrid1.SelectedCells.Clear(); // TODO: tesztelni!
+                SelectEditedCell();
+            },
+            DispatcherPriority.Loaded);
+        }
+
+        private void CellEditEnding_nextCell_insert()
+        {
+            dataGrid1.Focus();
+            dataGrid1.Dispatcher.InvokeAsync(() =>
+            {
+
+                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
+
+                // select next unchanged column; if last 'SellUnitPrice' column is reached, return to first 'Name' column
+                int column_shift = 0;
+                while (fieldsEntered[column_index + column_shift - 1] != 0)
+                {
+                    column_shift = column_index + column_shift == 3 ? -column_index + 1 : column_shift + 1;
+                }
+                cell = dataGrid1.Columns[column_index + column_shift].GetCellContent(row).Parent as DataGridCell;
+
+                // turn off eventual editing mode caused e.g. by tab key on data entry
+                if (cell.IsEditing) { cell.IsEditing = false; }
+
+                // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
+                // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
+                Button_AddStock.Focus();
+
+                SelectTextBox();
+
+
+
+            },
+            DispatcherPriority.Loaded);
         }
 
         private void SelectEditedCell()
@@ -787,48 +841,8 @@ namespace FrontendWPF.Windows
                 if (e.Key == Key.Enter && itemsView.IsEditingItem == false && edit_mode != "insert")
                 {
                     // e.Handled = true;
-                    // MoveToNextCell();
+                    // CellEditEnding_nextCell_update();
                 }
-        }
-
-
-        private void MoveToNextCell()
-        {
-            dataGrid1.Dispatcher.InvokeAsync(() =>
-            {
-                // select next  column; if last 'SellUnitPrice' column is reached, return to first 'Name' column
-                if (column_index == dataGrid1.Columns.Count - 1)
-                {
-                    column_index = 1;
-                    // move 1 row down if it is not the last row
-                    if (row_index < dataGrid1.Items.Count - 1)
-                    {
-                        row = dataGrid1.ItemContainerGenerator.ContainerFromItem(dataGrid1.Items[row_index + 1]) as DataGridRow;
-                        row_index++;
-                    }
-                }
-                else
-                {
-                    column_index++;
-                }
-
-                cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
-
-                // turn off eventual editing mode causes e.g. by tab key on data entry
-                // if (cell.IsEditing) { cell.IsEditing = false; }
-
-
-                // go into edit mode if in insert mode
-                cell.Focus(); // set focus on cell
-                if (edit_mode == "insert") // TODO: tesztelni!
-                {
-                    SelectTextBox();
-                }
-
-                if (edit_mode == "update") dataGrid1.SelectedCells.Clear(); // TODO: tesztelni!
-                SelectEditedCell();
-            },
-            DispatcherPriority.Loaded);
         }
 
         private void SelectTextBox()
@@ -950,12 +964,12 @@ namespace FrontendWPF.Windows
             }
             int ASCII = (int)input[0];
             input = " "; // reset input to empty to avoid false value, becasuse KeyUp event may run on function keys as well
-            if ((ASCII > 31 && ASCII < 256) == false) { return; } // stop if not number or digit
+            if (((ASCII > 31 && ASCII < 256) || ASCII == 336 || ASCII == 337 || ASCII == 368 || ASCII == 369) == false) { return; } // stop if not number or digit expect Ő(336), ő(337), Ű(368), ű(369)
             // if (ASCII == 43 || ASCII == 60 || ASCII == 61 || ASCII == 62) { return; } // stop if +, <, =, >
             bool key = e.Key == Key.Back;
 
-            // stop on most function keys
-            if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Oem102 && e.Key != Key.Subtract && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
+            // stop on most function keys, expect back, delete, <+í(Oem102), -, ., é(Oem1), ü(Oem2), ö(Oem3), ő(Oem4), Ű(Oem5), ú(Oem6), á(Oem7), Ó(OemPlus)
+            if (e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Oem102 && e.Key != Key.Subtract && e.Key != Key.OemPeriod && e.Key != Key.Oem1 && e.Key != Key.Oem2 && e.Key != Key.Oem3 && e.Key != Key.Oem4 && e.Key != Key.Oem5 && e.Key != Key.Oem6 && e.Key != Key.Oem7 && e.Key != Key.OemPlus && ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)) == false)
             {
                 return;
             }
@@ -1004,13 +1018,17 @@ namespace FrontendWPF.Windows
             string stopMessage = "";
             if (old_value == "-999" || op != "=")
             {
+                Dispatcher.InvokeAsync(() =>
+                {
+                    SelectTextBox(); // this + Background priority needed to avoid wrong Key.End selection
+                }, DispatcherPriority.Input);
                 Dispatcher.InvokeAsync(() => {
                     // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end; skip if an operator is entered into cell
 
                     if (op != "=" && stopMessage == "") { textBox.Text = op + new_value; } // restore operator into cell, only if there is no error message (because it restores the old value);
 
                     Shared.SendKey(Key.End);
-                }, DispatcherPriority.Input);
+                }, DispatcherPriority.Background);
             }
 
             // check data correctness

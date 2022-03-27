@@ -42,7 +42,6 @@ namespace FrontendWPF.Windows
             // UserService.Response_User responseUser = new UserService.Response_User();
             UserService.Response_Login responseLogin = new UserService.Response_Login();
 
-            // string uid = null;
             string username = Textbox_UserName.Text;
             string password = PasswordBox_Password.Visibility == Visibility.Visible ?  PasswordBox_Password.Password: textBox_showPassword.Text;
 
@@ -54,18 +53,18 @@ namespace FrontendWPF.Windows
                 responseLogin = client.LoginUser(username, Shared.CreateMD5(password));
 
                 string errorMessage = "";
-                if (responseLogin.Message.Contains("One or more errors occurred"))
+                if (responseLogin.Message.Contains("One or more errors occurred") || responseLogin.Message.Contains("Egy vagy több hiba történt"))
                 {
-                    errorMessage = $"The remote database is not available. Please check your Internet connection, or contact the service provider.";
+                    errorMessage = $"The remote database server is not available. Please check your Internet connection, or contact the service provider.";
                 }
-                else if (responseLogin.Message.Contains("Username or password incorrect!") == false && responseLogin.Message.Contains("Welcome") == false)
+                else if (responseLogin.Message.Contains("Unknown database"))
                 {
-                    errorMessage = responseLogin.Message;
+                    errorMessage = "The connection to the database server is established, but the database is not accessible. Please contact the administrator.";
                 }
-
-                if (errorMessage != "")
+                
+                if (errorMessage != "" &&  responseLogin.Message.Contains("Welcome") == false && responseLogin.Message.Contains("Username or password incorrect!") == false)
                 {
-                    MessageBox.Show(errorMessage, caption: "Error message");
+                    MessageBox.Show(errorMessage, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
             }

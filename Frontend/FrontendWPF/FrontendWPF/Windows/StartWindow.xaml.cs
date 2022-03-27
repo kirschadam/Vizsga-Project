@@ -221,12 +221,6 @@ namespace FrontendWPF.Windows
                     string responseLogout = client.LogoutUser(Shared.uid);
 
                     string errorMessage = "";
-                    /*
-                    if (responseLogout == null)
-                    {
-                        errorMessage = $"The remote host is not accessible. Please check your Internet connection, or contact the service provider.";
-                    }
-                    */
                     if (responseLogout.Contains("You have logged out!"))
                     {
                         MessageBox.Show("You have logged out.", caption: "Information", button: MessageBoxButton.OK, MessageBoxImage.Information);
