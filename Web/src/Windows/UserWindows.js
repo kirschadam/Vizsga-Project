@@ -78,7 +78,7 @@ export function UpdateWindow({onClose, user}){
 				uid: User.Uid,
 				id: user.Id,
 				username: e.username.value,
-				password: String(CryptoJS.MD5(e.newpassword.value)),
+				password: (e.newpassword.value === "" ? "" : String(CryptoJS.MD5(e.newpassword.value))),
 				location: e.location.value,
 				permission: e.permission.value,
 				active: e.active.value
