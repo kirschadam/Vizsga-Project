@@ -482,7 +482,7 @@
                     
                     <Button Name="Button_Filter" Click="Button_Filter_Click" Width="125" Height="40" Margin="0,12,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
                     <Button Name="Button_ReloadData" Click="Button_ReloadData_Click"  Width="125" Height="40" Margin="0,12,0,0" Content="Reset" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                    <Button Name="Button_DeleteStock" Click="Button_DeleteStock_Click"  Width="125" Height="40" Margin="0,12,0,15" Content="Delete logs" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                    <Button Name="Button_DeleteLog" Click="Button_DeleteLog_Click"  Width="125" Height="40" Margin="0,12,0,15" Content="Delete logs" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
                     
                 </StackPanel>
 

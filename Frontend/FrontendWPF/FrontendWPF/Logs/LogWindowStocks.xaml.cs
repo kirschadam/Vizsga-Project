@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -23,7 +22,7 @@ namespace FrontendWPF.Logs
         private List<StockLog> logList { get; set; }
 
         System.Collections.IList selectedItems;
-        List<StockLog> filterStocksList { get; set; }
+        List<Filter_StockLog> filterStocksList { get; set; }
         List<StockLog> filteredStocksList { get; set; }
 
         string edit_mode;
@@ -40,9 +39,10 @@ namespace FrontendWPF.Logs
         double windowWidth0;
         double windowHeight0;
 
+
+
         DateTime startDate = DateTime.Now.Date.AddDays(-30); // set an initial limit of 29 days
         DateTime endDate = DateTime.Now; //
-        // public double columnFontSize { get; set; }
 
         public LogWindowStocks()
         {
@@ -65,36 +65,27 @@ namespace FrontendWPF.Logs
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Foreground = Brushes.White;
 
-            //  https://www.codeproject.com/Questions/155935/how-to-add-rows-to-WPF-datagrids
-            /*
-            DataGridTextColumn col1 = new DataGridTextColumn();
-            dataGrid1.Columns.Add(col1);
-            col1.Binding = new Binding("id");
-            col1.Header = "ID";
-            */
-
             // get log file content
             logList = StockLog.GetStocksLog(startDate, endDate);
             if (logList == null) { IsEnabled = false; Close(); return; } // stop on any error
             dataGrid1.ItemsSource = logList;
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
             TextBlock_message.Text = $"{logList.Count} records loaded.";
-
-            // close window and stop if no purchase is retrieved
-            /*
             if (logList.Count == 0)
             {
-                closeCompleted = true;
-                IsEnabled = false; // so that window cannot be opened
-                Close();
-                return;
+                Button_Filter.IsEnabled = false;
+                Button_Filter.Foreground = Brushes.Gray;
+                Button_ReloadData.IsEnabled = false;
+                Button_ReloadData.Foreground = Brushes.Gray;
+                Button_DeleteLog.IsEnabled = false;
+                Button_DeleteLog.Foreground = Brushes.Gray;
+                Button_DatePicker.IsEnabled = false;
             }
-            */
 
             // if (window.IsLoaded == false) // run on the first time when window is not loaded
-            if (true)
+            // without if allow initial fontsize (and larger column with) on Reset
             {
-                filterStocksList = new List<StockLog>();
+                filterStocksList = new List<Filter_StockLog>();
 
                 Dispatcher.InvokeAsync(() =>
                 {
@@ -119,14 +110,14 @@ namespace FrontendWPF.Logs
             ScrollDown();
 
             // create/reset stock_filter item and add it to filter dataGrid0
-            stock_filter = new StockLog()
+            stock_filter = new Filter_StockLog()
             {
-                LogDate = null,
+                LogDate = "",
                 LogUsername = "",
                 LogOperation = "",
-                Id = null,
+                Id = "",
                 Product = "",
-                Quantity = null,
+                Quantity = "",
                 Location = "",
             };
 
@@ -158,7 +149,7 @@ namespace FrontendWPF.Logs
             column.SortDirection = sortDirection;
         }
 
-        private void Button_DeleteStock_Click(object sender, RoutedEventArgs e)
+        private void Button_DeleteLog_Click(object sender, RoutedEventArgs e)
         {
             TextBlock_message.Text = "Delete log file's content?";
             TextBlock_message.Foreground = Brushes.Salmon;
@@ -169,23 +160,15 @@ namespace FrontendWPF.Logs
                 try
                 {
                     // DELETE log file's content
-
                     StreamWriter sw = new StreamWriter(@".\Logs\manageStocks.log", append: false, encoding: Encoding.UTF8);
                     sw.WriteLine("LogDate;LogUsername;LogOperation;Id;Product;Quantity;Location");
                     sw.Close();
                 }
                 catch (Exception ex)
                 {
-                    if (ex.ToString().Contains("XXXXX"))
-                    {
-                        MessageBox.Show($"This will be a specific error. Details:\n{ex.Message}", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-                    else
-                    {
-                        MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
+                    MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+
                 }
                 TextBlock_message.Text = "Log file's content deleted.";
 
@@ -212,7 +195,7 @@ namespace FrontendWPF.Logs
         string new_value = "";
         int filterc_index;
         string changed_property_name;
-        StockLog stock_filter;
+        Filter_StockLog stock_filter;
 
 
         private void StopAnimation()
@@ -227,14 +210,7 @@ namespace FrontendWPF.Logs
             }, DispatcherPriority.ContextIdle);
         }
 
-
-
-        private void dataGrid1_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
-        {
-
-        }
-
-        // https://stackoverflow.com/questions/27744097/wpf-fade-out-animation-cant-change-opacity-any-more
+         // https://stackoverflow.com/questions/27744097/wpf-fade-out-animation-cant-change-opacity-any-more
         private void ChangeOpacity()
         {
             DoubleAnimation animation = new DoubleAnimation
@@ -249,10 +225,6 @@ namespace FrontendWPF.Logs
 
             cell.BeginAnimation(UIElement.OpacityProperty, animation);
         }
-
-
-
-
 
         private void ScrollDown()
         {
@@ -319,7 +291,6 @@ namespace FrontendWPF.Logs
                 stackPanel1.Height = 442 - 30 + window.ActualHeight - 500;
                 ScrollDown();
                 TextBlock_message.Text = "Enter filter value(s).";
-
             }
             else
             {
@@ -382,11 +353,9 @@ namespace FrontendWPF.Logs
             if (changed_property_name == "user name") { changed_property_name = "LogUsername"; }
             if (changed_property_name == "operation") { changed_property_name = "LogOperation"; }
 
-            // remove operator for integer columns Id and Quantity
+            // set operator value for specific column
             if (changed_property_name == "LogDate" || changed_property_name == "Id" || changed_property_name == "Quantity")
             {
-                if (op != "=" || (new_value != "" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
-
                 switch (changed_property_name)
                 {
                     case "LogDate": opLogDate = op; break;
@@ -395,111 +364,69 @@ namespace FrontendWPF.Logs
                     default: break;
                 }
             }
-
-            if (changed_property_name == "LogDate" && ((new_value.Length < 8 && new_value.Length > 0) || (new_value.Length > 8 && new_value.Length < 14))) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise stock_filter.Date will be set to null
-
-            // if any stock_filter value is null, set it temporarily to -999 to avoid error when setting old value 
-            if (changed_property_name == "LogDate" && stock_filter.LogDate == null) stock_filter.LogDate = DateTime.Parse("01.01.01 01:01:01");
-            if (changed_property_name == "Id" && stock_filter.Id == null) stock_filter.Id = -999;
-            if (changed_property_name == "Quantity" && stock_filter.Quantity == null) stock_filter.Quantity = -999;
+            else { op = ""; } // clear operator for string columns
 
             //get old property value of purchase by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
             old_value = stock_filter.GetType().GetProperty(changed_property_name).GetValue(stock_filter).ToString();
-            if (changed_property_name == "LogDate" && stock_filter.LogDate == DateTime.Parse("01.01.01 01:01:01")) stock_filter.LogDate = null;
-            if (changed_property_name == "Id" && stock_filter.Id == -999) stock_filter.Id = null;
-            if (changed_property_name == "Quantity" && stock_filter.Quantity == -999) stock_filter.Quantity = null;
-
-            string stopMessage = "";
-            if (old_value == "-999" || op != "=")
-            {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    SelectTextBox(); // this + Background priority needed to avoid wrong Key.End selection
-                }, DispatcherPriority.Input);
-                Dispatcher.InvokeAsync(() =>
-                {
-                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end; skip if an operator is entered into cell
-
-                    if (op != "=" && stopMessage == "") { textBox.Text = op + new_value; } // restore operator into cell, only if there is no error message (because it restores the old value);
-
-                    Shared.SendKey(Key.End);
-                }, DispatcherPriority.Background);
-            }
-            void SelectTextBox()
-            {
-                cell.Focus();
-                cell.IsEditing = true;
-
-                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down)); // move focus to textBox
-                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
-                textBox = (TextBox)cell.Content;
-                // Keyboard.Focus(textBox);
-                textBox.SelectAll();
-            }
 
             // check data correctness
-            bool minutesExist = false;
-            if (changed_property_name == "Id")
+            string stopMessage = "";
+            int? stock_filterId = null;
+            DateTime? stock_filterLogDate = null;
+            int? stock_filterQuantity = null;
+            bool logMinutesExist = false;
+            if (new_value != "")
             {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
+                if (changed_property_name == "Id")
                 {
-                    stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
+                    string stock_filterId0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    stock_filterId = int.TryParse(stock_filterId0, out var tempVal1) ? tempVal1 : (int?)null;
+                    if ((stock_filterId0 != "" && stock_filterId == null) || (stock_filterId < 0 || stock_filterId > 10000000))
+                    {
+                        stopMessage = $"The Id '{stock_filterId0}' does not exist, please enter a correct value for the Id!";
+                    }
                 }
-            }
-            else if (new_value != "" && changed_property_name == "Quantity") // if wrong Quantity value is entered
-            {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                if (int_val == null || (int_val < 0))
+                else if (changed_property_name == "Quantity") // if wrong Quantity value is entered
                 {
-                    stopMessage = $"Please enter a correct value for the Quantity!";
+                    string stock_filterQuantity0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    stock_filterQuantity = int.TryParse(stock_filterQuantity0, out var tempVal2) ? tempVal2 : (int?)null;
+                    if ((stock_filterQuantity0 != "" && stock_filterQuantity == null) || (stock_filterQuantity < 0))
+                    {
+                        stopMessage = $"Please enter a correct value for the Quantity!";
+                    }
+                    else if (stock_filterQuantity > 1000000)
+                    {
+                        stopMessage = $"Quantity cannot exceed 1,000,000!";
+                    }
                 }
-                else if (int_val > 1000000)
+                else if (changed_property_name == "LogDate") // if wrong LogDate value is entered
                 {
-                    stopMessage = $"Quantity cannot exceed 1,000,000!";
-                }
-            }
-            else if (new_value != "" && (changed_property_name == "LogDate" || changed_property_name == "Date")) // if wrong Date value is entered
-            {
-                old_value = old_value.Substring(0, old_value.Length - 3);
-                bool dateExists = DateTime.TryParse(new_value, out DateTime date_entered);
-                if (dateExists == false)
-                {
-                    stopMessage = $"Please enter a correct value for the date value!";
-                }
-                else
-                {
-                    // checks if minutes are entered; if not, minutues in the record will be ignored
-                    minutesExist = date_entered.Minute > 0;
+                    string stock_filterLogDate0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    stock_filterLogDate = DateTime.TryParse(stock_filterLogDate0, out var tempVal4) ? tempVal4 : (DateTime?)null;
+                    if (changed_property_name == "LogDate" && ((stock_filterLogDate0.Length < 8 && stock_filterLogDate0.Length >= 0) || (stock_filterLogDate0.Length > 8 && stock_filterLogDate0.Length < 14))) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise stock_filter.Date will be set to null
+                    if (stock_filterLogDate0 != "" && stock_filterLogDate == null)
+                    {
+                        stopMessage = $"Please enter a correct value for the date value!";
+                    }
+                    else
+                    {
+                        // checks if minutes are entered; if not, minutues in the record will be ignored
+                        logMinutesExist = ((DateTime)stock_filterLogDate).Minute > 0;
+                    }
                 }
             }
 
             if (stopMessage != "")  // warn user, and stop
             {
                 MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                if (old_value != "-999" && old_value != "01.01.01 01:01")
-                {
-                    textBox.Text = op == "=" ? old_value : op + old_value; // restore correct cell value if old value is not null, plus the operator if any
-                    Shared.SendKey(Key.End);
-                }
+                textBox.Text = old_value; // restore correct cell value if old value is not null
+                Shared.SendKey(Key.End);
                 return;
             }
 
-            if (filterc_index == 1 || filterc_index == 2 || filterc_index == 4 || filterc_index == 6) // // update string-type fields with new value ( LogUsername, LogOperation, Product, Location)
-            {
-                stock_filter.GetType().GetProperty(changed_property_name).SetValue(stock_filter, new_value);
-            }
-            else if (filterc_index == 0) // update LogDate with new value
-            {
-                DateTime? int_val = DateTime.TryParse(new_value, out var tempVal) ? tempVal : (DateTime?)null;
-                stock_filter.GetType().GetProperty(changed_property_name).SetValue(stock_filter, int_val);
-            }
-            else // update int?-type fields with new value (Id, Quantity)
-            {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                stock_filter.GetType().GetProperty(changed_property_name).SetValue(stock_filter, int_val);
-            }
+            // update filter fields
+            stock_filter.GetType().GetProperty(changed_property_name).SetValue(stock_filter, new_value);
 
             // filter
             filteredStocksList.Clear();
@@ -507,7 +434,7 @@ namespace FrontendWPF.Logs
             {
                 DateTime roundedLogDate = (DateTime)stock.LogDate;
                 roundedLogDate = roundedLogDate.AddSeconds(-roundedLogDate.Second);
-                if ((stock_filter.LogDate == null || (minutesExist ? Compare(roundedLogDate, stock_filter.LogDate, opLogDate) : Compare(stock.LogDate.Value.Date, stock_filter.LogDate, opLogDate))) && (stock_filter.LogUsername == "" || stock.LogUsername.ToLower().Contains(stock_filter.LogUsername.ToLower())) && (stock_filter.LogOperation == "" || stock.LogOperation.ToLower().Contains(stock_filter.LogOperation.ToLower())) && (stock_filter.Id == null || Compare(stock.Id, stock_filter.Id, opId)) && (stock_filter.Product == "" || stock.Product.ToLower().Contains(stock_filter.Product.ToLower())) && (stock_filter.Quantity == null || Compare(stock.Quantity, stock_filter.Quantity, opQuantity)) && (stock_filter.Location == "" || stock.Location.ToLower().Contains(stock_filter.Location.ToLower())))
+                if ((stock_filterLogDate == null || (logMinutesExist ? Compare(roundedLogDate, stock_filterLogDate, opLogDate) : Compare(stock.LogDate.Value.Date, stock_filterLogDate, opLogDate))) && (stock_filter.LogUsername == "" || stock.LogUsername.ToLower().Contains(stock_filter.LogUsername.ToLower())) && (stock_filter.LogOperation == "" || stock.LogOperation.ToLower().Contains(stock_filter.LogOperation.ToLower())) && (stock_filterId == null || Compare(stock.Id, stock_filterId, opId)) && (stock_filter.Product == "" || stock.Product.ToLower().Contains(stock_filter.Product.ToLower())) && (stock_filterQuantity == null || Compare(stock.Quantity, stock_filterQuantity, opQuantity)) && (stock_filter.Location == "" || stock.Location.ToLower().Contains(stock_filter.Location.ToLower())))
                 {
                     filteredStocksList.Add(stock);
                     continue;
@@ -550,9 +477,9 @@ namespace FrontendWPF.Logs
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
             if (Shared.loggedInUser.Permission < 6)
             {
-                Button_DeleteStock.IsEnabled = false;
-                Button_DeleteStock.Foreground = Brushes.Gray;
-                Button_DeleteStock.ToolTip = "You do not have rights to delete data!";
+                Button_DeleteLog.IsEnabled = false;
+                Button_DeleteLog.Foreground = Brushes.Gray;
+                Button_DeleteLog.ToolTip = "You do not have rights to delete data!";
             }
 
         }

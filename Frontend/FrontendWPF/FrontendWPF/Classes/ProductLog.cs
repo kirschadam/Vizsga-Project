@@ -9,6 +9,21 @@ using System.Windows.Media;
 
 namespace FrontendWPF.Classes
 {
+    public class Filter_ProductLog
+    {
+        // class requires getter-setter to be visible in DataGrid!
+        public string LogDate { set; get; }
+        public string LogUsername { set; get; }
+        public string LogOperation { set; get; }
+        public string Id { set; get; }
+        public string Name { set; get; }
+        public string BuyUnitPrice { set; get; }
+        public string SellUnitPrice { set; get; }
+
+        public Filter_ProductLog()
+        {
+        }
+    }
     public class ProductLog
     {
         // class requires getter-setter to be visible in DataGrid!
@@ -57,7 +72,7 @@ namespace FrontendWPF.Classes
             string[] row;
             int logAdded = 0;
             string errorMessage = "";
-            dbUsersList = User.GetUsers("", "", "", "", "","", "", "");
+            dbUsersList = User.GetUsers("", "", "", "", "", "", "", "");
             if (dbUsersList == null) { return null; } // stop on any error
 
             while (sr.EndOfStream == false)

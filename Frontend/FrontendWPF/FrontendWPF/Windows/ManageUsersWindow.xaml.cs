@@ -4,53 +4,45 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;  
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using FrontendWPF.Classes;
 using Microsoft.Win32;
 
-
 namespace FrontendWPF.Windows
 {
-
     public partial class ManageUsersWindow : Window
     {
         private UserService.UserServiceClient client = new UserService.UserServiceClient();
         private bool closeCompleted = false;
-
         private List<UserService.User> dbUsersList { get; set; }
         
         System.Collections.IList selectedItems;
         List<UserService.User> selectedUsersList { get; set; }
-        List<UserService.User> filterUsersList { get; set; }
+        List<Classes.User> filterUsersList { get; set; }
         List<UserService.User> filteredUsersList { get; set; }
         List<UserService.User> importList { get; set; }
         List<LocationService.Store> dbLocationsList { get; set; }
 
         int PK_column_index = 0;
         string edit_mode;
-        // private List<User> usersList { get; set; }
         private int[] fieldsEntered = new int[5]; // Username, Password, Location, Permission, Active 
         ScrollViewer scrollViewer;
-        string lastLocation = "";
-        int? lastPersmission = null;
-        int? lastActive = null;
         string input = "";
-        string opId = "=";
-        string opPermission = "=";
         double windowLeft0;
         double windowTop0;
         double windowWidth0;
         double windowHeight0;
+        string opId = "=";
+        string opPermission = "=";
+        string lastLocation = "";
+        int? lastPersmission = null;
+        int? lastActive = null;
 
         public ManageUsersWindow()
         {
@@ -78,31 +70,14 @@ namespace FrontendWPF.Windows
             if (dbUsersList == null) { IsEnabled = false; Close(); return; } // stop on any error
             TextBlock_message.Text = $"{dbUsersList.Count} users loaded.";
 
-            // close window and stop if no user is retrieved
-            /*
-            if (dbUsersList.Count == 0)
-            {
-                IsEnabled = false;
-                closeCompleted = true;
-                IsEnabled = false; // so that window cannot be opened
-                Close();
-                return;
-            }
-            */
-            /*
-            usersList = new List<User>();
-            for (int i = 0; i < dbUsersList.Count; i++)
-            {
-                usersList.Add(new User((int)dbUsersList[i].Id, dbUsersList[i].Username, dbUsersList[i].Password, dbUsersList[i].Location, dbUsersList[i].Permission, dbUsersList[i].Active));
-            }
-            */
-            // dataGrid1.ItemsSource = usersList;
             dataGrid1.ItemsSource = dbUsersList;
-
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
 
-            filterUsersList = new List<UserService.User>();
+            filterUsersList = new List<Classes.User>();
+            
+            
 
+            
             Dispatcher.InvokeAsync(() => {
                 double stretch = Math.Max((borderLeft.ActualWidth - 10 - 67) / (550 - 10 - 140), 0.8); // Border width - left margin - a bit more because first column remains unchanged
                 dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
@@ -116,25 +91,23 @@ namespace FrontendWPF.Windows
                 {
                     dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * stretch;
                     dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
-                    dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
                 }
                 dataGrid1.FontSize = 14 * Math.Min(stretch, 1); // reset font size to max 14 on large window width
                 dataGrid1.Items.Refresh();
                 ScrollDown();
                 selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
             }, DispatcherPriority.Loaded);
-            
-            ScrollDown();
-
+            if (ePasswordBox != null) { HidePasswordBox();} // hide password box if left open
+            EnableButtons();
             // create/reset user_filter item and add it to filter dataGrid0
-            user_filter = new UserService.User()
+            user_filter = new Classes.User()
             {
-                Id = null,
+                Id = "",
                 Username = "",
                 Password = "",
                 Location = "",
-                Permission = null,
-                Active = null
+                Permission = "",
+                Active = ""
             };
             filterUsersList.Clear();
             filterUsersList.Add(user_filter);
@@ -143,7 +116,6 @@ namespace FrontendWPF.Windows
             dataGrid0.Items.Refresh();
 
             SetUserAccess();
-
         }
 
         // https://stackoverflow.com/questions/16956251/sort-a-wpf-datagrid-programmatically
@@ -185,6 +157,13 @@ namespace FrontendWPF.Windows
 
         private void Button_DeleteUser_Click(object sender, RoutedEventArgs e)
         {
+            if (ePasswordBox != null) // stop if passwordBox is open
+            {
+                MessageBox.Show("Please confirm the password, or press Reset to cancel adding new user.", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                passwordTextBox.Focus();
+                return;  
+            } 
+            
             if (edit_mode == "update")
             {
                 edit_mode = "read";
@@ -260,16 +239,8 @@ namespace FrontendWPF.Windows
                             }
                             catch (Exception ex)
                             {
-                                if (ex.ToString().Contains("XXXXX"))
-                                {
-                                    MessageBox.Show($"This will be a specific error. Details:\n{ex.Message}", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                                    return;
-                                }
-                                else
-                                {
-                                    MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                                    return;
-                                }
+                                MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                return;
                             }
                         }
 
@@ -290,7 +261,6 @@ namespace FrontendWPF.Windows
                         checkBox_fadeInOut.IsChecked = true; // show gifImage
                         gifImage.StartAnimation();
                         MessageBox.Show(deleteMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-
                     }
                     // dataGrid1.Focus();
                     dataGrid1.ItemsSource = dbUsersList;
@@ -318,23 +288,29 @@ namespace FrontendWPF.Windows
 
         private void UpdateUser()
         {
-            if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
+            if (edit_mode != "update") // if not in update mode, switch to update mode
             {
-                SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
-            }
+                if (edit_mode == "insert") // remove incomplete added user 
+                {
+                    dbUsersList.Remove(user_edited);
+                    dataGrid1.ItemsSource = null;
+                    dataGrid1.ItemsSource = dbUsersList;
+                    EnableButtons();
+                }
+                if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
+                {
+                    SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
+                }
+                dataGrid1.CanUserSortColumns = false;
 
-            dataGrid1.CanUserSortColumns = false;
-
-
-            if (edit_mode == "read") // if read mode (or window just opened), switch to update mode
-            {
                 dataGrid1.IsReadOnly = false; // CanUserAddRows="False" must be set in XAML
-                edit_mode = "update";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Single;
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.Cell;
                 TextBlock_message.Text = "Update user.";
                 TextBlock_message.Foreground = Brushes.White;
                 ScrollDown();
+                if (ePasswordBox != null) { HidePasswordBox(); }
+                edit_mode = "update";
             }
             else
             {
@@ -343,7 +319,6 @@ namespace FrontendWPF.Windows
             }
         }
 
-
         private void Button_AddUser_Click(object sender, RoutedEventArgs e)
         {
             AddUser();
@@ -351,16 +326,9 @@ namespace FrontendWPF.Windows
 
         private void AddUser()
         {
-            if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
+            if (edit_mode != "insert") // if not in insert mode, switch to insert mode
             {
-                SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
-            }
-
-            dataGrid1.CanUserSortColumns = false;
-            Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
-
-            if (edit_mode == "read" || edit_mode == "update") // if read mode (window just opened) or update mode, switch to insert mode
-            {
+                Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
 
                 // in db select last user with highest Id
                 int? highestId = dbUsersList.Max(u => u.Id);
@@ -379,6 +347,12 @@ namespace FrontendWPF.Windows
                 dataGrid1.ItemsSource = null;
                 dataGrid1.ItemsSource = dbUsersList;
 
+                if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
+                {
+                    SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
+                }
+                dataGrid1.CanUserSortColumns = false;
+
                 dataGrid1.IsReadOnly = false; // CanUserAddRows="False" must be set in XAML
                 ScrollDown();
                 row_index = dataGrid1.Items.Count - 1;
@@ -387,7 +361,8 @@ namespace FrontendWPF.Windows
                 // delay execution after dataGrid1 is re-rendered (after new itemsource binding)!
                 // https://stackoverflow.com/questions/44272633/is-there-a-datagrid-rendering-complete-event
                 // https://stackoverflow.com/questions/9732709/the-calling-thread-cannot-access-this-object-because-a-different-thread-owns-it
-                dataGrid1.Dispatcher.InvokeAsync(() => {
+                dataGrid1.Dispatcher.InvokeAsync(() =>
+                {
                     // style the id cell of the new user
                     Shared.StyleDatagridCell(dataGrid1, dataGrid1.Items.Count - 1, PK_column_index, Brushes.Salmon, Brushes.White);
                     dataGrid1.Focus();
@@ -395,20 +370,20 @@ namespace FrontendWPF.Windows
                     cell = dataGrid1.Columns[1].GetCellContent(row).Parent as DataGridCell;
                     cell.IsEditing = true;
                     cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
-                },
-                DispatcherPriority.Background); // Background to avoid row = null error
+                }, DispatcherPriority.Background); // Background to avoid row = null error
 
                 edit_mode = "insert";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
                 TextBlock_message.Text = "Add user.";
                 TextBlock_message.Foreground = Brushes.White;
-            }
-            else
-            {
-                MessageBox.Show("Please fill in all user data, then press Enter.", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                dataGrid1.Focus();
-                dataGrid1.BeginEdit();
+                if (ePasswordBox != null) { HidePasswordBox(); } // hide password box if left open
+                Button_AddUser.IsEnabled = false;
+                Button_DeleteUser.IsEnabled = false;
+                Button_Filter.IsEnabled = false;
+                Button_Export.IsEnabled = false;
+                Button_Import.IsEnabled = false;
+                Button_LogWindow.IsEnabled = false;
             }
         }
 
@@ -422,15 +397,18 @@ namespace FrontendWPF.Windows
         int column_index;
         int filterc_index;
         string changed_property_name;
-        UserService.User user_edited, user_edited0, user_filter;
+        UserService.User user_edited, user_edited0;
+        Classes.User user_filter;
 
+        DataGridCellEditEndingEventArgs ePasswordBox;
         private void dataGrid1_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
+            if (ePasswordBox != null) { e = ePasswordBox; } // change event if password box is opened
             if (e.EditAction == DataGridEditAction.Commit)
             {
-                CellEditEnding_setup(e); // setup rules
+                if ( ePasswordBox == null && CellEditEnding_setup(e) == null) { return; } // setup rules: stop on null (do not check again if password box is open)
 
-                string stopMessage = CellEditEnding_checkInput(); // check data correctness
+                string stopMessage = ePasswordBox == null? CellEditEnding_checkInput() : ""; // check data correctness (do not check again if password box is open)
                 if (stopMessage == "stop") { return; } // stop on database error
                 if (stopMessage != "")  // warn user, and stop
                 {
@@ -439,7 +417,6 @@ namespace FrontendWPF.Windows
                     // cell.Content = old_value;
 
                     Dispatcher.InvokeAsync(() => {
-
                         // select edited row/cell if user selected another row/cell
                         SelectEditedCell();
                         
@@ -457,8 +434,7 @@ namespace FrontendWPF.Windows
                     return;
                 }
                 // stop in insert mode if new and old value are the same AND the field was already updated (in insert mode the suggested old values of columns Location, Permission and Active can be same as old values if accepted) OR in each case in update mode; 
-                else 
-                if (old_value == new_value && (fieldsEntered[column_index - 1] == 1 || edit_mode == "update")) // && column_index < 3
+                else if (old_value == new_value && (fieldsEntered[column_index - 1] == 1 || edit_mode == "update")) // && column_index < 3
                 {
                     CellEditEnding_nextCell_update();
                     return;
@@ -470,18 +446,42 @@ namespace FrontendWPF.Windows
                 
                 if (edit_mode == "insert") // mark edited cell with salmon in insert mode
                 {
-                Shared.StyleDatagridCell(dataGrid1, row_index, column_index, Brushes.Salmon, Brushes.White); // style the updated cell
+                    Shared.StyleDatagridCell(dataGrid1, row_index, column_index, Brushes.Salmon, Brushes.White); // style the updated cell
                 }
 
-                if (changed_property_name == "Password" && new_value != old_value)
+                if (changed_property_name == "Password")
                 {
-                    new_value = Shared.CreateMD5(new_value); // encypt new password (the old password is already encrypted
+                    if (Shared.CreateMD5(new_value) != old_value)
+                    {
+                        if (ePasswordBox == null) // 1. run (before password confirmation)
+                        {
+                            dataGrid1.CellEditEnding -= new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid1_CellEditEnding);
+                            ePasswordBox = e; // setting passwordBox event
+                            dataGrid1.IsReadOnly = true;
+                            textBlock_username.Text = $"for {user_edited.Username}:";
+                            passwordBox.Visibility = Visibility.Visible;
+                            dataGrid1.Dispatcher.InvokeAsync(() => {
+                            passwordTextBox.Focus();
+                            }, DispatcherPriority.Loaded);
+                            return;
+                        }
+                        else // 2. run (after password confirmation)
+                        {
+                            new_value = Shared.CreateMD5(new_value); // encyrpt new password (the old password is already encrypted
+                            HidePasswordBox();
+                        }
+                    }
+                    else
+                    {
+                        CellEditEnding_nextCell_update();
+                        return;
+                    }
                 }
 
                 // start saving new valid value
                 fieldsEntered[column_index - 1] = 1; // register the entered property's column index
 
-                if (column_index < 4) // // update string-type fields with new value (Username / Password / Location)
+                if (column_index < 4) // update string-type fields with new value (Username / Password / Location)
                 {
                     user_edited.GetType().GetProperty(changed_property_name).SetValue(user_edited, new_value);
                 }
@@ -538,19 +538,10 @@ namespace FrontendWPF.Windows
                     }
                     catch (Exception ex)
                     {
-                        if (ex.ToString().Contains("XXXXX"))
-                        {
-                            MessageBox.Show("This will be a specific error.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        else
-                        {
-                            MessageBox.Show("An error occured, with the following details:\n" + ex.ToString(), caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
+                        MessageBox.Show("An error occured, with the following details:\n" + ex.ToString(), caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
                     }
-                    
-                    
+                     
                     if (edit_mode == "insert")
                     {
                         lastLocation = user_edited.Location; // save last data to suggest them for next record
@@ -571,8 +562,14 @@ namespace FrontendWPF.Windows
                         dataGrid1.IsReadOnly = true;
                         dataGrid1.Dispatcher.InvokeAsync(() => {
                             Button_AddUser.Focus(); // set focus to allow repeatedly add user on pressing the Add user button
-                        },
-                        DispatcherPriority.Loaded);
+                        }, DispatcherPriority.Loaded);
+
+                        Button_AddUser.IsEnabled = true;
+                        Button_DeleteUser.IsEnabled = true;
+                        Button_Filter.IsEnabled = true;
+                        Button_Export.IsEnabled = true;
+                        Button_Import.IsEnabled = true;
+                        Button_LogWindow.IsEnabled = true;
                     }
                     else if (edit_mode == "update")
                     {
@@ -584,7 +581,6 @@ namespace FrontendWPF.Windows
                     }
                     old_value = new_value; // update old_value after successful update
                     TextBlock_message.Foreground = Brushes.LightGreen;
-                    
                
                     checkBox_fadeInOut.IsChecked = false;
                     checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
@@ -596,15 +592,11 @@ namespace FrontendWPF.Windows
                 }
 
             }
-            else
-            {
-                return;
-            }
         }
 
-        private void CellEditEnding_setup(DataGridCellEditEndingEventArgs e)
+        private string CellEditEnding_setup(DataGridCellEditEndingEventArgs e)
         {
-            if (Button_UpdateUser.IsKeyboardFocused)
+            if (edit_mode != "update" && Button_UpdateUser.IsKeyboardFocused) // switch to insert mode if 'Update' is clicked
             {
                 edit_mode = "read";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
@@ -612,17 +604,26 @@ namespace FrontendWPF.Windows
                 dbUsersList.RemoveAt(dbUsersList.Count - 1);
                 dataGrid1.ItemsSource = null;
                 dataGrid1.ItemsSource = dbUsersList;
+                EnableButtons();
                 UpdateUser();
-                return;
+                return null;
+            }
+            else if (edit_mode != "insert" && Button_AddUser.IsKeyboardFocused) // switch to insert mode if 'Add' is clicked
+            {
+                edit_mode = "read";
+                EnableButtons();
+                AddUser();
+                return null;
             }
             else if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
             {
-                return;
+                EnableButtons();
+                return null;
             }
             else if (Button_Close.IsKeyboardFocused)
             {
                 CloseWindow();
-                return;
+                return null;
             }
 
             row = e.Row;
@@ -634,12 +635,12 @@ namespace FrontendWPF.Windows
             cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
             textBox = (TextBox)cell.Content;
             new_value = textBox.Text;
-
+            
             changed_property_name = dataGrid1.Columns[column_index].Header.ToString();
             // get old property value of user by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
             old_value = user_edited.GetType().GetProperty(changed_property_name).GetValue(user_edited).ToString();
-
+            return "OK";
         }
 
         private string CellEditEnding_checkInput()
@@ -714,18 +715,14 @@ namespace FrontendWPF.Windows
 
                 cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
 
-                // turn off eventual editing mode causes e.g. by tab key on data entry
-                // if (cell.IsEditing) { cell.IsEditing = false; }
-
-
                 // go into edit mode if in insert mode
                 cell.Focus(); // set focus on cell
-                if (edit_mode == "insert") // TODO: tesztelni!
+                if (edit_mode == "insert")
                 {
                     SelectTextBox();
                 }
 
-                if (edit_mode == "update") dataGrid1.SelectedCells.Clear(); // TODO: tesztelni!
+                if (edit_mode == "update") dataGrid1.SelectedCells.Clear();
                 SelectEditedCell();
             },
             DispatcherPriority.Loaded);
@@ -748,17 +745,9 @@ namespace FrontendWPF.Windows
 
                 // turn off eventual editing mode caused e.g. by tab key on data entry
                 if (cell.IsEditing) { cell.IsEditing = false; }
-
-                // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
-                // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
                 Button_ReloadData.Focus();
-
                 SelectTextBox();
-
-
-
-            },
-            DispatcherPriority.Loaded); // style the id cell of the new user
+            }, DispatcherPriority.Loaded);
         }
 
         private void SelectEditedCell()
@@ -778,6 +767,16 @@ namespace FrontendWPF.Windows
             }
         }
 
+        private  void EnableButtons()
+        {
+            Button_AddUser.IsEnabled = true;
+            Button_DeleteUser.IsEnabled = true;
+            Button_Filter.IsEnabled = true;
+            Button_Export.IsEnabled = true;
+            Button_Import.IsEnabled = true;
+            Button_LogWindow.IsEnabled = true;
+        }
+
         private void StopAnimation()
         {
             // to avoid error "The calling thread cannot access this object because a different thread owns it"
@@ -792,23 +791,21 @@ namespace FrontendWPF.Windows
 
         private void dataGrid1_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
+            row = e.Row;
+            row_index = row.GetIndex();
+            column = e.Column;
+            column_index = column.DisplayIndex;
+            cell = dataGrid1.Columns[column_index].GetCellContent(row).Parent as DataGridCell;
 
             // in insert mode, do not allow user to edit a different row, and restore selection, focus and editing
             if (edit_mode == "insert" &&  e.Row.GetIndex() != row_index)
             {
                 e.Cancel = true;
                 SelectEditedCell();
-
                 SelectTextBox();
-
             }
         }
 
-        
-        private void dataGrid1_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
-        {
-
-        }
 
         // https://stackoverflow.com/questions/27744097/wpf-fade-out-animation-cant-change-opacity-any-more
         private void ChangeOpacity()
@@ -824,26 +821,6 @@ namespace FrontendWPF.Windows
             animation.Completed += (s, a) => cell.Opacity = 0;
 
             cell.BeginAnimation(UIElement.OpacityProperty, animation);
-        }
-
-        private void dataGrid1_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            DataGrid dataGrid1 = sender as DataGrid;
-            
-            // https://stackoverflow.com/questions/3248023/code-to-check-if-a-cell-of-a-datagrid-is-currently-edited
-            IEditableCollectionView itemsView = dataGrid1.Items;
-            
-            // prevent dataGrid to select lower cell on Enter if not editing (otherwise entire editing would stop
-            if (e.Key == Key.Enter && (itemsView.IsAddingNew || itemsView.IsEditingItem) == false && edit_mode != "insert")
-            {
-
-            }
-
-            if (e.Key == Key.Enter && itemsView.IsEditingItem == false && edit_mode != "insert")
-            {
-                // e.Handled = true;
-                // NextCell_update();
-            }
         }
 
         private void SelectTextBox()
@@ -876,15 +853,6 @@ namespace FrontendWPF.Windows
             gifImage.StopAnimation();
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            /*
-            if (e.Key == Key.Enter)
-            {
-                return;
-            }
-            */
-        }
         // make window draggable
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -941,11 +909,12 @@ namespace FrontendWPF.Windows
                 TextBlock_message.Text = "Select an option.";
             }
         }
-
+        DataGridBeginningEditEventArgs eBeginningEdit;
         private void dataGrid0_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
             row = e.Row;
             column = e.Column;
+            eBeginningEdit = e;
         }
 
         private void dataGrid0_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -953,6 +922,9 @@ namespace FrontendWPF.Windows
             input = e.Text; // get character entered
         }
 
+        int? user_filterId = null;
+        int? user_filterPermission = null;
+        int? user_filterActive = null;
         private void dataGrid0_KeyUp(object sender, KeyEventArgs e)
         // private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
@@ -993,10 +965,11 @@ namespace FrontendWPF.Windows
             
             changed_property_name = dataGrid1.Columns[filterc_index].Header.ToString();
 
-            // remove operator for integer columns Id and Permission
+           // remove operator for integer columns Id and Permission
+           // set operator value for specific column
            if (changed_property_name == "Id" || changed_property_name == "Permission")
             {
-                if (op != "=" || (new_value != "" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
+                // if (op != "=" || (new_value != "" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
                 
                 switch (changed_property_name)
                 {
@@ -1005,78 +978,59 @@ namespace FrontendWPF.Windows
                     default: break;
                 }
             }
+            else { op = ""; } // clear operator for string columns
 
-            // if any user_filter value is null, set it temporarily to -999 to avoid error when setting old value                
-            if (changed_property_name == "Id" && user_filter.Id == null) user_filter.Id = -999;
-            if (changed_property_name == "Permission" && user_filter.Permission == null) user_filter.Permission = -999;
-            if (changed_property_name == "Active" && user_filter.Active == null) user_filter.Active = -999;
-            //get old property value of User by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
             int? int_val = Int32.TryParse(user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString(), out var tempVal0) ? tempVal0 : (int?)null;
-
             old_value = int_val != null ? user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString() : "";
-            if (changed_property_name == "Id" && user_filter.Id == -999) user_filter.Id = null;
-            if (changed_property_name == "Permission" && user_filter.Permission == -999) user_filter.Permission = null;
-            if (changed_property_name == "Active" && user_filter.Active == -999) user_filter.Active = null;
 
-            string stopMessage = "";
-            if (old_value == "-999" || op != "=")
-            {
-                // dataGrid1.Focus();
-                Dispatcher.InvokeAsync(() =>
-                {
-                    SelectTextBox(); // this + Background priority needed to avoid wrong Key.End selection
-                }, DispatcherPriority.Input);
-                Dispatcher.InvokeAsync(() => {
-                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end; skip if an operator is entered into cell
-                    
-                    if (op != "=" && stopMessage == "") { textBox.Text = op + new_value; } // restore operator into cell, only if there is no error message (because it restores the old value);
-
-                    Shared.SendKey(Key.End);
-                }, DispatcherPriority.Background);
-            }
 
             // check data correctness
-            if (changed_property_name == "Id")
+            string stopMessage = "";
+            if (new_value != "")
             {
-                int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
+                if (changed_property_name == "Id")
                 {
-                    stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
+                    string user_filterId0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    user_filterId = int.TryParse(user_filterId0, out var tempVal1) ? tempVal1 : (int?)null;
+                    // int_val = Int32.TryParse(user_filterId0, out var tempVal) ? tempVal : (int?)null;
+                    if ((user_filterId0 != "" && user_filterId == null) || (user_filterId < 0 || user_filterId > 10000000))
+                        if ((user_filterId0 != "" && user_filterId == null) || (user_filterId < 0 || user_filterId > 10000000))
+                        {
+                            stopMessage = $"The Id '{user_filterId0}' does not exist, please enter a correct value for the Id!";
+                        }
                 }
-            }
-            else if (changed_property_name == "Permission" && (new_value != "" && Shared.permissionList.Any(p => p == new_value) == false)) // if wrong Permission value is entered
-            {
-                stopMessage = $"The Permission value '{new_value}' does not exist, please enter the correct value (between 0-9)!";
-            }
-            else if (changed_property_name == "Active" && (new_value != "" && (new_value == "0" || new_value == "1") == false)) // if wrong Active value is entered
-            {
-                stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
-            }
+                else if (changed_property_name == "Permission")
+                {
+                    string user_filterPermission0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    user_filterPermission = int.TryParse(user_filterPermission0, out var tempVal2) ? tempVal2 : (int?)null;
+                    if ((user_filterPermission0 != "" && Shared.permissionList.Any(p => p == user_filterPermission0) == false)) // if wrong Permission value is entered
+                    {
+                        stopMessage = $"The Permission value '{user_filterPermission0}' does not exist, please enter the correct value (between 0-9)!";
+                    }
+                }
+                else if (changed_property_name == "Active")
+                {
+                    // string user_filterActive0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    user_filterActive = int.TryParse(new_value, out var tempVal3) ? tempVal3 : (int?)null;
+                    if ( (new_value == "0" || new_value == "1") == false) // if wrong Active value is entered
+                    {
+                        stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
+                    }
+                }
 
-            
-            if (stopMessage != "")  // warn user, and stop
-            {
-                MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                if (old_value != "-999")
+                if (stopMessage != "")  // warn user, and stop
                 {
-                    textBox.Text = op == "=" ? old_value : op + old_value; // restore correct cell value if old value is not null, plus the operator if any
+                    MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    textBox.Text = old_value; // restore correct cell value if old value is not null
                     Shared.SendKey(Key.End);
+                    return;
                 }
-                return;
             }
                 
-            if (filterc_index < 4 == filterc_index > 0) // // update string-type fields with new value (Username / Password / Location)
-            {
-                user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, new_value);
-            }
-            else // update int?-type fields with new value (Permission / Active)
-            {
-                int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, int_val);
-
-            }
-
+            // update filter fields
+            user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, new_value);
+            
             string password = ""; // encrypt only as a separate variable, leaving user_password unchanged
             if (new_value !="" && new_value != "-1" && changed_property_name == "Password" && new_value != old_value)
             {
@@ -1088,10 +1042,9 @@ namespace FrontendWPF.Windows
             foreach (var user in dbUsersList)
             {
 
-                if ((user_filter.Id == null || Compare(user.Id, user_filter.Id, opId)) && (user_filter.Username == "" || user.Username.ToLower().Contains(user_filter.Username.ToLower())) && (password == "" ||  user.Password == password) && (user_filter.Location == "" || user.Location.ToLower().Contains(user_filter.Location.ToLower())) && (user_filter.Permission == null || Compare(user.Permission, user_filter.Permission, opPermission)) && (user_filter.Active == null || user.Active == user_filter.Active))
+                if ((user_filterId == null || Compare(user.Id, user_filterId, opId)) && (user_filter.Username == "" || user.Username.ToLower().Contains(user_filter.Username.ToLower())) && (password == "" ||  user.Password == password) && (user_filter.Location == "" || user.Location.ToLower().Contains(user_filter.Location.ToLower())) && (user_filterPermission == null || Compare(user.Permission, user_filterPermission, opPermission)) && (user_filterActive == null || user.Active == user_filterActive))
                 {
                     filteredUsersList.Add(user);
-                    continue;
                 }
             }
             // update dataGrid1 with filtered items                    
@@ -1112,7 +1065,7 @@ namespace FrontendWPF.Windows
                 default: return false;
             }
         }
-        
+
         private void SetUserAccess()
         {
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
@@ -1381,6 +1334,50 @@ namespace FrontendWPF.Windows
         }
 
         Logs.LogWindowUsers LogWindowUsers;
+
+        private void Button_confirmPwd_Click(object sender, RoutedEventArgs e)
+        {
+            if(passwordTextBox.Text == new_value)
+            {
+                dataGrid1_CellEditEnding(dataGrid1, ePasswordBox); // run CellEditEnding event to finish saving confirmed password
+            }
+            else
+            {
+                MessageBox.Show("Password incorrect, please retype!", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                passwordTextBox.Focus();
+            }
+        }
+        // confirm password when pressing the Enter key
+        private void passwordTextBox_confirmPwd_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) { Button_confirmPwd_Click(sender, e); }
+        }
+
+        private void HidePasswordBox()
+        {
+            dataGrid1.CellEditEnding += new EventHandler<DataGridCellEditEndingEventArgs>(dataGrid1_CellEditEnding);
+            ePasswordBox = null;
+            dataGrid1.IsReadOnly = false;
+            passwordBox.Visibility = Visibility.Collapsed;
+            passwordTextBox.Text = "";
+        }
+
+        private void textBlock_ShowPassword_Click(object sender, MouseButtonEventArgs e)
+        {
+            passwordTextBox.FontFamily = new FontFamily(familyName: "Helvetica");
+            passwordTextBox.Padding = new Thickness(0, 1, 0, 0);
+            textBlock_hidePassword.Visibility = Visibility.Visible;
+            textBlock_showPassword.Visibility = Visibility.Collapsed;
+
+        }
+        private void textBlock_HidePassword_Click(object sender, MouseButtonEventArgs e)
+        {
+            passwordTextBox.FontFamily = new FontFamily(familyName: "Hololens MDL2 Assets");
+            passwordTextBox.Padding = new Thickness(0, 0, 0, 4);
+            textBlock_showPassword.Visibility = Visibility.Visible;
+            textBlock_hidePassword.Visibility = Visibility.Collapsed;
+        }
+
         private void Button_LogWindow_Click(object sender, RoutedEventArgs e)
         {
             // show only if not open already (to avoid multiple instances)

@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using FrontendWPF.Classes;
-
+using System.Linq;
 
 namespace FrontendWPF.Logs
 {
@@ -25,7 +22,7 @@ namespace FrontendWPF.Logs
         private List<UserLog> logList { get; set; }
 
         System.Collections.IList selectedItems;
-        List<UserLog> filterUsersList { get; set; }
+        List<Filter_UserLog> filterUsersList { get; set; }
         List<UserLog> filteredUsersList { get; set; }
 
         string edit_mode;
@@ -43,10 +40,10 @@ namespace FrontendWPF.Logs
         double windowWidth0;
         double windowHeight0;
 
+
         DateTime startDate = DateTime.Now.Date.AddDays(-30); // set an initial limit of 29 days
         DateTime endDate = DateTime.Now; //
-        // public double columnFontSize { get; set; }
-
+ 
         public LogWindowUsers()
         {
             InitializeComponent();
@@ -68,36 +65,27 @@ namespace FrontendWPF.Logs
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Foreground = Brushes.White;
 
-            //  https://www.codeproject.com/Questions/155935/how-to-add-rows-to-WPF-datagrids
-            /*
-            DataGridTextColumn col1 = new DataGridTextColumn();
-            dataGrid1.Columns.Add(col1);
-            col1.Binding = new Binding("id");
-            col1.Header = "ID";
-            */
-
             // get log file content
             logList = UserLog.GetUsersLog(startDate, endDate);
             if (logList == null) { IsEnabled = false; Close(); return; } // stop on any error
             dataGrid1.ItemsSource = logList;
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
             TextBlock_message.Text = $"{logList.Count} records loaded.";
-
-            // close window and stop if no User is retrieved
-            /*
             if (logList.Count == 0)
             {
-                closeCompleted = true;
-                IsEnabled = false; // so that window cannot be opened
-                Close();
-                return;
+                Button_Filter.IsEnabled = false;
+                Button_Filter.Foreground = Brushes.Gray;
+                Button_ReloadData.IsEnabled = false;
+                Button_ReloadData.Foreground = Brushes.Gray;
+                Button_DeleteLog.IsEnabled = false;
+                Button_DeleteLog.Foreground = Brushes.Gray;
+                Button_DatePicker.IsEnabled = false;
             }
-            */
 
             // if (window.IsLoaded == false) // run on the first time when window is not loaded
-            if (true)
+            // without if allow initial fontsize (and larger column with) on Reset
             {
-                filterUsersList = new List<UserLog>();
+                filterUsersList = new List<Filter_UserLog>();
 
                 Dispatcher.InvokeAsync(() =>
                 {
@@ -123,17 +111,17 @@ namespace FrontendWPF.Logs
             ScrollDown();
 
             // create/reset user_filter item and add it to filter dataGrid0
-            user_filter = new UserLog()
+            user_filter = new Filter_UserLog()
             {
-                LogDate = null,
+                LogDate = "",
                 LogUsername = "",
                 LogOperation = "",
-                Id = null,
+                Id = "",
                 Username = "",
                 Password = "",
                 Location = "",
-                Permission = null,
-                Active = null
+                Permission = "",
+                Active = ""
             };
 
             filterUsersList.Clear();
@@ -164,7 +152,7 @@ namespace FrontendWPF.Logs
             column.SortDirection = sortDirection;
         }
 
-        private void Button_DeleteUser_Click(object sender, RoutedEventArgs e)
+        private void Button_DeleteLog_Click(object sender, RoutedEventArgs e)
         {
             TextBlock_message.Text = "Delete log file's content?";
             TextBlock_message.Foreground = Brushes.Salmon;
@@ -175,23 +163,14 @@ namespace FrontendWPF.Logs
                 try
                 {
                     // DELETE log file's content
-
                     StreamWriter sw = new StreamWriter(@".\Logs\manageUsers.log", append: false, encoding: Encoding.UTF8);
                     sw.WriteLine("LogDate;LogUsername;LogOperation;Id;Username;Password;Location;Permission;Active");
                     sw.Close();
                 }
                 catch (Exception ex)
                 {
-                    if (ex.ToString().Contains("XXXXX"))
-                    {
-                        MessageBox.Show($"This will be a specific error. Details:\n{ex.Message}", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-                    else
-                    {
                         MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
-                    }
                 }
                 TextBlock_message.Text = "Log file's content deleted.";
 
@@ -218,7 +197,7 @@ namespace FrontendWPF.Logs
         string new_value = "";
         int filterc_index;
         string changed_property_name;
-        UserLog user_filter;
+        Filter_UserLog user_filter;
 
 
         private void StopAnimation()
@@ -231,13 +210,6 @@ namespace FrontendWPF.Logs
                 //Thread.Sleep(5000);
                 gifImage.StopAnimation();
             }, DispatcherPriority.ContextIdle);
-        }
-
-
-
-        private void dataGrid1_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
-        {
-
         }
 
         // https://stackoverflow.com/questions/27744097/wpf-fade-out-animation-cant-change-opacity-any-more
@@ -255,10 +227,6 @@ namespace FrontendWPF.Logs
 
             cell.BeginAnimation(UIElement.OpacityProperty, animation);
         }
-
-
-
-
 
         private void ScrollDown()
         {
@@ -283,7 +251,6 @@ namespace FrontendWPF.Logs
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed) DragMove();
-
         }
 
         private void Button_Close_Click(object sender, RoutedEventArgs e)
@@ -334,7 +301,6 @@ namespace FrontendWPF.Logs
                 TextBlock_message.Text = "Select an option.";
             }
         }
-
 
         private void dataGrid0_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
@@ -389,11 +355,9 @@ namespace FrontendWPF.Logs
             if (changed_property_name == "user name") { changed_property_name = "LogUsername"; }
             if (changed_property_name == "operation") { changed_property_name = "LogOperation"; }
 
-            // remove operator for integer columns Id, Permission and Active
+            // set operator value for specific column
             if (changed_property_name == "LogDate" || changed_property_name == "Id" || changed_property_name == "Permission" || changed_property_name == "Active")
             {
-                if (op != "=" || (new_value != "" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
-
                 switch (changed_property_name)
                 {
                     case "LogDate": opLogDate = op; break;
@@ -403,110 +367,76 @@ namespace FrontendWPF.Logs
                     default: break;
                 }
             }
+            else { op = ""; } // clear operator for string columns
 
-            if (changed_property_name == "LogDate" && ((new_value.Length < 8 && new_value.Length > 0) || (new_value.Length > 8 && new_value.Length < 14))) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise user_filter.Date will be set to null
-
-            // if any user_filter value is null, set it temporarily to -999 to avoid error when setting old value 
-            if (changed_property_name == "LogDate" && user_filter.LogDate == null) user_filter.LogDate = DateTime.Parse("01.01.01 01:01:01");
-            if (changed_property_name == "Id" && user_filter.Id == null) user_filter.Id = -999;
-            if (changed_property_name == "Permission" && user_filter.Permission == null) user_filter.Permission = -999;
-            if (changed_property_name == "Active" && user_filter.Active == null) user_filter.Active = -999;
 
             //get old property value of user by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
             old_value = user_filter.GetType().GetProperty(changed_property_name).GetValue(user_filter).ToString();
-            if (changed_property_name == "LogDate" && user_filter.LogDate == DateTime.Parse("01.01.01 01:01:01")) user_filter.LogDate = null;
-            if (changed_property_name == "Id" && user_filter.Id == -999) user_filter.Id = null;
-            if (changed_property_name == "Permission" && user_filter.Permission == -999) user_filter.Permission = null;
-            if (changed_property_name == "Active" && user_filter.Active == -999) user_filter.Active = null;
-
-            string stopMessage = "";
-            if (old_value == "-999" || op != "=")
-            {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    SelectTextBox(); // this + Background priority needed to avoid wrong Key.End selection
-                }, DispatcherPriority.Input);
-                Dispatcher.InvokeAsync(() =>
-                {
-                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end; skip if an operator is entered into cell
-
-                    if (op != "=" && stopMessage == "") { textBox.Text = op + new_value; } // restore operator into cell, only if there is no error message (because it restores the old value);
-
-                    Shared.SendKey(Key.End);
-                }, DispatcherPriority.Background);
-            }
-            void SelectTextBox()
-            {
-                cell.Focus();
-                cell.IsEditing = true;
-
-                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down)); // move focus to textBox
-                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
-                textBox = (TextBox)cell.Content;
-                // Keyboard.Focus(textBox);
-                textBox.SelectAll();
-            }
 
             // check data correctness
+            string stopMessage = "";
+            int? user_filterId = null;
+            DateTime? user_filterLogDate = null;
+            int? user_filterPermission = null;
+            int? user_filterActive = null;
             bool minutesExist = false;
-            if (changed_property_name == "Id")
+            if (new_value != "")
             {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
+                if (changed_property_name == "Id")
                 {
-                    stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
+                    string user_filterId0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    user_filterId = int.TryParse(user_filterId0, out var tempVal1) ? tempVal1 : (int?)null;
+                    if ((user_filterId0 != "" && user_filterId == null) || (user_filterId < 0 || user_filterId > 10000000))
+                    {
+                        stopMessage = $"The Id '{user_filterId0}' does not exist, please enter a correct value for the Id!";
+                    }
                 }
-            }
-            else if (changed_property_name == "Permission" && new_value != "" && Shared.permissionList.Any(p => p == new_value) == false) // if wrong Permission value is entered
-            {
-                stopMessage = $"The Permission value '{new_value}' does not exist, please enter the correct value (between 0-9)!";
-            }
-            else if (changed_property_name == "Active" && (new_value != "" && (new_value == "0" || new_value == "1") == false)) // if wrong Active value is entered
-            {
-                stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
-            }
-            else if (new_value != "" && (changed_property_name == "LogDate" || changed_property_name == "Date")) // if wrong Date value is entered
-            {
-                old_value = old_value.Substring(0, old_value.Length - 3);
-                bool dateExists = DateTime.TryParse(new_value, out DateTime date_entered);
-                if (dateExists == false)
+                else if (changed_property_name == "Permission")
                 {
-                    stopMessage = $"Please enter a correct value for the date value!";
+                    string user_filterPermission0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    user_filterPermission = int.TryParse(user_filterPermission0, out var tempVal2) ? tempVal2 : (int?)null;
+                    if ((user_filterPermission0 != "" && Shared.permissionList.Any(p => p == user_filterPermission0) == false)) // if wrong Permission value is entered
+                    {
+                        stopMessage = $"The Permission value '{user_filterPermission0}' does not exist, please enter the correct value (between 0-9)!";
+                    }
                 }
-                else
+                else if (changed_property_name == "Active")
                 {
-                    // checks if minutes are entered; if not, minutues in the record will be ignored
-                    minutesExist = date_entered.Minute > 0;
+                    string user_filterActive0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    user_filterActive = int.TryParse(user_filterActive0, out var tempVal3) ? tempVal3 : (int?)null;
+                    if ( (new_value == "0" || new_value == "1") == false) // if wrong Active value is entered
+                    {
+                        stopMessage = $"The Active value '{new_value}' does not exist, please enter the correct value (1 or 0)!";
+                    }
+                }
+                else if (changed_property_name == "LogDate") // if wrong LogDate value is entered
+                {
+                    string user_filterLogDate0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    user_filterLogDate = DateTime.TryParse(user_filterLogDate0, out var tempVal4) ? tempVal4 : (DateTime?)null;
+                    if (changed_property_name == "LogDate" && ((user_filterLogDate0.Length < 8 && user_filterLogDate0.Length >= 0) || (user_filterLogDate0.Length > 8 && user_filterLogDate0.Length < 14))) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise user_filter.Date will be set to null
+                    if (user_filterLogDate0 != "" && user_filterLogDate == null)
+                    {
+                        stopMessage = $"Please enter a correct value for the date value!";
+                    }
+                    else
+                    {
+                        // checks if minutes are entered; if not, minutues in the record will be ignored
+                        minutesExist = ((DateTime)user_filterLogDate).Minute > 0;
+                    }
                 }
             }
 
             if (stopMessage != "")  // warn user, and stop
             {
                 MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                if (old_value != "-999" && old_value != "01.01.01 01:01")
-                {
-                    textBox.Text = op == "=" ? old_value : op + old_value; // restore correct cell value if old value is not null, plus the operator if any
-                    Shared.SendKey(Key.End);
-                }
+                textBox.Text = old_value; // restore correct cell value if old value is not null
+                Shared.SendKey(Key.End);
                 return;
             }
 
-            if (filterc_index == 1 || filterc_index == 2 || filterc_index == 4 || filterc_index == 5 || filterc_index == 6) // // update string-type fields with new value ( LogUsername, LogOperation, Username, Password, Location )
-            {
-                user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, new_value);
-            }
-            else if (filterc_index == 0) // // update LogDate with new value
-            {
-                DateTime? int_val = DateTime.TryParse(new_value, out var tempVal) ? tempVal : (DateTime?)null;
-                user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, int_val);
-            }
-            else // update int?-type fields with new value (Id, Permission, Active)
-            {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, int_val);
-
-            }
+            // update filter fields
+            user_filter.GetType().GetProperty(changed_property_name).SetValue(user_filter, new_value);
 
             string password = ""; // encrypt only as a separate variable, leaving user_password unchanged
             if (new_value != "" && new_value != "-1" && changed_property_name == "Password" && new_value != old_value)
@@ -520,7 +450,7 @@ namespace FrontendWPF.Logs
             {
                 DateTime roundedLogDate = (DateTime)user.LogDate;
                 roundedLogDate = roundedLogDate.AddSeconds(-roundedLogDate.Second);
-                if ((user_filter.LogDate == null || (minutesExist ? Compare(roundedLogDate, user_filter.LogDate, opLogDate) : Compare(user.LogDate.Value.Date, user_filter.LogDate, opLogDate))) && (user_filter.LogUsername == "" || user.LogUsername.ToLower().Contains(user_filter.LogUsername.ToLower())) && (user_filter.LogOperation == "" || user.LogOperation.ToLower().Contains(user_filter.LogOperation.ToLower())) && (user_filter.Id == null || Compare(user.Id, user_filter.Id, opId)) && (user_filter.Username == "" || user.Username.ToLower().Contains(user_filter.Username.ToLower())) && (password == "" || user.Password == password) && (user_filter.Location == "" || user.Location.ToLower().Contains(user_filter.Location.ToLower())) && (user_filter.Permission == null || Compare(user.Permission, user_filter.Permission, opPermission)) && (user_filter.Active == null || Compare(user.Active, user_filter.Active, opActive)))
+                if ((user_filterLogDate == null || (minutesExist ? Compare(roundedLogDate, user_filterLogDate, opLogDate) : Compare(user.LogDate.Value.Date, user_filterLogDate, opLogDate))) && (user_filter.LogUsername == "" || user.LogUsername.ToLower().Contains(user_filter.LogUsername.ToLower())) && (user_filter.LogOperation == "" || user.LogOperation.ToLower().Contains(user_filter.LogOperation.ToLower())) && (user_filterId == null || Compare(user.Id, user_filterId, opId)) && (user_filter.Username == "" || user.Username.ToLower().Contains(user_filter.Username.ToLower())) && (password == "" || user.Password == password) && (user_filter.Location == "" || user.Location.ToLower().Contains(user_filter.Location.ToLower())) && (user_filterPermission == null || Compare(user.Permission, user_filterPermission, opPermission)) && (user_filterActive == null || Compare(user.Active, user_filterActive, opActive)))
                 {
                     filteredUsersList.Add(user);
                     continue;
@@ -563,9 +493,9 @@ namespace FrontendWPF.Logs
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
             if (Shared.loggedInUser.Permission < 6)
             {
-                Button_DeleteUser.IsEnabled = false;
-                Button_DeleteUser.Foreground = Brushes.Gray;
-                Button_DeleteUser.ToolTip = "You do not have rights to delete data!";
+                Button_DeleteLog.IsEnabled = false;
+                Button_DeleteLog.Foreground = Brushes.Gray;
+                Button_DeleteLog.ToolTip = "You do not have rights to delete data!";
             }
 
         }
@@ -627,8 +557,6 @@ namespace FrontendWPF.Logs
         {
             if (startDate != (DateTime)datePicker.SelectedDate && endDate != (DateTime)datePicker.SelectedDate)  // to avoid set change two times due to false double selection change from datePicker databox editing
             {
-
-
                 if (pickStartDate)
                 {
                     startDate = (DateTime)datePicker.SelectedDate;
@@ -733,7 +661,6 @@ namespace FrontendWPF.Logs
             }, DispatcherPriority.SystemIdle);
         }
 
-   
     }
 }
 

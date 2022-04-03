@@ -10,6 +10,25 @@ using FrontendWPF.Classes;
 
 namespace FrontendWPF.Classes
 {
+    public class Filter_SalePurchaseLog
+    {
+        // class requires getter-setter to be visible in DataGrid!
+        public string LogDate { set; get; }
+        public string LogUsername { set; get; }
+        public string LogOperation { set; get; }
+        public string Id { set; get; }
+        public string Product { set; get; }
+        public string Quantity { set; get; }
+        public string TotalPrice { set; get; }
+        public string Date { set; get; }
+        public string Location { set; get; }
+        public string Username { set; get; }
+
+        public Filter_SalePurchaseLog()
+        {
+        }
+    }
+
     public class SalePurchaseLog
     {
         // class requires getter-setter to be visible in DataGrid!

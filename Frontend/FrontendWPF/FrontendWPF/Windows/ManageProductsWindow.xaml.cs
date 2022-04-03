@@ -4,23 +4,18 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using FrontendWPF.Classes;
 using Microsoft.Win32;
 
 namespace FrontendWPF.Windows
 {
-
     public partial class ManageProductsWindow : Window
     {
         private StockService.StockServiceClient stockClient = new StockService.StockServiceClient();
@@ -28,28 +23,30 @@ namespace FrontendWPF.Windows
         private List<StockService.Product> dbProductsList { get; set; }
 
         System.Collections.IList selectedItems;
-        List<StockService.Product> filterProductsList { get; set; }
+        List<Classes.Product> filterProductsList { get; set; }
         List<StockService.Product> filteredProductsList { get; set; }
         List<StockService.Product> selectedProductsList { get; set; }
         List<StockService.Product> importList { get; set; }
+
+
 
         int PK_column_index = 0;
         string edit_mode;
         private List<Product> productsList { get; set; }
         private int[] fieldsEntered = new int[3]; // Name, BuyUnitPrice, SellUnitPrice
         ScrollViewer scrollViewer;
-        string lastName = "";
-        int lastNameIndex = 1;
-        int? lastBuyUnitPrice = null;
-        int? lastSellUnitPrice = null;
         string input = "";
-        string opId = "=";
-        string opBuyUnitPrice = "=";
-        string opSellUnitPrice = "=";
         double windowLeft0;
         double windowTop0;
         double windowWidth0;
         double windowHeight0;
+        string opId = "=";
+        string opBuyUnitPrice = "=";
+        string opSellUnitPrice = "=";
+        string lastName = "";
+        int lastNameIndex = 1;
+        int? lastBuyUnitPrice = null;
+        int? lastSellUnitPrice = null;
 
         public ManageProductsWindow() : this(false)
         { }
@@ -98,6 +95,7 @@ namespace FrontendWPF.Windows
             if (dbProductsList == null) { IsEnabled = false; Close(); return; } // stop on any error
             TextBlock_message.Text = $"{dbProductsList.Count} products loaded.";
 
+            /*
             // close window and stop if no product is retrieved
             if (dbProductsList.Count == 0)
             {
@@ -107,20 +105,15 @@ namespace FrontendWPF.Windows
                 Close();
                 return;
             }
-
-
-
-
-
-
+            */
 
             dataGrid1.ItemsSource = dbProductsList;
-
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
+            
+            filterProductsList = new List<Classes.Product>();
 
-            filterProductsList = new List<StockService.Product>();
-
-            Dispatcher.InvokeAsync(() => {
+            Dispatcher.InvokeAsync(() =>
+            {
                 double stretch = Math.Max((borderLeft.ActualWidth - 10 - 74) / (550 - 10 - 128), 1); // Border width - left margin - a bit more because first column remains unchanged
                 dataGrid1.Width = window.ActualWidth - 250 - 10; // expand dataGrid1 with to panel width (-ColumnDefinition2 width - stackPanel left margin)
                 dataGrid0.Width = dataGrid1.Width;
@@ -133,23 +126,21 @@ namespace FrontendWPF.Windows
                 {
                     dataGrid1.Columns[i].Width = dataGrid1.Columns[i].MinWidth * stretch;
                     dataGrid0.Columns[i].Width = dataGrid1.Columns[i].Width;
-                    // dataGrid0.Columns[i].MaxWidth = dataGrid1.Columns[i].ActualWidth * stretch;
                 }
                 dataGrid1.FontSize = 14 * Math.Min(stretch, Shared.layout == "" ? 1 : stretch);
                 dataGrid1.Items.Refresh();
                 ScrollDown();
                 selectedItems = dataGrid1.SelectedItems; // to make sure it is not null;
             }, DispatcherPriority.Loaded);
-
-            ScrollDown();
+            EnableButtons();
 
             // create/reset product_filter item and add it to filter dataGrid0
-            product_filter = new StockService.Product()
+            product_filter = new Classes.Product()
             {
-                Id = null,
+                Id = "",
                 Name = "",
-                BuyUnitPrice = null,
-                SellUnitPrice = null
+                BuyUnitPrice = "",
+                SellUnitPrice = ""
             };
             filterProductsList.Clear();
             filterProductsList.Add(product_filter);
@@ -263,16 +254,8 @@ namespace FrontendWPF.Windows
                             }
                             catch (Exception ex)
                             {
-                                if (ex.ToString().Contains("XXXXX"))
-                                {
-                                    MessageBox.Show($"This will be a specific error. Details:\n{ex.Message}", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                                    return;
-                                }
-                                else
-                                {
-                                    MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                                    return;
-                                }
+                                MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                                return;
                             }
                         }
 
@@ -293,7 +276,6 @@ namespace FrontendWPF.Windows
                         checkBox_fadeInOut.IsChecked = true; // show gifImage
                         gifImage.StartAnimation();
                         MessageBox.Show(deleteMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-
                     }
                     // dataGrid1.Focus();
                     dataGrid1.ItemsSource = dbProductsList;
@@ -313,7 +295,6 @@ namespace FrontendWPF.Windows
             dataGrid1.CanUserSortColumns = true;
         }
 
-
         private void Button_UpdateProduct_Click(object sender, RoutedEventArgs e)
         {
             UpdateProduct();
@@ -321,23 +302,29 @@ namespace FrontendWPF.Windows
 
         private void UpdateProduct()
         {
-            if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
+            if (edit_mode != "update") // if not in update mode, switch to update mode
             {
-                SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
-            }
+                if (edit_mode == "insert") // remove incomplete added user 
+                {
+                    dbProductsList.Remove(product_edited);
+                    dataGrid1.ItemsSource = null;
+                    dataGrid1.ItemsSource = dbProductsList;
+                    EnableButtons();
+                }
+                if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
+                {
+                    SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
+                }
+                dataGrid1.CanUserSortColumns = false;
 
-            dataGrid1.CanUserSortColumns = false;
-
-
-            if (edit_mode == "read") // if read mode (or window just opened), switch to update mode
-            {
                 dataGrid1.IsReadOnly = false; // CanUserAddRows="False" must be set in XAML
-                edit_mode = "update";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Single;
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.Cell;
                 TextBlock_message.Text = "Update product.";
                 TextBlock_message.Foreground = Brushes.White;
                 ScrollDown();
+
+                edit_mode = "update";
             }
             else
             {
@@ -346,7 +333,6 @@ namespace FrontendWPF.Windows
             }
         }
 
-
         private void Button_AddProduct_Click(object sender, RoutedEventArgs e)
         {
             AddProduct();
@@ -354,16 +340,9 @@ namespace FrontendWPF.Windows
 
         private void AddProduct()
         {
-            if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
+            if (edit_mode != "insert") // if not in insert mode, switch to insert mode
             {
-                SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
-            }
-
-            dataGrid1.CanUserSortColumns = false;
-            Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
-
-            if (edit_mode == "read" || edit_mode == "update") // if read mode (window just opened) or update mode, switch to insert mode
-            {
+                Array.Clear(fieldsEntered, 0, fieldsEntered.Length);
 
                 // in db select last product with highest Id
                 int? highestId = dbProductsList.Count > 0 ? dbProductsList.Max(u => u.Id) : 0;
@@ -380,6 +359,12 @@ namespace FrontendWPF.Windows
                 dbProductsList.Add(product_edited);
                 dataGrid1.ItemsSource = null;
                 dataGrid1.ItemsSource = dbProductsList;
+
+                if (dataGrid1.Columns[0].SortDirection != ListSortDirection.Ascending)
+                {
+                    SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
+                }
+                dataGrid1.CanUserSortColumns = false;
 
                 dataGrid1.IsReadOnly = false; // CanUserAddRows="False" must be set in XAML
                 ScrollDown();
@@ -398,20 +383,20 @@ namespace FrontendWPF.Windows
                     cell = dataGrid1.Columns[1].GetCellContent(row).Parent as DataGridCell;
                     cell.IsEditing = true;
                     cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
-                },
-                DispatcherPriority.Background); // Background to avoid row = null error
+                }, DispatcherPriority.Background); // Background to avoid row = null error
 
                 edit_mode = "insert";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
                 dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
                 TextBlock_message.Text = "Add product.";
                 TextBlock_message.Foreground = Brushes.White;
-            }
-            else
-            {
-                MessageBox.Show("Please fill in all product data, then press Enter.", caption: "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                dataGrid1.Focus();
-                dataGrid1.BeginEdit();
+
+                Button_AddProduct.IsEnabled = false;
+                Button_DeleteProduct.IsEnabled = false;
+                Button_Filter.IsEnabled = false;
+                Button_Export.IsEnabled = false;
+                Button_Import.IsEnabled = false;
+                Button_LogWindow.IsEnabled = false;
             }
         }
 
@@ -425,15 +410,17 @@ namespace FrontendWPF.Windows
         int column_index;
         int filterc_index;
         string changed_property_name;
-        StockService.Product product_edited, product_edited0, product_filter;
+        StockService.Product product_edited, product_edited0;
+        Classes.Product product_filter;
 
         private void dataGrid1_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Commit)
             {
-                CellEditEnding_setup(e); // setup rules
-                
+                if (CellEditEnding_setup(e) == null) { return; } // setup rules: stop on null
+
                 string stopMessage = CellEditEnding_checkInput(); // check data correctness
+                if (stopMessage == "stop") { return; } // stop on database error
                 if (stopMessage != "")  // warn user, and stop
                 {
                     MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -442,7 +429,6 @@ namespace FrontendWPF.Windows
 
                     Dispatcher.InvokeAsync(() =>
                     {
-
                         // select edited row/cell if user selected another row/cell
                         SelectEditedCell();
 
@@ -480,7 +466,7 @@ namespace FrontendWPF.Windows
                 // start saving new valid value
                 fieldsEntered[column_index - 1] = 1; // register the entered property's column index
 
-                if (column_index == 1) // // update string-type fields with new value (Name)
+                if (column_index == 1) // update string-type fields with new value (Name)
                 {
                     product_edited.GetType().GetProperty(changed_property_name).SetValue(product_edited, new_value);
                 }
@@ -488,7 +474,6 @@ namespace FrontendWPF.Windows
                 {
                     int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
                     product_edited.GetType().GetProperty(changed_property_name).SetValue(product_edited, Convert.ToInt32(int_val));
-
                 }
 
                 // check if all properties are entered, then insert into database
@@ -519,7 +504,14 @@ namespace FrontendWPF.Windows
                         else if (edit_mode == "update")
                         {
                             hostMessage = stockClient.UpdateProduct(Shared.uid, product_edited.Id.ToString(), product_edited.Name, product_edited.BuyUnitPrice.ToString(), product_edited.SellUnitPrice.ToString());
-                            if (hostMessage != "Product successfully updated!")
+                            if (hostMessage == "Unauthorized user!")
+                            {
+                                Shared.Logout(); // stop on unauthorized user
+                                IsEnabled = false;
+                                Close();
+                                return;
+                            }
+                            else if (hostMessage != "Product successfully updated!")
                             {
                                 MessageBox.Show(hostMessage + " Field was not updated.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                                 // restore old value // TODO: restore cell value? 
@@ -530,16 +522,8 @@ namespace FrontendWPF.Windows
                     }
                     catch (Exception ex)
                     {
-                        if (ex.ToString().Contains("XXXXX"))
-                        {
-                            MessageBox.Show("This will be a specific error.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
-                        else
-                        {
-                            MessageBox.Show("An error occured, with the following details:\n" + ex.ToString(), caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                            return;
-                        }
+                        MessageBox.Show("An error occured, with the following details:\n" + ex.ToString(), caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
                     }
 
 
@@ -565,9 +549,14 @@ namespace FrontendWPF.Windows
                         dataGrid1.Dispatcher.InvokeAsync(() =>
                         {
                             Button_AddProduct.Focus(); // set focus to allow repeatedly add product on pressing the Add product button
-                        },
-                        DispatcherPriority.Loaded);
+                        }, DispatcherPriority.Loaded);
 
+                        Button_AddProduct.IsEnabled = true;
+                        Button_DeleteProduct.IsEnabled = true;
+                        Button_Filter.IsEnabled = true;
+                        Button_Export.IsEnabled = true;
+                        Button_Import.IsEnabled = true;
+                        Button_LogWindow.IsEnabled = true;
                     }
                     else if (edit_mode == "update")
                     {
@@ -580,7 +569,6 @@ namespace FrontendWPF.Windows
                     old_value = new_value; // update old_value after successful update
                     TextBlock_message.Foreground = Brushes.LightGreen;
 
-
                     checkBox_fadeInOut.IsChecked = false;
                     checkBox_fadeInOut.IsChecked = true; // fade in-out gifImage, fade out TextBlock_message.Text
                     gifImage.StartAnimation();
@@ -591,16 +579,11 @@ namespace FrontendWPF.Windows
                 }
 
             }
-            else
-            {
-                return;
-            }
         }
 
-        private void CellEditEnding_setup(DataGridCellEditEndingEventArgs e)
+        private string CellEditEnding_setup(DataGridCellEditEndingEventArgs e)
         {
-            // exit insert mode if 'Update product' is clicked
-            if (Button_UpdateProduct.IsKeyboardFocused)
+            if (edit_mode != "update" && Button_UpdateProduct.IsKeyboardFocused) // switch to insert mode if 'Update' is clicked
             {
                 edit_mode = "read";
                 dataGrid1.SelectionMode = DataGridSelectionMode.Extended;
@@ -608,17 +591,25 @@ namespace FrontendWPF.Windows
                 dbProductsList.RemoveAt(dbProductsList.Count - 1);
                 dataGrid1.ItemsSource = null;
                 dataGrid1.ItemsSource = dbProductsList;
+                EnableButtons();
                 UpdateProduct();
-                return;
+                return null;
+            }
+            else if (edit_mode != "insert" && Button_AddProduct.IsKeyboardFocused) // switch to insert mode if 'Add' is clicked
+            {
+                edit_mode = "read";
+                EnableButtons();
+                AddProduct();
+                return null;
             }
             else if (Button_ReloadData.IsKeyboardFocused) // return if 'Reload data" is clicked
             {
-                return;
+                return null;
             }
             else if (Button_Close.IsKeyboardFocused)
             {
                 CloseWindow();
-                return;
+                return null;
             }
 
             row = e.Row;
@@ -637,6 +628,7 @@ namespace FrontendWPF.Windows
             // get old property value of product by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
             old_value = product_edited.GetType().GetProperty(changed_property_name).GetValue(product_edited).ToString();
+            return "OK";
         }
         
         private string CellEditEnding_checkInput()
@@ -646,8 +638,7 @@ namespace FrontendWPF.Windows
             {
                 stopMessage = "New value cannot be empty!";
             }
-            else
-            if (changed_property_name == "Name" && new_value != old_value && dbProductsList.Any(p => p.Name == new_value)) // stop if product already exists in database, AND if new name is different
+            else if (changed_property_name == "Name" && new_value != old_value && dbProductsList.Any(p => p.Name == new_value)) // stop if product already exists in database, AND if new name is different
             {
                 stopMessage = $"The name '{new_value}' is already taken, please enter another name!";
             }
@@ -698,12 +689,12 @@ namespace FrontendWPF.Windows
 
                 // go into edit mode if in insert mode
                 cell.Focus(); // set focus on cell
-                if (edit_mode == "insert") // TODO: tesztelni!
+                if (edit_mode == "insert")
                 {
                     SelectTextBox();
                 }
 
-                if (edit_mode == "update") dataGrid1.SelectedCells.Clear(); // TODO: tesztelni!
+                if (edit_mode == "update") dataGrid1.SelectedCells.Clear();
                 SelectEditedCell();
             },
             DispatcherPriority.Loaded);
@@ -731,13 +722,8 @@ namespace FrontendWPF.Windows
                 // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
                 // cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Right));
                 Button_AddProduct.Focus();
-
                 SelectTextBox();
-
-
-
-            },
-        DispatcherPriority.Loaded); // style the id cell of the new product
+            }, DispatcherPriority.Loaded);
         }
 
         private void SelectEditedCell()
@@ -755,6 +741,16 @@ namespace FrontendWPF.Windows
                     dataGrid1.SelectedItem = dataGrid1.Items[row_index];
                 }
             }
+        }
+
+        private void EnableButtons()
+        {
+            Button_AddProduct.IsEnabled = true;
+            Button_DeleteProduct.IsEnabled = true;
+            Button_Filter.IsEnabled = true;
+            Button_Export.IsEnabled = true;
+            Button_Import.IsEnabled = true;
+            Button_LogWindow.IsEnabled = true;
         }
 
         private void StopAnimation()
@@ -777,17 +773,10 @@ namespace FrontendWPF.Windows
             {
                 e.Cancel = true;
                 SelectEditedCell();
-
                 SelectTextBox();
-
             }
         }
 
-
-        private void dataGrid1_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
-        {
-
-        }
 
         // https://stackoverflow.com/questions/27744097/wpf-fade-out-animation-cant-change-opacity-any-more
         private void ChangeOpacity()
@@ -851,21 +840,11 @@ namespace FrontendWPF.Windows
             gifImage.StopAnimation();
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            /*
-            if (e.Key == Key.Enter)
-            {
-                return;
-            }
-            */
-        }
 
         // make window draggable
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed) DragMove();
-
         }
 
         private void Button_Close_Click(object sender, RoutedEventArgs e)
@@ -927,7 +906,10 @@ namespace FrontendWPF.Windows
         {
             input = e.Text; // get character entered
         }
-
+        
+        int? product_filterId = null;
+        int? product_filterBuyUnitPrice = null;
+        int? product_filterSellUnitPrice = null;
         private void dataGrid0_KeyUp(object sender, KeyEventArgs e)
         // private void dataGrid0_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
@@ -971,11 +953,9 @@ namespace FrontendWPF.Windows
             if (changed_property_name == "Purchase price") { changed_property_name = "BuyUnitPrice"; }
             if (changed_property_name == "Sales price") { changed_property_name = "SellUnitPrice"; }
 
-            // remove operator for integer columns Id and UnitPrice
+            // set operator value for specific column
             if (changed_property_name == "Id" || changed_property_name == "BuyUnitPrice" || changed_property_name == "SellUnitPrice")
             {
-                if (op != "=" || (new_value !="" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
-
                 switch (changed_property_name)
                 {
                     case "Id": opId = op; break;
@@ -984,87 +964,73 @@ namespace FrontendWPF.Windows
                     default: break;
                 }
             }
+            else { op = ""; } // clear operator for string columns
 
-            // if any product_filter value is null, set it temporarily to -999 to avoid error when setting old value         
-            if (changed_property_name == "Id" && product_filter.Id == null) product_filter.Id = -999;
-            if (changed_property_name == "BuyUnitPrice" && product_filter.BuyUnitPrice == null) product_filter.BuyUnitPrice = -999;
-            if (changed_property_name == "SellUnitPrice" && product_filter.SellUnitPrice == null) product_filter.SellUnitPrice = -999;
             //get old property value of Product by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
             old_value = product_filter.GetType().GetProperty(changed_property_name).GetValue(product_filter).ToString();
-            if (changed_property_name == "Id" && product_filter.Id == -999) product_filter.Id = null;
-            if (changed_property_name == "BuyUnitPrice" && product_filter.BuyUnitPrice == -999) product_filter.BuyUnitPrice = null;
-            if (changed_property_name == "SellUnitPrice" && product_filter.SellUnitPrice == -999) product_filter.SellUnitPrice = null;
-
-            string stopMessage = "";
-            if (old_value == "-999" || op != "=")
-            {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    SelectTextBox(); // this + Background priority needed to avoid wrong Key.End selection
-                }, DispatcherPriority.Input);
-                Dispatcher.InvokeAsync(() => {
-                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end; skip if an operator is entered into cell
-
-                    if (op != "=" && stopMessage == "") { textBox.Text = op + new_value; } // restore operator into cell, only if there is no error message (because it restores the old value);
-
-                    Shared.SendKey(Key.End);
-                }, DispatcherPriority.Background);
-            }
 
             // check data correctness
-            if (changed_property_name == "Id")
+            string stopMessage = "";
+            if (new_value != "")
             {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
+                if (changed_property_name == "Id")
                 {
-                    stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
+                    string product_filterId0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    product_filterId = int.TryParse(product_filterId0, out var tempVal1) ? tempVal1 : (int?)null;
+                    if ((product_filterId0 != "" && product_filterId == null) || (product_filterId < 0 || product_filterId > 10000000))
+                    {
+                        stopMessage = $"The Id '{product_filterId0}' does not exist, please enter a correct value for the Id!";
+                    }
                 }
-            }
-            else if (changed_property_name == "UnitPrice" && new_value != "") // if wrong UnitPrice value is entered
-            {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                if ((new_value != "" && int_val == null) || int_val < 0)
+                else if (changed_property_name == "BuyUnitPrice") // if wrong UnitPrice value is entered
                 {
-                    stopMessage = $"The Unit price '{new_value}' does not exist, please enter a correct value for the Unit price!";
+                    string product_filterBuyUnitPrice0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    product_filterBuyUnitPrice = int.TryParse(product_filterBuyUnitPrice0, out var tempVal1) ? tempVal1 : (int?)null;
+                    int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
+                    if ((product_filterBuyUnitPrice0 != "" && product_filterBuyUnitPrice == null) || product_filterBuyUnitPrice < 0)
+                    {
+                        stopMessage = $"The Purchase price '{product_filterBuyUnitPrice0}' does not exist, please enter a correct value for the Unit price!";
+                    }
+                    else if (product_filterBuyUnitPrice > 10000000)
+                    {
+                        stopMessage = $"Purchase price cannot exceed 10,000,000!";
+                    }
                 }
-                else if (int_val > 10000000)
+                else if (changed_property_name == "SellUnitPrice") // if wrong UnitPrice value is entered
                 {
-                    stopMessage = $"Price cannot exceed 10,000,000!";
+                    string product_filterSellUnitPrice0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    product_filterSellUnitPrice = int.TryParse(product_filterSellUnitPrice0, out var tempVal1) ? tempVal1 : (int?)null;
+                    if ((product_filterSellUnitPrice0 != "" && product_filterSellUnitPrice == null) || product_filterSellUnitPrice < 0)
+                    {
+                        stopMessage = $"The Sales price '{new_value}' does not exist, please enter a correct value for the Unit price!";
+                    }
+                    else if (product_filterSellUnitPrice > 10000000)
+                    {
+                        stopMessage = $"Sales price cannot exceed 10,000,000!";
+                    }
                 }
             }
 
             if (stopMessage != "")  // warn user, and stop
             {
                 MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                if (old_value != "-999")
-                {
-                    textBox.Text = op == "=" ? old_value : op + old_value; // restore correct cell value if old value is not null, plus the operator if any
-                    Shared.SendKey(Key.End);
-                }
+                textBox.Text = old_value; // restore correct cell value if old value is not null
+                Shared.SendKey(Key.End);
                 return;
             }
 
-            if (filterc_index == 1 ) // // update string-type fields with new value (Name)
-            {
-                product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, new_value);
-            }
-            else // update int?-type fields with new value (Id, BuyUnitPrice, SellUnitPrice)
-            {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, int_val);
-
-            }
+            // update filter fields
+            product_filter.GetType().GetProperty(changed_property_name).SetValue(product_filter, new_value);
 
             // filter
             filteredProductsList.Clear();
             foreach (var product in dbProductsList)
             {
 
-                if ((product_filter.Id == null || Compare(product.Id, product_filter.Id, opId)) && (product_filter.Name == "" || product.Name.ToLower().Contains(product_filter.Name.ToLower())) && (product_filter.BuyUnitPrice == null || Compare(product.BuyUnitPrice, product_filter.BuyUnitPrice, opBuyUnitPrice)) && (product_filter.SellUnitPrice == null || Compare(product.SellUnitPrice, product_filter.SellUnitPrice, opSellUnitPrice)))
+                if ((product_filterId == null || Compare(product.Id, product_filterId, opId)) && (product_filter.Name == "" || product.Name.ToLower().Contains(product_filter.Name.ToLower())) && (product_filterBuyUnitPrice == null || Compare(product.BuyUnitPrice, product_filterBuyUnitPrice, opBuyUnitPrice)) && (product_filterSellUnitPrice == null || Compare(product.SellUnitPrice, product_filterSellUnitPrice, opSellUnitPrice)))
                 {
                     filteredProductsList.Add(product);
-                    continue;
                 }
             }
             // update dataGrid1 with filtered items                    

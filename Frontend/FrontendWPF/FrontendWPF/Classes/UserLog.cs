@@ -9,6 +9,23 @@ using System.Windows.Media;
 
 namespace FrontendWPF.Classes
 {
+    public class Filter_UserLog
+    {
+        // class requires getter-setter to be visible in DataGrid!
+        public string LogDate { set; get; }
+        public string LogUsername { set; get; }
+        public string LogOperation { set; get; }
+        public string Id { set; get; }
+        public string Username { set; get; }
+        public string Password { set; get; }
+        public string Location { set; get; }
+        public string Permission { set; get; }
+        public string Active { set; get; }
+
+        public Filter_UserLog()
+        {
+        }
+    }
     public class UserLog
     {
         // class requires getter-setter to be visible in DataGrid!

@@ -110,16 +110,8 @@ namespace FrontendWPF.Windows
             }
             catch (Exception ex)
             {
-                if (ex.ToString().Contains("XXXXX"))
-                {
-                    MessageBox.Show("This will be a specific error.", caption: "Error message");
-                    return;
-                }
-                else
-                {
-                    MessageBox.Show("Hiba történt, amelynek a részletei a következők:\n" + ex.ToString(), caption: "Error message");
-                    return;
-                }
+                MessageBox.Show("Hiba történt, amelynek a részletei a következők:\n" + ex.ToString(), caption: "Error message");
+                return;
             }
 
             Button_Register.Click -= Button_Register_ClickAsync; // remove event handlers

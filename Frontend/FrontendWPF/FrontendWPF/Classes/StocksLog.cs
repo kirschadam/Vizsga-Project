@@ -9,6 +9,22 @@ using System.Windows.Media;
 
 namespace FrontendWPF.Classes
 {
+    public class Filter_StockLog
+    {
+        // class requires getter-setter to be visible in DataGrid!
+        public string LogDate { set; get; }
+        public string LogUsername { set; get; }
+        public string LogOperation { set; get; }
+        public string Id { set; get; }
+        public string Product { set; get; }
+        public string Stock { set; get; }
+        public string Quantity { set; get; }
+        public string Location { set; get; }
+
+        public Filter_StockLog()
+        {
+        }
+    }
     public class StockLog
     {
         // class requires getter-setter to be visible in DataGrid!

@@ -17,7 +17,6 @@
         MouseDown="Window_MouseDown"
         Closing="Window_Closing"
         x:Name="window"
-        KeyDown="Window_KeyDown"
         SizeChanged="window_SizeChanged"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
         >
@@ -163,20 +162,20 @@
                         <DataGridTextColumn Header="Permission" Binding="{Binding Permission}" />
                         <DataGridTextColumn Header="Active" Binding="{Binding Path=Active}" />
                     </DataGrid.Columns>
-                    
+
                 </DataGrid>
+
             </StackPanel>
-            
+
             <StackPanel x:Name="stackPanel1" VerticalAlignment="Top" Margin="0,45,0,0" Height="442" Orientation="Horizontal">
-                
+
                 <DataGrid Name="dataGrid1" Background="AliceBlue" FontSize="14" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="2" Margin="10,0,0,0" HorizontalScrollBarVisibility="Visible" IsReadOnly="True"
                   AutoGenerateColumns="False" CanUserAddRows="False" CanUserReorderColumns="False" CanUserDeleteRows="False" VirtualizingStackPanel.VirtualizationMode="Standard"
                   SelectedCellsChanged="dataGrid1_SelectedCellsChanged"
                   CellEditEnding="dataGrid1_CellEditEnding"
                   BeginningEdit="dataGrid1_BeginningEdit" 
-                  PreviewKeyDown="dataGrid1_PreviewKeyDown"
                   >
-  
+
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -285,18 +284,37 @@
 
             <StackPanel Grid.Row="0" Margin="0,0,0,0" VerticalAlignment="Bottom" HorizontalAlignment="Center" >
 
+                <Border
+                Margin="0,0,1,10"
+                Name="passwordBox" Visibility="Collapsed"
+                Background="LightSalmon" 
+                BorderBrush="Black" 
+                BorderThickness="1" 
+                CornerRadius="5,5,5,5" Height="195" Width="222">
+                    <StackPanel>
+                        <TextBlock Text="Confirm password" FontSize="15" FontWeight="DemiBold" Foreground="White" Width="145" Height="20" Margin="0,15,0,0" TextAlignment="Center" />
+                        <TextBlock Name="textBlock_username" Text="for user:" FontSize="15" FontWeight="DemiBold" Foreground="White" Width="145" Height="20" Margin="0,0,0,0" TextAlignment="Center" />
+                        <TextBox Name="passwordTextBox" MinWidth="150" Height="25" HorizontalAlignment="Center" Padding="0,0,0,4"  VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Hololens MDL2 Assets" FontSize="14" FontWeight="Bold"  Margin="0,15,0,0" KeyDown="passwordTextBox_confirmPwd_KeyDown"/>
+                        <TextBlock Name="textBlock_showPassword" Text="&#xf06e;" FontFamily="{StaticResource FontAwesome}" Foreground="#FF8E52F7" FontSize="22" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,5,0,0" ToolTip="Show password" PreviewMouseDown="textBlock_ShowPassword_Click" Cursor="Hand"></TextBlock>
+                        <TextBlock Name="textBlock_hidePassword" Text="&#xf023;" FontFamily="{StaticResource FontAwesome}" Foreground="#FF8E52F7" FontSize="22" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,5,0,0" ToolTip="Hide password" PreviewMouseDown="textBlock_HidePassword_Click" Cursor="Hand" Visibility="Collapsed"></TextBlock>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button x:Name="Button_confirmPwd" Width="90" Height="40" Margin="0,15,0,0" Content="OK" Background="#FF8E52F7" Click="Button_confirmPwd_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
                 <Grid>
                     <StackPanel Margin="0,0,0,10" HorizontalAlignment="Left" >
-                        <Button Name="Button_AddUser" Click="Button_AddUser_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Add" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                        <Button Name="Button_UpdateUser" Click="Button_UpdateUser_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Update" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                        <Button Name="Button_DeleteUser" Click="Button_DeleteUser_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Delete" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                        <Button Name="Button_Filter" Click="Button_Filter_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button x:Name="Button_AddUser" Click="Button_AddUser_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Add" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button x:Name="Button_UpdateUser" Click="Button_UpdateUser_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Update" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button x:Name="Button_DeleteUser" Click="Button_DeleteUser_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Delete" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button x:Name="Button_Filter" Click="Button_Filter_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Filter" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
                     </StackPanel>
                     <StackPanel Margin="105,0,0,10" HorizontalAlignment="Right" >
-                        <Button Name="Button_ReloadData" Click="Button_ReloadData_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Reset" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
-                        <Button Name="Button_Export" Click="Button_Export_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Export" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Export data to file"/>
-                        <Button Name="Button_Import" Click="Button_Import_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Import" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Import data from file"/>
-                        <Button Name="Button_LogWindow" Click="Button_LogWindow_Click" Width="90" Height="40" Margin="0,12,0,10" Content="View log" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="View log window"/>
+                        <Button x:Name="Button_ReloadData" Click="Button_ReloadData_Click"  Width="90" Height="40" Margin="0,12,0,0" Content="Reset" FontWeight="Normal" ToolTipService.ShowOnDisabled="True"/>
+                        <Button x:Name="Button_Export" Click="Button_Export_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Export" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Export data to file"/>
+                        <Button x:Name="Button_Import" Click="Button_Import_Click" Width="90" Height="40" Margin="0,12,0,0" Content="Import" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="Import data from file"/>
+                        <Button x:Name="Button_LogWindow" Click="Button_LogWindow_Click" Width="90" Height="40" Margin="0,12,0,10" Content="View log" FontWeight="Normal" ToolTipService.ShowOnDisabled="True" ToolTip="View log window"/>
                     </StackPanel>
                 </Grid>
                 <!--<Border Width="250"
@@ -304,47 +322,45 @@
                         Background="White"
                         Opacity="0.5"/>-->
 
-                <CheckBox Name="checkBox_fadeInOut" Content="Img Fade in-out" Visibility="Collapsed"
+                <CheckBox x:Name="checkBox_fadeInOut" Content="Img Fade in-out" Visibility="Collapsed"
                 IsChecked="False" Margin="5">
                     <CheckBox.Triggers>
-                        <EventTrigger RoutedEvent="CheckBox.Checked">
-                            <EventTrigger.Actions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <!--<DoubleAnimation Storyboard.TargetName="imgOff" 
+                        <EventTrigger RoutedEvent="ToggleButton.Checked">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <!--<DoubleAnimation Storyboard.TargetName="imgOff" 
                                          Storyboard.TargetProperty="Opacity"
                                          To="0" Duration="0:00:00.2" />-->
-                                        <DoubleAnimation Storyboard.TargetName="gifImage" 
+                                    <DoubleAnimation Storyboard.TargetName="gifImage" 
                                          Storyboard.TargetProperty="Opacity"
                                          To="1" Duration="0:00:3" AutoReverse="True"
                                          FillBehavior="Stop" />
-                                        <DoubleAnimation Storyboard.TargetName="TextBlock_message" 
+                                    <DoubleAnimation Storyboard.TargetName="TextBlock_message" 
                                          Storyboard.TargetProperty="Opacity"
                                          To="0" Duration="0:00:5" BeginTime="0:0:5"
                                          FillBehavior="Stop"
                                          Completed="MessageFadeOut_Completed" />
 
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger.Actions>
+                                </Storyboard>
+                            </BeginStoryboard>
                         </EventTrigger>
-                        <EventTrigger RoutedEvent="CheckBox.Unchecked">
-                            <EventTrigger.Actions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <!--<DoubleAnimation Storyboard.TargetName="imgOff" 
+                        <EventTrigger RoutedEvent="ToggleButton.Unchecked">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <!--<DoubleAnimation Storyboard.TargetName="imgOff" 
                                          Storyboard.TargetProperty="Opacity"
                                          To="1" Duration="0:00:00.2" />
                                         <DoubleAnimation Storyboard.TargetName="imgOn" 
                                          Storyboard.TargetProperty="Opacity"
                                          To="0" Duration="0:00:00.2" />-->
-                                        <!--<DoubleAnimation Storyboard.TargetName="TextBlock_message" 
+
+                                    <!--<DoubleAnimation Storyboard.TargetName="TextBlock_message" 
                                          Storyboard.TargetProperty="Opacity"
                                          To="1" Duration="0:00:0" BeginTime="0:0:0"
                                          FillBehavior="HoldEnd" />-->
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </EventTrigger.Actions>
+
+                                </Storyboard>
+                            </BeginStoryboard>
                         </EventTrigger>
                     </CheckBox.Triggers>
                 </CheckBox>

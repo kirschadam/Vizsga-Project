@@ -11,11 +11,11 @@ namespace FrontendWPF.Classes
     public class SalePurchase
     {
         // class requires getter-setter to be visible in DataGrid!
-        public int? Id { set; get; }
+        public string Id { set; get; }
         public string Product { set; get; }
-        public int? Quantity { set; get; }
-        public int? TotalPrice { set; get; }
-        public DateTime? Date { set; get; }
+        public string Quantity { set; get; }
+        public string TotalPrice { set; get; }
+        public string Date { set; get; }
         public string Location { set; get; }
         public string Username { set; get; }
 
@@ -23,7 +23,7 @@ namespace FrontendWPF.Classes
         {
         }
 
-        public SalePurchase(int? id, string product, int? quantity, int? totalPrice, DateTime? date, string location, string username)
+        public SalePurchase(string id, string product, string quantity, string totalPrice, string date, string location, string username)
         {
             Id = id;
             Product = product;
@@ -46,10 +46,9 @@ namespace FrontendWPF.Classes
             try
             {
                 string hostMessage = client.ListSalePurchase(Shared.uid, type, id, product, qOver, qUnder, priceOver, priceUnder, before, after, location, user, limit).Message;
-                if (hostMessage.Contains("Unable to connect")) //  temporary solultion, I will need error message Unable to connect...
-
+                if (hostMessage.Contains("Unable to connect") || hostMessage.Contains("One or more errors occurred") || hostMessage.Contains("Egy vagy több hiba történt")) // returns 0 item (instead of null) if backend cannot connect to database
                 {
-                    MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
+                    MessageBox.Show("The remote database is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return null;
                 }
                 else if (hostMessage == "Unauthorized user!")
@@ -69,12 +68,12 @@ namespace FrontendWPF.Classes
             {
                 if (ex.ToString().Contains("Unable to connect to the remote server") || ex.ToString().Contains("EndpointNotFoundException"))
                 {
-                    MessageBox.Show("The remote server is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message");
+                    MessageBox.Show("The remote server is not accessible. Please make sure you have Internet access and the application is allowed by the firewall.", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                     return null;
                 }
                 else
                 {
-                    MessageBox.Show("An error occurred, the details are the following:\n" + ex.ToString(), caption: "Error message");
+                    MessageBox.Show("An error occurred, the details are the following:\n" + ex.ToString(), caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
                     return null;
                 }
             }

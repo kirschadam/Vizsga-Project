@@ -9,13 +9,37 @@ using System.Windows.Media;
 
 namespace FrontendWPF.Classes
 {
+    public class Filter_LocationLog
+    {
+        // class requires getter-setter to be visible in DataGrid!
+        public string LogDate { set; get; }
+        public string LogUsername { set; get; }
+        public string LogOperation { set; get; }
+        public string Id { set; get; }
+        public string Name { set; get; }
+        public string Region { set; get; }
+
+        public Filter_LocationLog()
+        {
+        }
+
+        public Filter_LocationLog(string logDate, string logUsername, string logOperation, string id, string name, string region)
+        {
+            LogDate = logDate;
+            LogUsername = logUsername;
+            LogOperation = logOperation;
+            Id = id;
+            Name = name;
+            Region = region;
+        }
+    }
     public class LocationLog
     {
         // class requires getter-setter to be visible in DataGrid!
         public DateTime? LogDate { set; get; }
         public string LogUsername { set; get; }
         public string LogOperation { set; get; }
-        public int?  Id { set; get; }
+        public int? Id { set; get; }
         public string Name { set; get; }
         public string Region { set; get; }
 
@@ -32,6 +56,7 @@ namespace FrontendWPF.Classes
             Name = name;
             Region = region;
         }
+
 
         // returns a list of locations log
         public static List<LocationLog> GetLocationsLog(DateTime startDate, DateTime endDate)

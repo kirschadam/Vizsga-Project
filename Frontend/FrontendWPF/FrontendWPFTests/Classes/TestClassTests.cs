@@ -10,7 +10,7 @@ namespace FrontendWPF.Classes.Tests
         {
             TestClass testClass = new TestClass();
             bool expected = true;
-            bool actual = testClass.Compare(51, 50, op: "=");
+            bool actual = testClass.Compare(50, 50, op: "=");
             Assert.AreEqual(expected, actual, message: "A két érték nem egyenlő!");
         }
 

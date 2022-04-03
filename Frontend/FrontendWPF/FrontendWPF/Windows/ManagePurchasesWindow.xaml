@@ -17,7 +17,6 @@
         MouseDown="Window_MouseDown"
         Closing="Window_Closing"
         x:Name="window"
-        KeyDown="Window_KeyDown"
         SizeChanged="window_SizeChanged"
         Loaded="window_Loaded"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 
@@ -358,7 +357,6 @@
                   SelectedCellsChanged="dataGrid1_SelectedCellsChanged"
                   CellEditEnding="dataGrid1_CellEditEnding"
                   BeginningEdit="dataGrid1_BeginningEdit" 
-                  PreviewKeyDown="dataGrid1_PreviewKeyDown"
                   >
 
                     <DataGrid.ColumnHeaderStyle>

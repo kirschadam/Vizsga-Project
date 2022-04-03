@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -23,7 +22,7 @@ namespace FrontendWPF.Logs
         private List<SalePurchaseLog> logList { get; set; }
 
         System.Collections.IList selectedItems;
-        List<SalePurchaseLog> filterPurchasesList { get; set; }
+        List<Filter_SalePurchaseLog> filterPurchasesList { get; set; }
         List<SalePurchaseLog> filteredPurchasesList { get; set; }
 
         string edit_mode;
@@ -44,7 +43,6 @@ namespace FrontendWPF.Logs
 
         DateTime startDate = DateTime.Now.Date.AddDays(-30); // set an initial limit of 29 days
         DateTime endDate = DateTime.Now; //
-        // public double columnFontSize { get; set; }
 
         public LogWindowPurchases()
         {
@@ -67,36 +65,27 @@ namespace FrontendWPF.Logs
             dataGrid1.SelectionUnit = DataGridSelectionUnit.FullRow;
             TextBlock_message.Foreground = Brushes.White;
 
-            //  https://www.codeproject.com/Questions/155935/how-to-add-rows-to-WPF-datagrids
-            /*
-            DataGridTextColumn col1 = new DataGridTextColumn();
-            dataGrid1.Columns.Add(col1);
-            col1.Binding = new Binding("id");
-            col1.Header = "ID";
-            */
-
             // get log file content
             logList = SalePurchaseLog.GetSalesPurchasesLog(type: "purchase", startDate, endDate);
             if (logList == null) { IsEnabled = false; Close(); return; } // stop on any error
             dataGrid1.ItemsSource = logList;
             SortDataGrid(dataGrid1, columnIndex: 0, sortDirection: ListSortDirection.Ascending);
             TextBlock_message.Text = $"{logList.Count} records loaded.";
-
-            // close window and stop if no purchase is retrieved
-            /*
             if (logList.Count == 0)
             {
-                closeCompleted = true;
-                IsEnabled = false; // so that window cannot be opened
-                Close();
-                return;
+                Button_Filter.IsEnabled = false;
+                Button_Filter.Foreground = Brushes.Gray;
+                Button_ReloadData.IsEnabled = false;
+                Button_ReloadData.Foreground = Brushes.Gray;
+                Button_DeleteLog.IsEnabled = false;
+                Button_DeleteLog.Foreground = Brushes.Gray;
+                Button_DatePicker.IsEnabled = false;
             }
-            */
 
             // if (window.IsLoaded == false) // run on the first time when window is not loaded
-            if (true)
+            // without if allow initial fontsize (and larger column with) on Reset
             {
-                filterPurchasesList = new List<SalePurchaseLog>();
+                filterPurchasesList = new List<Filter_SalePurchaseLog>();
 
                 Dispatcher.InvokeAsync(() =>
                 {
@@ -122,15 +111,16 @@ namespace FrontendWPF.Logs
             ScrollDown();
 
             // create/reset purchase_filter item and add it to filter dataGrid0
-            purchase_filter = new SalePurchaseLog()
+            purchase_filter = new Filter_SalePurchaseLog()
             {
-                LogDate = null,
+                LogDate = "",
                 LogUsername = "",
                 LogOperation = "",
-                Id = null,
+                Id = "",
                 Product = "", // Name of product
-                Quantity = null,
-                Date = null,
+                Quantity = "",
+                TotalPrice = "",
+                Date = "",
                 Location = "",
                 Username = ""
             };
@@ -163,7 +153,7 @@ namespace FrontendWPF.Logs
             column.SortDirection = sortDirection;
         }
 
-        private void Button_DeletePurchase_Click(object sender, RoutedEventArgs e)
+        private void Button_DeleteLog_Click(object sender, RoutedEventArgs e)
         {
             TextBlock_message.Text = "Delete log file's content?";
             TextBlock_message.Foreground = Brushes.Salmon;
@@ -174,23 +164,14 @@ namespace FrontendWPF.Logs
                 try
                 {
                     // DELETE log file's content
-
                     StreamWriter sw = new StreamWriter(@".\Logs\managePurchases.log", append: false, encoding: Encoding.UTF8);
                     sw.WriteLine("LogDate;LogUsername;LogOperation;Id;Product;Quantity;TotalPrice;Date;Location;Username");
                     sw.Close();
                 }
                 catch (Exception ex)
                 {
-                    if (ex.ToString().Contains("XXXXX"))
-                    {
-                        MessageBox.Show($"This will be a specific error. Details:\n{ex.Message}", caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-                    else
-                    {
-                        MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
+                    MessageBox.Show("An error occurred, with the following details:\n" + ex.Message, caption: "Error message", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
                 TextBlock_message.Text = "Log file's content deleted.";
 
@@ -217,8 +198,7 @@ namespace FrontendWPF.Logs
         string new_value = "";
         int filterc_index;
         string changed_property_name;
-        SalePurchaseLog purchase_filter;
-
+        Filter_SalePurchaseLog purchase_filter;
 
         private void StopAnimation()
         {
@@ -230,13 +210,6 @@ namespace FrontendWPF.Logs
                 //Thread.Sleep(5000);
                 gifImage.StopAnimation();
             }, DispatcherPriority.ContextIdle);
-        }
-
-
-
-        private void dataGrid1_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
-        {
-
         }
 
         // https://stackoverflow.com/questions/27744097/wpf-fade-out-animation-cant-change-opacity-any-more
@@ -388,11 +361,9 @@ namespace FrontendWPF.Logs
             if (changed_property_name == "operation") { changed_property_name = "LogOperation"; }
             if (changed_property_name == "Total price") { changed_property_name = "TotalPrice"; }
 
-            // remove operator for integer columns Id and UnitPrice
+            // set operator value for specific column
             if (changed_property_name == "LogDate" || changed_property_name == "Id" || changed_property_name == "Quantity" || changed_property_name == "TotalPrice" || changed_property_name == "Date")
             {
-                if (op != "=" || (new_value != "" && new_value.ToString().Substring(0, 1) == "=")) { new_value = new_value.Substring(op.Length); } // remove entered operator
-
                 switch (changed_property_name)
                 {
                     case "LogDate": opLogDate = op; break;
@@ -403,127 +374,114 @@ namespace FrontendWPF.Logs
                     default: break;
                 }
             }
+            else { op = ""; } // clear operator for string columns
 
-            if ((changed_property_name == "LogDate" || changed_property_name == "Date") && ((new_value.Length < 8 && new_value.Length > 0) || (new_value.Length > 8 && new_value.Length < 14))) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise purchase_filter.Date will be set to null
-
-            // if any purchase_filter value is null, set it temporarily to -999 to avoid error when setting old value 
-            if (changed_property_name == "LogDate" && purchase_filter.LogDate == null) purchase_filter.LogDate = DateTime.Parse("01.01.01 01:01:01");
             if (changed_property_name == "Product name") { changed_property_name = "Product"; }
             if (changed_property_name == "Total price") { changed_property_name = "TotalPrice"; }
             if (changed_property_name == "User name") { changed_property_name = "Username"; }
-            if (changed_property_name == "Id" && purchase_filter.Id == null) purchase_filter.Id = -999;
-            if (changed_property_name == "Quantity" && purchase_filter.Quantity == null) purchase_filter.Quantity = -999;
-            if (changed_property_name == "TotalPrice" && purchase_filter.TotalPrice == null) purchase_filter.TotalPrice = -999;
-            if (changed_property_name == "Date" && purchase_filter.Date == null) purchase_filter.Date = DateTime.Parse("01.01.01 01:01:01");
-
+            
             //get old property value of purchase by property name
             // https://stackoverflow.com/questions/1196991/get-property-value-from-string-using-reflection
             old_value = purchase_filter.GetType().GetProperty(changed_property_name).GetValue(purchase_filter).ToString();
-            if (changed_property_name == "LogDate" && purchase_filter.LogDate == DateTime.Parse("01.01.01 01:01:01")) purchase_filter.LogDate = null;
-            if (changed_property_name == "Id" && purchase_filter.Id == -999) purchase_filter.Id = null;
-            if (changed_property_name == "Quantity" && purchase_filter.Quantity == -999) purchase_filter.Quantity = null;
-            if (changed_property_name == "TotalPrice" && purchase_filter.TotalPrice == -999) purchase_filter.TotalPrice = null;
-            if (changed_property_name == "Date" && purchase_filter.Date == DateTime.Parse("01.01.01 01:01:01")) purchase_filter.Date = null;
-
-            string stopMessage = "";
-            if (old_value == "-999" || op != "=")
-            {
-                Dispatcher.InvokeAsync(() =>
-                {
-                    SelectTextBox(); // this + Background priority needed to avoid wrong Key.End selection
-                }, DispatcherPriority.Input);
-                Dispatcher.InvokeAsync(() =>
-                {
-                    // for some reason, cursor goes to the front of the cell when inputting into empty integer-type cell; therefore, set cursor to the end; skip if an operator is entered into cell
-
-                    if (op != "=" && stopMessage == "") { textBox.Text = op + new_value; } // restore operator into cell, only if there is no error message (because it restores the old value);
-
-                    Shared.SendKey(Key.End);
-                }, DispatcherPriority.Background);
-            }
-            void SelectTextBox()
-            {
-                cell.Focus();
-                cell.IsEditing = true;
-
-                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down)); // move focus to textBox
-                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Down));
-                textBox = (TextBox)cell.Content;
-                // Keyboard.Focus(textBox);
-                textBox.SelectAll();
-            }
 
             // check data correctness
+            string stopMessage = "";
+            int? purchase_filterId = null;
+            DateTime? purchase_filterLogDate = null;
+            int? purchase_filterQuantity = null;
+            int? purchase_filterTotalPrice = null;
+            DateTime? purchase_filterDate = null;
             bool minutesExist = false;
-            if (changed_property_name == "Id")
+            bool logMinutesExist = false;
+            if (new_value != "")
             {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                if ((new_value != "" && int_val == null) || (int_val < 0 || int_val > 10000000))
+                if (changed_property_name == "Id")
                 {
-                    stopMessage = $"The Id '{new_value}' does not exist, please enter a correct value for the Id!";
+                    string purchase_filterId0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    purchase_filterId = int.TryParse(purchase_filterId0, out var tempVal1) ? tempVal1 : (int?)null;
+                    if ((purchase_filterId0 != "" && purchase_filterId == null) || (purchase_filterId < 0 || purchase_filterId > 10000000))
+                    {
+                        stopMessage = $"The Id '{purchase_filterId0}' does not exist, please enter a correct value for the Id!";
+                    }
                 }
-            }
-            else if (new_value != "" && changed_property_name == "Quantity") // if wrong Active value is entered
-            {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                if (int_val == null || (int_val < 0))
+                else if (changed_property_name == "Quantity") // if wrong Quantity value is entered
                 {
-                    stopMessage = $"Please enter a correct value for the Quantity!";
+                    string purchase_filterQuantity0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    purchase_filterQuantity = int.TryParse(purchase_filterQuantity0, out var tempVal2) ? tempVal2 : (int?)null;
+                    if ((purchase_filterQuantity0 != "" && purchase_filterQuantity == null) || (purchase_filterQuantity < 0))
+                    {
+                        stopMessage = $"Please enter a correct value for the Quantity!";
+                    }
+                    else if (purchase_filterQuantity > 1000000)
+                    {
+                        stopMessage = $"Quantity cannot exceed 1,000,000!";
+                    }
                 }
-                else if (int_val > 1000000)
+                else if (changed_property_name == "TotalPrice") // if wrong TotalPrice value is entered
                 {
-                    stopMessage = $"Quantity cannot exceed 1,000,000!";
+                    string purchase_filterTotalPrice0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    purchase_filterTotalPrice = int.TryParse(purchase_filterTotalPrice0, out var tempVal3) ? tempVal3 : (int?)null;
+                    if ((purchase_filterTotalPrice0 != "" && purchase_filterTotalPrice == null) || (purchase_filterTotalPrice < 0))
+                    {
+                        stopMessage = $"Please enter a correct value for the Total price!";
+                    }
+                    else if (purchase_filterTotalPrice > 1000000000)
+                    {
+                        stopMessage = $"Total price cannot exceed 1,000,000,000!";
+                    }
                 }
-            }
-            else if (new_value != "" && (changed_property_name == "LogDate" || changed_property_name == "Date")) // if wrong Date value is entered
-            {
-                old_value = old_value.Substring(0, old_value.Length - 3);
-                bool dateExists = DateTime.TryParse(new_value, out DateTime date_entered);
-                if (dateExists == false)
+                else if (changed_property_name == "LogDate") // if wrong LogDate value is entered
                 {
-                    stopMessage = $"Please enter a correct value for the date value!";
+                    string purchase_filterLogDate0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    purchase_filterLogDate = DateTime.TryParse(purchase_filterLogDate0, out var tempVal4) ? tempVal4 : (DateTime?)null;
+
+                    if ((purchase_filterLogDate0.Length < 8 && purchase_filterLogDate0.Length >= 0) || (purchase_filterLogDate0.Length > 8 && purchase_filterLogDate0.Length < 14)) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise purchase_filter.Date will be set to null
+                    if (purchase_filterLogDate0 != "" && purchase_filterLogDate == null)
+                    {
+                        stopMessage = $"Please enter a correct value for the date value!";
+                    }
+                    else
+                    {
+                        // checks if minutes are entered; if not, minutues in the record will be ignored
+                        logMinutesExist = ((DateTime)purchase_filterLogDate).Minute > 0;
+                    }
                 }
-                else
+                else if (changed_property_name == "Date") // if wrong Date value is entered
                 {
-                    // checks if minutes are entered; if not, minutues in the record will be ignored
-                    minutesExist = date_entered.Minute > 0;
+                    string purchase_filterDate0 = new_value.Replace(">", "").Replace("<", "").Replace("=", "");
+                    purchase_filterDate = DateTime.TryParse(purchase_filterDate0, out var tempVal4) ? tempVal4 : (DateTime?)null;
+
+                    if ((purchase_filterDate0.Length < 8 && purchase_filterDate0.Length >= 0) || (purchase_filterDate0.Length > 8 && purchase_filterDate0.Length < 14)) { return; } // stop if date length is < 8 OR when time is edited (a character is deleted), otherwise purchase_filter.Date will be set to null
+                    if (purchase_filterDate0 != "" && purchase_filterDate == null)
+                    {
+                        stopMessage = $"Please enter a correct value for the date value!";
+                    }
+                    else
+                    {
+                        // checks if minutes are entered; if not, minutues in the record will be ignored
+                        minutesExist = ((DateTime)purchase_filterDate).Minute > 0;
+                    }
                 }
             }
 
             if (stopMessage != "")  // warn user, and stop
             {
                 MessageBox.Show(stopMessage, caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                if (old_value != "-999" && old_value != "01.01.01 01:01")
-                {
-                    textBox.Text = op == "=" ? old_value : op + old_value; // restore correct cell value if old value is not null, plus the operator if any
-                    Shared.SendKey(Key.End);
-                }
+                textBox.Text = old_value; // restore correct cell value if old value is not null
+                Shared.SendKey(Key.End);
                 return;
             }
 
-            if (filterc_index == 1 || filterc_index == 2 || filterc_index == 4 || filterc_index == 8 || filterc_index == 9) // // update string-type fields with new value ( LogUsername, LogOperation, Product (name),  Location, Username )
-            {
-                purchase_filter.GetType().GetProperty(changed_property_name).SetValue(purchase_filter, new_value);
-            }
-            else if (filterc_index == 0 || filterc_index == 7) // // update LogDate, Date fields with new value
-            {
-                DateTime? int_val = DateTime.TryParse(new_value, out var tempVal) ? tempVal : (DateTime?)null;
-                purchase_filter.GetType().GetProperty(changed_property_name).SetValue(purchase_filter, int_val);
-            }
-            else // update int?-type fields with new value (Quantity, UnitPrice)
-            {
-                int? int_val = Int32.TryParse(new_value, out var tempVal) ? tempVal : (int?)null;
-                purchase_filter.GetType().GetProperty(changed_property_name).SetValue(purchase_filter, int_val);
-
-            }
-
+            // update filter fields
+            purchase_filter.GetType().GetProperty(changed_property_name).SetValue(purchase_filter, new_value);
+            
             // filter
             filteredPurchasesList.Clear();
             foreach (var purchase in logList)
             {
                 DateTime roundedLogDate = (DateTime)purchase.LogDate;
                 roundedLogDate = roundedLogDate.AddSeconds(-roundedLogDate.Second);
-                if ((purchase_filter.LogDate == null || (minutesExist ? Compare(roundedLogDate, purchase_filter.LogDate, opLogDate) : Compare(purchase.LogDate.Value.Date, purchase_filter.LogDate, opLogDate))) && (purchase_filter.LogUsername == "" || purchase.LogUsername.ToLower().Contains(purchase_filter.LogUsername.ToLower())) && (purchase_filter.LogOperation == "" || purchase.LogOperation.ToLower().Contains(purchase_filter.LogOperation.ToLower())) && (purchase_filter.Id == null || Compare(purchase.Id, purchase_filter.Id, opId)) && (purchase_filter.Product == "" || purchase.Product.ToLower().Contains(purchase_filter.Product.ToLower())) && (purchase_filter.Quantity == null || Compare(purchase.Quantity, purchase_filter.Quantity, opQuantity)) && (purchase_filter.TotalPrice == null || Compare(purchase.TotalPrice, purchase_filter.TotalPrice, opTotalPrice)) && (purchase_filter.Date == null || (purchase.Date != null && (minutesExist ? Compare(purchase.Date, purchase_filter.Date, opDate) : Compare(purchase.Date.Value.Date, purchase_filter.Date, opDate)))) && (purchase_filter.Location == "" || purchase.Location.ToLower().Contains(purchase_filter.Location.ToLower())) && (purchase_filter.Username == "" || purchase.Username.ToLower().Contains(purchase_filter.Username.ToLower())))
+                if ((purchase_filterLogDate == null || (logMinutesExist ? Compare(roundedLogDate, purchase_filterLogDate, opLogDate) : Compare(purchase.LogDate.Value.Date, purchase_filterLogDate, opLogDate))) && (purchase_filter.LogUsername == "" || purchase.LogUsername.ToLower().Contains(purchase_filter.LogUsername.ToLower())) && (purchase_filter.LogOperation == "" || purchase.LogOperation.ToLower().Contains(purchase_filter.LogOperation.ToLower())) && (purchase_filterId == null || Compare(purchase.Id, purchase_filterId, opId)) && (purchase_filter.Product == "" || purchase.Product.ToLower().Contains(purchase_filter.Product.ToLower())) && (purchase_filterQuantity == null || Compare(purchase.Quantity, purchase_filterQuantity, opQuantity)) && (purchase_filterTotalPrice == null || Compare(purchase.TotalPrice, purchase_filterTotalPrice, opTotalPrice)) && (purchase_filterDate == null || (purchase.Date != null && (minutesExist ? Compare(purchase.Date, purchase_filterDate, opDate) : Compare(purchase.Date.Value.Date, purchase_filterDate, opDate)))) && (purchase_filter.Location == "" || purchase.Location.ToLower().Contains(purchase_filter.Location.ToLower())) && (purchase_filter.Username == "" || purchase.Username.ToLower().Contains(purchase_filter.Username.ToLower())))
                 {
                     filteredPurchasesList.Add(purchase);
                     continue;
@@ -566,9 +524,9 @@ namespace FrontendWPF.Logs
             // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
             if (Shared.loggedInUser.Permission < 6)
             {
-                Button_DeletePurchase.IsEnabled = false;
-                Button_DeletePurchase.Foreground = Brushes.Gray;
-                Button_DeletePurchase.ToolTip = "You do not have rights to delete data!";
+                Button_DeleteLog.IsEnabled = false;
+                Button_DeleteLog.Foreground = Brushes.Gray;
+                Button_DeleteLog.ToolTip = "You do not have rights to delete data!";
             }
 
         }

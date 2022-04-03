@@ -17,7 +17,6 @@
         MouseDown="Window_MouseDown"
         Closing="Window_Closing"
         x:Name="window"
-        KeyDown="Window_KeyDown"
         SizeChanged="window_SizeChanged"
         Loaded="window_Loaded"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" 

@@ -1,19 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 using FrontendWPF.Classes;
 
 
@@ -34,7 +24,6 @@ namespace FrontendWPF.Windows
             gifImage.StartAnimation();
         }
 
-
         private async void Button_Login_ClickAsync(object sender, RoutedEventArgs e)
         {
             client = new UserService.UserServiceClient();
@@ -44,9 +33,6 @@ namespace FrontendWPF.Windows
 
             string username = Textbox_UserName.Text;
             string password = PasswordBox_Password.Visibility == Visibility.Visible ?  PasswordBox_Password.Password: textBox_showPassword.Text;
-
-            // string query = $"WHERE Username='{userName}' AND Password='{Shared.CreateMD5(password)}'";
-            // dbUsersList = User.GetUsers("", "", "", "", ""); // query the user from database
 
             try
             {
@@ -107,7 +93,7 @@ namespace FrontendWPF.Windows
                 Shared.StartWindow.button_login.Foreground = Brushes.LightGreen;
                 Shared.StartWindow.button_login.Content = "Log out";
 
-                // 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
+                // permisson levels: 0-2: view only 3-5: +insert/update 6-8: +delete 9: +user management (admin)
                 if (Shared.loggedInUser.Active == 1)
                 {
                     if (Shared.loggedInUser.Permission < 9)
@@ -139,11 +125,9 @@ namespace FrontendWPF.Windows
                     TextBlock_Login.Foreground = Brushes.Salmon;
                     TextBlock_Login.Text = "Your membership is suspended, please contact the administrator!";
                     await Task.Delay(5000);
-                    // MessageBox.Show("Your membership is suspended, please contact the administrator!", caption: "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
 
                 // how to run a method as an Action: https://stackoverflow.com/questions/13260322/how-to-use-net-action-to-execute-a-method-with-unknown-number-of-parameters
-
                 // await Shared.Delay(() => CloseWindow(), 2500);
                 await Task.Delay(2500); // delays below code with 2500ms
                 Close();
@@ -160,14 +144,7 @@ namespace FrontendWPF.Windows
             if(e.Key == Key.Enter) { Button_Login_ClickAsync(sender, e); }
         }
 
-
-
-
         // Fade-in-out animation
-
-
-
-
         private void WindowFadeOut_Completed(object sender, EventArgs e)
         {
             closeCompleted = true;
@@ -221,7 +198,6 @@ namespace FrontendWPF.Windows
             }
         }
 
-
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed) DragMove();
@@ -250,32 +226,6 @@ namespace FrontendWPF.Windows
             textBlock_hidePassword.Visibility = Visibility.Collapsed;
             textBlock_showPassword.Visibility = Visibility.Visible;
         }
-
-
-        /*
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            AlreadyFaded = false;
-        }
-
-        private bool AlreadyFaded;
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            if (!AlreadyFaded)
-            {
-                 AlreadyFaded = true;
-                 e.Cancel = true;
-                 DoubleAnimation anim = new DoubleAnimation(0, TimeSpan.FromSeconds(4));
-                 WindowFadeOut.Completed += new EventHandler(WindowFadeOut_Completed);
-                 BeginAnimation(OpacityProperty, anim);
-            }
-        }
-
-        private void WindowFadeOut_Completed(object sender, EventArgs e)
-        {
-            Close();
-        }
-        */
 
     }
 }
