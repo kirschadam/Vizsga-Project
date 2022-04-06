@@ -3,7 +3,6 @@ DEFAULT CHARACTER SET utf8
 COLLATE utf8_hungarian_ci;
 USE `assets`;
 
-
 CREATE TABLE `regions` (
   `id` int(12) PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(50) UNIQUE
@@ -95,3 +94,33 @@ SELECT `quantity` FROM `sales`
 WHERE `id` = NEW.`id`))
 WHERE `stocks`.`locationId` = NEW.`locationId` 
 AND `stocks`.`productId` = NEW.`productId`;
+
+DELIMITER $$
+CREATE TRIGGER tr_create_stocks_from_purchases
+BEFORE INSERT ON purchases FOR EACH ROW
+BEGIN
+IF (SELECT COUNT(*) FROM stocks WHERE productId = NEW.productId AND locationId = NEW.locationId  LIMIT 1) = 0
+THEN
+INSERT INTO stocks
+SET locationId = NEW.locationId,
+productId = NEW.productId,
+quantity =  0;
+END IF;
+END;
+$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE TRIGGER tr_create_stocks_from_sales
+BEFORE INSERT ON sales FOR EACH ROW
+BEGIN
+IF (SELECT COUNT(*) FROM stocks WHERE productId = NEW.productId AND locationId = NEW.locationId  LIMIT 1) = 0
+THEN
+INSERT INTO stocks
+SET locationId = NEW.locationId,
+productId = NEW.productId,
+quantity =  0;
+END IF;
+END;
+$$
+DELIMITER ;
