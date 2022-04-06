@@ -15,7 +15,7 @@ namespace Base_service.DatabaseManager
         /// The base function for getting rows in tables.<br/>
         /// <paramref name="table"/>: The table to make an update in.<br/>
         /// <paramref name="columns"/>: The columns that we want to get from the query.<br/>
-        /// <paramref name="condition_array"/>: The conditions in a 3 dimensional array. (column, <br/>
+        /// <paramref name="condition_array"/>: The conditions in a 3 dimensional array. (column, operator(>,<,=,etc...), value) <br/>
         /// <paramref name="inner_joins"/>: The inner joins to other tables that may be needed for the desired results.
         /// </summary>
         /// <returns>A Tuple with an DaTatable containing the results and a string (error message, if there is one).</returns>
