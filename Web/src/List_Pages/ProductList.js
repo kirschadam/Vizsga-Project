@@ -199,9 +199,9 @@ function Products({currentpage}) {
 				</div>
     		</div>
 
-			<div className={"text-black " + (createdisplay ? "" : "invisible")}><CreateWindow onClose={() => {setCreateDisplay(false)}}/></div>
-			<div className={"text-black " + (updatedisplay ? "" : "invisible")}><UpdateWindow product={product} onClose={() => {setUpdateDisplay(false)}}/></div>
-			<div className={"text-black " + (deletedisplay ? "" : "invisible")}><DeleteWindow product={product} onClose={() => {setDeleteDisplay(false)}}/></div>
+			<div className={(createdisplay ? "" : "invisible")}><CreateWindow onClose={() => {setCreateDisplay(false)}}/></div>
+			<div className={(updatedisplay ? "" : "invisible")}><UpdateWindow product={product} onClose={() => {setUpdateDisplay(false)}}/></div>
+			<div className={(deletedisplay ? "" : "invisible")}><DeleteWindow product={product} onClose={() => {setDeleteDisplay(false)}}/></div>
 		</Fragment>
   	)
 }

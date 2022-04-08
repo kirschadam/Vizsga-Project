@@ -1,6 +1,6 @@
 export function BaseModal({ onClosed, Submitted, children, title}) {
     return(
-        <div className="modal d-block">
+        <div className="modal d-block text-black">
             <div className="modal-dialog">
                 <div className="modal-content">
                     <form onSubmit={Submitted}>
