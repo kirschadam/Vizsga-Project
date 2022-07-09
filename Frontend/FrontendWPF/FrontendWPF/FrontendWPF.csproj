@@ -327,7 +327,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Connected Services\UserService\UserService.wsdl" />
-    <None Include="FrontendWPF_TemporaryKey.pfx" />
     <None Include="Connected Services\StockService\item.disco" />
     <None Include="Connected Services\StockService\configuration91.svcinfo" />
     <None Include="Connected Services\StockService\configuration.svcinfo" />
